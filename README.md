@@ -7,7 +7,7 @@ To make it easier for me (and my wife), I wrote a small program in my preferred 
 
 This may also be useful for others, so I will publish this little program here.
 
-To date, the program has only been tested in my local network and with Linux (manjaro) as the operating system. But it should run anywhere if you have Java installed. (Testers with a different configuration are welcome)
+To date, the program has only been tested in my local network and with Linux (manjaro) as the operating system. But it should run anywhere if you have Java11 installed. (Testers with a different configuration are welcome)
 
 The program is provided as a JAR file with the source code in it. This means that all (!) Source files are contained in this one jar file. Nevertheless, the JAR file can be executed directly. (java -jar TasmoView.jar)
 
@@ -28,7 +28,7 @@ Da ich einige Tasmota-Geräte benutze, musste ich oft nach der entsprechenden IP
 
 Um es mir (und meiner Frau) einfacher zu machen, habe ich ein kleines Programm in meiner bevorzugten Programmiersprache java geschrieben. Dies kann eventuell auch für andere nützlich sein, so dass ich dieses kleine Programm hier veröffentliche.
 
-Das Programm ist bis heute nur in meinem lokalen Netzwerk und mit Linux (manjaro) als Betriebssystem getestet. Aber es sollte überall laufen wenn Sie Java installiert haben. (Tester mit anderer Kopnfiguration sind willkommen)
+Das Programm ist bis heute nur in meinem lokalen Netzwerk und mit Linux (manjaro) als Betriebssystem getestet. Aber es sollte überall laufen wenn Sie Java11 installiert haben. (Tester mit anderer Kopnfiguration sind willkommen)
 
 Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung gestellt. Dies bedeutet, dass alle (!) Quelldateien in dieser einen Jar-Datei enthalten sind. Trotzdem ist die JAR-Datei direkt ausführbar. (java -jar TasmoView.jar)
 
