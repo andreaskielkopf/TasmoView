@@ -45,3 +45,10 @@ Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung geste
 * Wird ein Gerät in der Tabelle markiert, so kann mit einem Knopfdruck [Browser] die URL dieses Gerätes an den Browser geschickt werden, so dass der Browser die HTML-Seite des Gerätes darstellt
 * Im Browser kann das Gerät dann gesteuert und konfiguriert werden
 * Jedes Tasmota-Gerät das über den Browser erreichbar ist wird auch gefunden
+
+----
+
+Get JAVA13:
+* OpenJDK 13 https://jdk.java.net/13/
+* Oracle java SE 13 https://www.oracle.com/technetwork/java/javase/downloads/index.html
+
