@@ -23,6 +23,8 @@ The program is provided as a JAR file with the source code in it. This means tha
 * The device can then be controlled and configured in the browser
 * Every Tasmota device that can be reached via the browser is also found
 ----
+![Screenshot](/info/Browser.png)
+----
 
 Da ich einige Tasmota-Geräte benutze, musste ich oft nach der entsprechenden IP in meinem Netzwerk suchen. Dann habe ich TasmoManager gefunden. Das funktioniert sehr gut, aber ich musste einen MQTT-Server einrichten und jedes Gerät für die Verwendung von mqtt konfigurieren ...
 
