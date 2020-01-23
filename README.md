@@ -1,5 +1,5 @@
 # TasmoView 0.1
-Tool to search Tasmota-Devices in the local Network via HTTP
+Tool to search [Tasmota-Devices](https://tasmota.github.io/docs/#/Home) in the local Network via HTTP
 
 Since I use some Tasmota devices, I often had to search for the corresponding IP in my network. Then I found TasmoManager. This works very well, but I had to set up an MQTT server and configure each device to use mqtt ...
 
