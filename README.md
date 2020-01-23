@@ -52,5 +52,3 @@ Get JAVA13:
 * [OpenJDK 13](https://jdk.java.net/13/) https://jdk.java.net/13/
 * [OpenJDK 11](https://jdk.java.net/archive/) https://jdk.java.net/archive/
 * [Oracle java SE 13](https://www.oracle.com/technetwork/java/javase/downloads/index.html) https://www.oracle.com/technetwork/java/javase/downloads/index.html
-
-
