@@ -1,5 +1,5 @@
 # TasmoView 0.1
-Tool to search Tasmota-Devices in the local Network via HTTP
+Tool to search [Tasmota-Devices](https://tasmota.github.io/docs/#/Home) in the local Network via HTTP
 
 Since I use some Tasmota devices, I often had to search for the corresponding IP in my network. Then I found TasmoManager. This works very well, but I had to set up an MQTT server and configure each device to use mqtt ...
 
@@ -26,7 +26,7 @@ The program is provided as a JAR file with the source code in it. This means tha
 ![Screenshot](/info/Browser.png)
 ----
 
-Da ich einige Tasmota-Geräte benutze, musste ich oft nach der entsprechenden IP in meinem Netzwerk suchen. Dann habe ich TasmoManager gefunden. Das funktioniert sehr gut, aber ich musste einen MQTT-Server einrichten und jedes Gerät für die Verwendung von mqtt konfigurieren ...
+Da ich einige [Tasmota-Geräte](https://tasmota.github.io/docs/#/Home) benutze, musste ich oft nach der entsprechenden IP in meinem Netzwerk suchen. Dann habe ich TasmoManager gefunden. Das funktioniert sehr gut, aber ich musste einen MQTT-Server einrichten und jedes Gerät für die Verwendung von mqtt konfigurieren ...
 
 Um es mir (und meiner Frau) einfacher zu machen, habe ich ein kleines Programm in meiner bevorzugten Programmiersprache java geschrieben. Dies kann eventuell auch für andere nützlich sein, so dass ich dieses kleine Programm hier veröffentliche.
 
@@ -49,8 +49,8 @@ Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung geste
 ----
 
 Get JAVA13:
-* OpenJDK 13 https://jdk.java.net/13/
-* OpenJDK 11 https://jdk.java.net/archive/
-* Oracle java SE 13 https://www.oracle.com/technetwork/java/javase/downloads/index.html
+* [OpenJDK 13](https://jdk.java.net/13/) https://jdk.java.net/13/
+* [OpenJDK 11](https://jdk.java.net/archive/) https://jdk.java.net/archive/
+* [Oracle java SE 13](https://www.oracle.com/technetwork/java/javase/downloads/index.html) https://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 
