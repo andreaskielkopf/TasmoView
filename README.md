@@ -1,5 +1,5 @@
 
-# TasmoView 0.2
+# TasmoView 0.3 Alpha
 
 Tool to search [Tasmota-Devices](https://tasmota.github.io/docs/#/Home) in the local Network via HTTP
 
@@ -87,9 +87,49 @@ Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung geste
 ![Screenshot](./info/SensorData.png)
 ----
 # 0.3
-- [ ] weitere Sensortypen :thinking:
-- [ ] Automatik für die Abfragerate bei schnellen Änderungen je Gerät
+- [ ] Gestrichelte Linien für das Raster
+- [ ] Erweitern auf 10000 Messungen
+- [ ] Werte beim erfassen mit dem richtigen Zeitpunkt übernehmen
+- [ ] Doppelte Werte bereits beim Erfassen droppen
 - [ ] senkrechte Linien im Diagramm um den zeitlichen Verlauf einordnen zu können
+- [ ] speichern der MAC und IP der gefundenen Tasmotas ???
+- [ ] Jeder Sensor bekommt einen Spitznamen (speichern)
+- [ ] Die Farbe der Messskalen werden einstellbar
+- [ ] Die Farben der Sensoren werden einstellbar
+- [ ] weitere Sensortypen :thinking:
+- [ ] 
+- [ ] speichern der komprimierten Messungen (auf Wunsch)
+- [ ] laden von früheren Messungen
+- [ ] Einstellbare Zeitskala
+- [ ] Automatik für die Abfragerate bei schnellen Änderungen je Gerät
+- [ ] Vergleich historischer Messungen
+- [ ] Täglich selbe Zeit
+- [ ] Wöchentlich
+- [ ] Mondphasen
+- [ ] jährlich
+- [ ] Täglich nach Sonnenaufgang/Sonnenuntergang
+- [ ] X/Y-Graph mit 2 Sensoren Temperatur/Feuchte
+- [ ] Graph aus Formel
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] ihr Vorschlag kann als Pull-Request hier eingefügt werden
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+- [ ] 
+
 ----
 
 Get JAVA13:
