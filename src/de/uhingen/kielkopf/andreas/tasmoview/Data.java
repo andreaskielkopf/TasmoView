@@ -1,19 +1,28 @@
 package de.uhingen.kielkopf.andreas.tasmoview;
 
+import java.awt.BorderLayout;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.TreeSet;
+import java.util.prefs.Preferences;
 
+import javax.swing.JList;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
+import de.uhingen.kielkopf.andreas.tasmoview.sensors.SensorGraphPanel;
 
 /** Singleton um die Daten des Programms zentral zu halten */
 public class Data {
    /** Singleton */
-   public static final Data                                  data          =new Data();
+   public static final Data                                  data               =new Data();
    /** gemeinsam verwendete Passwortfeld */
    private JPasswordField                                    passwordField;
    /** gemeinsam verwendetes Feld für den Username */
@@ -21,19 +30,28 @@ public class Data {
    private ScanPanel                                         scanPanel;
    TasmoList                                                 tasmolist;
    /** Liste der gefundenen Tasmotas mit ihren Daten */
-   public final TreeSet<Tasmota>                             tasmotas      =new TreeSet<Tasmota>();
+   public final TreeSet<Tasmota>                             tasmotas           =new TreeSet<Tasmota>();
+   /** Liste der bisher gefundenen Sensoren */
+   public final TreeSet<Sensor>                              sensoren           =new TreeSet<Sensor>();
+   public final TreeSet<String>                              sensorTypen        =new TreeSet<String>();
+   public final TreeSet<Tasmota>                             tasmotasMitSensoren=new TreeSet<Tasmota>();
    // TODO lokal zwischenspeichern
    /** Liste der offenen Suche von Tasmotas oder der offenen Refreshs */
-   public final TreeSet<Tasmota>                             unconfirmed   =new TreeSet<Tasmota>();
+   public final TreeSet<Tasmota>                             unconfirmed        =new TreeSet<Tasmota>();
    /** Die eigene IP dieses Rechners */
-   public InetAddress                                        myIp          =null;
+   public InetAddress                                        myIp               =null;
    /** spezielles TableModel mit wechselnden Tabellen und Überschriften für die Infoseite */
-   public TasmoTableModell                                   dataModel     =null;
+   public TasmoTableModell                                   dataModel          =null;
    /** 2D-ArrayList mit Uberschriften für die benannten Tabellen */
-   public final LinkedHashMap<String, LinkedHashSet<String>> tablenames    =new LinkedHashMap<String, LinkedHashSet<String>>();
+   public final LinkedHashMap<String, LinkedHashSet<String>> tablenames         =new LinkedHashMap<String, LinkedHashSet<String>>();
    /** Bitset mit den gefundenen tasmotas als Bit (nicht nochmal nach denen suchen) */
-   public final BitSet                                       found_tasmotas=new BitSet(256);
+   public final BitSet                                       found_tasmotas     =new BitSet(256);
+   private JList<Sensor>                                     sensorList;
+   private SensorGraphPanel                                  sensorGraphPanel;
    // TODO lokal zwischenspeichern und holen
+   static final String                                       USER               ="user";
+   static final String                                       PASSWORD           ="password";
+   public final Preferences                                  prefs              =Preferences.userNodeForPackage(TasmoView.class);
    /** Im Konstruktor werden Die festgelegte Tabellen mit ihren Überschriften definiert und eingetragen */
    private Data() {
       String[][] init= { // {"Tabellenname", "Spalte2", "Spalte3", "Spalte4", ...}
@@ -63,13 +81,16 @@ public class Data {
          if (test) {
             data.found_tasmotas.set(t.ipPart);
             data.tasmotas.add(t);
+            // Tasmota-Gerät gefunden
+            System.out.println(t);
          }
       }
    }
    /** Konstrukor für das gemeinsam genutzte Feld */
    JPasswordField getPasswordField() {
       if (passwordField==null) {
-         passwordField=new JPasswordField();
+         System.out.println(prefs.get(PASSWORD, ""));
+         passwordField=new JPasswordField(prefs.get(PASSWORD, ""));
          // TODO optional lokal zwischenspeichern und holen
          passwordField.setColumns(10);
       }
@@ -79,7 +100,8 @@ public class Data {
    JTextField getUserField() {
       if (userField==null) {
          // TODO lokal zwischenspeichern und holen
-         userField=new JTextField("admin");
+         System.out.println(prefs.get(USER, "admin"));
+         userField=new JTextField(prefs.get(USER, "admin"));
          userField.setColumns(10);
       }
       return userField;
@@ -95,5 +117,25 @@ public class Data {
          tasmolist=new TasmoList();
       }
       return tasmolist;
+   }
+   public JList<Sensor> getSensorList() {
+      if (sensorList==null) {
+         sensorList=new JList<Sensor>();
+         // sensorList.setVisibleRowCount(10);
+         sensorList.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+               List<Sensor> sl=getSensorList().getSelectedValuesList();
+               getSensorGraphPanel().setSensors(sl);
+            }
+         });
+      }
+      return sensorList;
+   }
+   public SensorGraphPanel getSensorGraphPanel() {
+      if (sensorGraphPanel==null) {
+         sensorGraphPanel=new SensorGraphPanel();
+         sensorGraphPanel.setLayout(new BorderLayout(0, 0));
+      }
+      return sensorGraphPanel;
    }
 }

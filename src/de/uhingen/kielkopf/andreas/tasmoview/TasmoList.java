@@ -21,7 +21,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -32,11 +32,13 @@ public class TasmoList extends JPanel {
    private JList<String>     tableauswahl;
    private JPanel            panel;
    private JButton           browserButton;
+   private JPanel            panel_1;
+   private JPanel            panel_2;
    /** Eine Tabellemit auswöhlbaren Ansichten */
    public TasmoList() {
       setLayout(new BorderLayout(0, 0));
-      add(getScrollPane(), BorderLayout.CENTER);
       add(getPanel(), BorderLayout.NORTH);
+      add(getPanel_2(), BorderLayout.CENTER);
    }
    /** Scrollpane um die Tabelle herrum */
    private JScrollPane getScrollPane() {
@@ -57,6 +59,8 @@ public class TasmoList extends JPanel {
          FontMetrics fm=table.getFontMetrics(table.getFont());
          table.setRowHeight((int) (1.15f*fm.getHeight()));
          table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+         table.setModel(Data.data.dataModel);
+         table.setFillsViewportHeight(true);
          table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent event) {
@@ -64,8 +68,6 @@ public class TasmoList extends JPanel {
                getBrowserButton().setEnabled(b);
             }
          });
-         table.setModel(Data.data.dataModel);
-         table.setFillsViewportHeight(true);
       }
       return table;
    }
@@ -74,15 +76,9 @@ public class TasmoList extends JPanel {
          tableauswahl=new JList<String>();
          tableauswahl.setFixedCellWidth(120);
          tableauswahl.setFixedCellHeight(25);
-         tableauswahl.setBorder(new EmptyBorder(2, 2, 2, 2));
+         tableauswahl.setBorder(new TitledBorder(null, "Select Report", TitledBorder.LEADING, TitledBorder.TOP, null, null));
          tableauswahl.setSize(new Dimension(100, 20));
          tableauswahl.setFont(new Font("Dialog", Font.BOLD, 15));
-         tableauswahl.addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-               String key=getTableAuswahl().getSelectedValue();
-               Data.data.dataModel.setTable(key);
-            }
-         });
          tableauswahl.setVisibleRowCount(2);
          tableauswahl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
          tableauswahl.setLayoutOrientation(JList.VERTICAL_WRAP);
@@ -100,6 +96,12 @@ public class TasmoList extends JPanel {
             }
          });
          tableauswahl.setSelectedIndex(0);
+         tableauswahl.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+               String key=getTableAuswahl().getSelectedValue();
+               if (key!=null) Data.data.dataModel.setTable(key);
+            }
+         });
       }
       return tableauswahl;
    }
@@ -108,7 +110,7 @@ public class TasmoList extends JPanel {
          panel=new JPanel();
          panel.setLayout(new BorderLayout(0, 0));
          panel.add(getTableAuswahl(), BorderLayout.CENTER);
-         panel.add(getBrowserButton(), BorderLayout.EAST);
+         panel.add(getPanel_1(), BorderLayout.EAST);
       }
       return panel;
    }
@@ -154,5 +156,23 @@ public class TasmoList extends JPanel {
             System.err.println("Browser-start not supported:"+os);
          }
       }
+   }
+   private JPanel getPanel_1() {
+      if (panel_1==null) {
+         panel_1=new JPanel();
+         panel_1.setBorder(new TitledBorder(null, "put into Browser", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+         panel_1.setLayout(new BorderLayout(0, 0));
+         panel_1.add(getBrowserButton(), BorderLayout.CENTER);
+      }
+      return panel_1;
+   }
+   private JPanel getPanel_2() {
+      if (panel_2==null) {
+         panel_2=new JPanel();
+         panel_2.setLayout(new BorderLayout(0, 0));
+         panel_2.setBorder(new TitledBorder(null, "Report", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+         panel_2.add(getScrollPane(), BorderLayout.CENTER);
+      }
+      return panel_2;
    }
 }

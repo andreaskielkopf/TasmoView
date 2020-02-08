@@ -21,7 +21,7 @@ public abstract class JsonObject {
       c.add(this);
       return c;
    }
-   /** Gib das erste passende Obhjekt zurück oder null */
+   /** Gib das erste passende Objekt zurück oder null */
    public JsonObject getJsonObject(String name) {
       for (JsonObject o:getAll()) {
          if (name==null) {
@@ -39,6 +39,13 @@ public abstract class JsonObject {
          } else if (name.equals(o.name)) c.add(o);
       }
       return c;
+   }
+   /** Gib das erste passende Objekt zurück oder null */
+   public final Double getDoubleValue(String name) {
+      for (JsonObject jo:getAll(name)) {
+         if (jo instanceof JsonValue) return ((JsonValue) jo).getDoubleValue();
+      }
+      return null;
    }
    /** Zerteile den String in hierarchische JsonObjekte */
    public static final JsonObject interpret(String part) {

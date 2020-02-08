@@ -15,9 +15,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.prefs.BackingStoreException;
 import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -46,10 +48,11 @@ public class ScanPanel extends JPanel {
    private Timer             scanTimer       =null;
    /** Das gesamte ScanPanel */
    private JPanel            scanPanel;
+   private JButton           btnStorePWD;
    public ScanPanel() {
       setLayout(new BorderLayout(0, 0));
-      add(getProgressBar(), BorderLayout.SOUTH);
-      add(getScanPanel(), BorderLayout.CENTER);
+      add(getProgressBar(), BorderLayout.CENTER);
+      add(getScanPanel(), BorderLayout.NORTH);
    }
    /** Ermittle die lokale IP und trage sie zum Nutzen für alle ein */
    private JLabel getIPLabel() {
@@ -70,6 +73,7 @@ public class ScanPanel extends JPanel {
    public JToggleButton getScanButton() {
       if (scanButton==null) {
          scanButton=new JToggleButton("Scan");
+         scanButton.setToolTipText("Scan for new Devices");
          scanButton.setIcon(new ImageIcon(ScanPanel.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/edit-find.png")));
          scanButton.setSelectedIcon(new ImageIcon(ScanPanel.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/process-stop.png")));
          scanButton.setPreferredSize(new Dimension(120, 40));
@@ -102,6 +106,7 @@ public class ScanPanel extends JPanel {
    private JToggleButton getRefreshButton() {
       if (refreshButton==null) {
          refreshButton=new JToggleButton("Refresh");
+         refreshButton.setToolTipText("Refresh Data on already found Devices");
          refreshButton.setSelectedIcon(new ImageIcon(ScanPanel.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/process-stop.png")));
          refreshButton.setIcon(new ImageIcon(ScanPanel.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/edit-find.png")));
          refreshButton.setPreferredSize(new Dimension(140, 40));
@@ -163,9 +168,7 @@ public class ScanPanel extends JPanel {
             btn.setSelected(false);
             getScanButton().setEnabled(true);
             getRefreshButton().setEnabled(true);
-            for (Tasmota t:Data.data.tasmotas) {
-               System.out.println(t);
-            }
+            // for (Tasmota t:Data.data.tasmotas) System.out.println(t);
             getProgressBar().setString("ready");
          }
       }, ABSTAND_IN_MS*++offset);
@@ -183,14 +186,16 @@ public class ScanPanel extends JPanel {
    private JPanel getScanPanel() {
       if (scanPanel==null) {
          scanPanel=new JPanel();
-         scanPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 5));
-         scanPanel.add(getScanButton());
+         FlowLayout fl_scanPanel=new FlowLayout(FlowLayout.LEFT, 5, 5);
          scanPanel.add(getIPLabel());
+         scanPanel.setLayout(fl_scanPanel);
+         scanPanel.add(getScanButton());
+         scanPanel.add(getRefreshButton());
          scanPanel.add(getUserLabel());
          scanPanel.add(Data.data.getUserField());
          scanPanel.add(getPasswordLabel());
          scanPanel.add(Data.data.getPasswordField());
-         scanPanel.add(getRefreshButton());
+         scanPanel.add(getBtnStorePWD());
       }
       return scanPanel;
    }
@@ -205,5 +210,27 @@ public class ScanPanel extends JPanel {
          passwordLabel=new JLabel("HTML-password");
       }
       return passwordLabel;
+   }
+   private JButton getBtnStorePWD() {
+      if (btnStorePWD==null) {
+         btnStorePWD=new JButton("store User and Password");
+         btnStorePWD.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+               try {
+                  Data.data.prefs.put(Data.USER, Data.data.getUserField().getText());
+                  /**
+                   * Das ist nicht 100% sicher weil der String im Speicher bleibt bis das Programm endet. Aber da das Passwort sowieso unverschlßsselt in den
+                   * Preferences landet ist das nicht schlimm. Das Passwort kann eh auch aus den HTML-Anfragen extrahiert werden
+                   */
+                  Data.data.prefs.put(Data.PASSWORD, new String(Data.data.getPasswordField().getPassword()));
+                  Data.data.prefs.flush();
+                  System.out.println("Username and Password stored");
+               } catch (BackingStoreException e1) {
+                  e1.printStackTrace();
+               }
+            }
+         });
+      }
+      return btnStorePWD;
    }
 }

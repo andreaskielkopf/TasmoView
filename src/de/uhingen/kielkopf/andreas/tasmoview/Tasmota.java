@@ -17,16 +17,17 @@ import java.util.concurrent.ExecutionException;
 
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonArray;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
+import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
 
 public class Tasmota implements Comparable<Tasmota> {
    /** mehrfach verwendeter client */
-   private final HttpClient                                         client     =HttpClient.newHttpClient();;
+   private static final HttpClient                                  client     =HttpClient.newHttpClient();;
    /** Nummer des Gerätes */
    public final int                                                 ipPart;
    /** Text der IP des Gerätes */
    public final String                                              hostaddress;
    /** Name des Gerätes nachdem es erkannt wurde */
-   private JsonArray                                                name;
+   public JsonArray                                                 name;
    private JsonObject                                               warning;
    /** unbeantwortete Anfragen */
    private final ArrayList<CompletableFuture<HttpResponse<String>>> incomplete =new ArrayList<CompletableFuture<HttpResponse<String>>>();
@@ -40,33 +41,21 @@ public class Tasmota implements Comparable<Tasmota> {
    private static final String                                      SUCHKENNUNG="FriendlyName";
    /** Warnungen erkennen */
    private static final String                                      WARNING    ="WARNING";
+   private static final String                                      SENSOREN   ="StatusSNS";
    /** Lege ein Tasmota-Objekt probeweise an und fange an zu testen ob es antwortet */
    private Tasmota(int i) throws UnknownHostException, URISyntaxException {
       ipPart=i;
       byte[] nextIp=Data.data.myIp.getAddress();
       nextIp[3]=(byte) i;
       hostaddress=InetAddress.getByAddress(nextIp).getHostAddress();
-      request(SUCHANFRAGE);
+      incomplete.add(request(SUCHANFRAGE));
    }
-   public static final void scanFor(int i) {
-      try {
-         Tasmota tasmota=new Tasmota(i);
-         if (Data.data.tasmotas.contains(tasmota)) {
-            // requests retten
-            ArrayList<CompletableFuture<HttpResponse<String>>> r=tasmota.incomplete;
-            // bisheriges Tasmota-Objekt wiederverwenden
-            tasmota=Data.data.tasmotas.ceiling(tasmota);
-            tasmota.incomplete.addAll(r);
-         }
-         // neue Anfragen sind unterwegs
-         Data.data.unconfirmed.add(tasmota); // System.out.println(tasmota);
-         Data.testUnconfirmed();
-      } catch (UnknownHostException|URISyntaxException e) {
-         e.printStackTrace();
-      }
-   }
-   /** fordere eine bestimmte Übertragung an und setze sie zu den unbeantworteten */
-   private final void request(String anfrage) throws URISyntaxException {
+   /**
+    * fordere eine bestimmte Übertragung an und setze sie zu den unbeantworteten Anfragen
+    * 
+    * @return
+    */
+   final CompletableFuture<HttpResponse<String>> request(String anfrage) throws URISyntaxException {
       StringBuilder sb=new StringBuilder();
       // Benutzername und Passwort einbinden
       sb.append("user=");
@@ -80,7 +69,7 @@ public class Tasmota implements Comparable<Tasmota> {
                .uri(new URI("http", hostaddress, "/cm", sb.toString(), "")) //
                .timeout(Duration.ofMinutes(1)).build();
       // request absenden und asynchron bearbeiten
-      incomplete.add(client.sendAsync(request, BodyHandlers.ofString()));
+      return client.sendAsync(request, BodyHandlers.ofString());
    }
    /** versuche die offenen Anfragen zu verarbeiten */
    public final void process() {
@@ -102,7 +91,8 @@ public class Tasmota implements Comparable<Tasmota> {
                   JsonObject jo=j.getJsonObject(SUCHKENNUNG);
                   if (jo instanceof JsonArray) name=(JsonArray) jo;
                   warning=j.getJsonObject(WARNING);
-                  System.out.println(this);
+                  // Tasmota-Gerät verlangt Passwort
+                  if (warning!=null) System.out.println(this);
                }
                jsontree.put(anfrage, j);
                complete.put(anfrage, j);
@@ -125,6 +115,7 @@ public class Tasmota implements Comparable<Tasmota> {
       for (JsonObject jo:json.getAll()) {
          if (jo.name==null) continue;
          if (jo.name.equalsIgnoreCase(anfrage)) continue;
+         if (jo.name.equalsIgnoreCase(SENSOREN)) Sensor.addSensors(this, jo);
          if (k.contains(jo.name)) continue;
          k.add(jo.name);
          changed=true;
@@ -169,10 +160,23 @@ public class Tasmota implements Comparable<Tasmota> {
       if (a.length==1) return a[0];
       return s.substring(a[0].length()+1);
    }
-   /**
-    * Das gibt normalerweise FriendlyName private String getName() { if (name==null) return " ? ? ? "; JsonObject fo=name.getJsonObject(0); if (!(fo instanceof
-    * JsonString)) return " * * * "; return ((JsonString) fo).value; }
-    */
+   public static final void scanFor(int i) {
+      try {
+         Tasmota tasmota=new Tasmota(i);
+         if (Data.data.tasmotas.contains(tasmota)) {
+            // requests retten
+            ArrayList<CompletableFuture<HttpResponse<String>>> r=tasmota.incomplete;
+            // bisheriges Tasmota-Objekt wiederverwenden
+            tasmota=Data.data.tasmotas.ceiling(tasmota);
+            tasmota.incomplete.addAll(r);
+         }
+         // neue Anfragen sind unterwegs
+         Data.data.unconfirmed.add(tasmota); // System.out.println(tasmota);
+         Data.testUnconfirmed();
+      } catch (UnknownHostException|URISyntaxException e) {
+         e.printStackTrace();
+      }
+   }
    @Override
    public int compareTo(Tasmota o) {
       return Integer.compare(this.ipPart, o.ipPart);
