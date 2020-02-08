@@ -21,7 +21,7 @@ import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonValue;
 public class Sensor implements Comparable<Sensor> {
    // public static final String STATUS_SNS="StatusSNS";
    public static final String     STATUS_8      ="Status 8";
-   private static final int       MAXWERTE      =1000;
+   private static final int       MAXWERTE      =10000;
    public static Instant          firstTimestamp=null;
    // private static Instant lastTimestamp =null;
    public static double           timescaleS    =5d/MAXWERTE;

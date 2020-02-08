@@ -88,7 +88,7 @@ Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung geste
 ----
 # 0.3
 - [ ] Gestrichelte Linien für das Raster
-- [ ] Erweitern auf 10000 Messungen
+- [x] Erweitern auf 10000 Messungen
 - [ ] Werte beim erfassen mit dem richtigen Zeitpunkt übernehmen
 - [ ] Doppelte Werte bereits beim Erfassen droppen
 - [ ] senkrechte Linien im Diagramm um den zeitlichen Verlauf einordnen zu können
