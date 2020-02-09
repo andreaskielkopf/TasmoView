@@ -87,9 +87,13 @@ Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung geste
 ![Screenshot](./info/SensorData.png)
 ----
 # 0.3
-- [ ] Gestrichelte Linien für das Raster
 - [x] Erweitern auf 10000 Messungen
 - [x] Werte beim erfassen mit dem richtigen Zeitpunkt vom Sensor übernehmen
+- [x] Gestrichelte Linien für das Raster
+- [x] generate classfiles for java11
+- [x] FIXME: concurrent modifcation of Arraylists in Raster
+- [ ] FIXME: Versatz zwischen Raster und Wertegraph
+- [ ] FIXME: Raster zu eng bei Negativen Messwerten
 - [ ] Doppelte Werte bereits beim Erfassen droppen
 - [ ] senkrechte Linien im Diagramm um den zeitlichen Verlauf einordnen zu können
 - [ ] speichern der MAC und IP der gefundenen Tasmotas ???
@@ -110,10 +114,6 @@ Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung geste
 - [ ] Täglich nach Sonnenaufgang/Sonnenuntergang
 - [ ] X/Y-Graph mit 2 Sensoren Temperatur/Feuchte
 - [ ] Graph aus Formel
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
 - [ ] 
 - [ ] 
 - [ ] 

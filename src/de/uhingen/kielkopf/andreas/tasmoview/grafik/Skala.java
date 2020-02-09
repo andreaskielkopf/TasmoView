@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
@@ -13,28 +14,32 @@ import java.util.TreeSet;
 import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
 
 public class Skala {
-   public final TreeSet<Sensor> sensoren =new TreeSet<Sensor>();
+   static private final Stroke  STROKE_DASHED=new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] {3, 7}, 0);
+   static private final Stroke  STROKE_TICKS =new BasicStroke(1.6f);
+   static private final Stroke  STROKE_LABELS=new BasicStroke(2f);
+   static private final Stroke  STROKE_GRAPHS=new BasicStroke(2f);
+   static private int           MINORTICK    =7;
+   static private int           MIDLETICK    =15;
+   static private int           MAJORTICK    =20;
    // private static final long serialVersionUID=-1232799680846666655L;
-   private static int           MINORTICK=7;
-   private static int           MIDLETICK=15;
-   private static int           MAJORTICK=20;
-   private float                rulerpos =0.5f;
-   private Raster               raster   =null;
-   private Boolean              vertical =true;
-   private int                  oldw     =1;
-   private int                  oldh     =1;
-   private Color                color    =Color.MAGENTA;
+   public final TreeSet<Sensor> sensoren     =new TreeSet<Sensor>();
+   private float                rulerpos     =0.5f;
+   private Raster               raster       =null;
+   private Boolean              vertical     =true;
+   private int                  oldw         =1;
+   private int                  oldh         =1;
+   private Color                color        =Color.MAGENTA;
    /* Die Ticks als Pfad */
-   Path2D.Double                pTicks   =new Path2D.Double();
+   Path2D.Double                pTicks       =new Path2D.Double();
    /* Das Raster als Pfad */
-   Path2D.Double                pRaster  =new Path2D.Double();
+   Path2D.Double                pRaster      =new Path2D.Double();
    private double               abstand;
    // private AffineTransform at1 =new AffineTransform();
    private AffineTransform      at2;
-   Rectangle2D.Double           r        =null;
+   Rectangle2D.Double           r            =null;
    final String                 typ;
    private AffineTransform      at3;
-   private boolean              visible  =true;
+   private boolean              visible      =true;
    public Skala(String t) {
       this.typ=t;
       switch (t) {
@@ -78,11 +83,6 @@ public class Skala {
       if ((h==oldh)&&(w==oldw)) return;
       oldh=h;
       oldw=w;
-      // AffineTransform at=new AffineTransform();
-      // at.translate(0, oldh);
-      // at.scale(1, -1);
-      // at.translate(10, 10);
-      // at1=at;
       calculateSkala();
    }
    /** berechne die Pfade für die Skala und das Raster neu */
@@ -138,15 +138,17 @@ public class Skala {
       g2d.setColor(color.darker());
       g2d.setFont(new Font("Dialog", Font.PLAIN, 19));
       // System.out.println(typ);
-      g2d.setStroke(new BasicStroke(1f));
+      // g2d.setStroke(new BasicStroke(1f));
+      g2d.setStroke(STROKE_DASHED);
       if (pRaster!=null) g2d.draw(pRaster);
-      g2d.setStroke(new BasicStroke(1.6f));
+      g2d.setStroke(STROKE_TICKS);
       if (pTicks!=null) g2d.draw(pTicks);
       // AffineTransform at3=at2.createInverse();
       // try { g2d.transform(at2.createInverse()); } catch (NoninvertibleTransformException e) { e.printStackTrace(); }
       if (raster==null) return;
       g2d.scale(1, -1);
       float start=oldw*(rulerpos+0.025f);
+      g2d.setStroke(STROKE_LABELS);
       for (Entry<Double, String> entry:raster.getLabels().entrySet()) {
          float f=(float) (double) ((20-oldh)*(entry.getKey()-raster.rmin)/(raster.rmax-raster.rmin));
          g2d.drawString(entry.getValue(), start, f);
@@ -163,8 +165,8 @@ public class Skala {
          double sy=((oldh-20)/(r.getHeight()+0.1d)); // °C, %...
          at3=AffineTransform.getScaleInstance(sx, sy);
          at3.translate(-r.getX(), -r.getY());
+         g2d.setStroke(STROKE_GRAPHS);
          g2d.setColor(color);
-         g2d.setStroke(new BasicStroke(2f));
          for (Sensor sensor:sensoren) {
             Path2D.Double p=sensor.getPath();
             p.transform(at3);

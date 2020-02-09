@@ -1,8 +1,8 @@
 package de.uhingen.kielkopf.andreas.tasmoview.grafik;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /** Raster verwaltet das Raster und die für eine Skala erforderlichen Werte */
 public class Raster {
@@ -12,9 +12,9 @@ public class Raster {
    private double                                major  =1d;
    private double                                midle  =0.5d;
    private double                                minor  =0.1d;
-   private ArrayList<Double>                     majors =new ArrayList<Double>();
-   private ArrayList<Double>                     midles =new ArrayList<Double>();
-   private ArrayList<Double>                     minors =new ArrayList<Double>();
+   private CopyOnWriteArrayList<Double>          majors =new CopyOnWriteArrayList<Double>();
+   private CopyOnWriteArrayList<Double>          midles =new CopyOnWriteArrayList<Double>();
+   private CopyOnWriteArrayList<Double>          minors =new CopyOnWriteArrayList<Double>();
    private ConcurrentSkipListMap<Double, String> labels =new ConcurrentSkipListMap<Double, String>();
    private static DecimalFormat                  df3    =new DecimalFormat("###");
    private static DecimalFormat                  df2    =new DecimalFormat("##");
@@ -72,13 +72,13 @@ public class Raster {
       }
       return true;
    }
-   ArrayList<Double> getMajors() {
+   CopyOnWriteArrayList<Double> getMajors() {
       return majors;
    }
-   ArrayList<Double> getMinors() {
+   CopyOnWriteArrayList<Double> getMinors() {
       return minors;
    }
-   ArrayList<Double> getMidles() {
+   CopyOnWriteArrayList<Double> getMidles() {
       return midles;
    }
    ConcurrentSkipListMap<Double, String> getLabels() {
