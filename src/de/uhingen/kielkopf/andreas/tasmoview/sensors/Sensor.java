@@ -16,10 +16,10 @@ import de.uhingen.kielkopf.andreas.tasmoview.Data;
 import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonList;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
+import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonString;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonValue;
 
 public class Sensor implements Comparable<Sensor> {
-   // public static final String STATUS_SNS="StatusSNS";
    public static final String     STATUS_8      ="Status 8";
    private static final int       MAXWERTE      =10000;
    public static Instant          firstTimestamp=null;
@@ -164,6 +164,15 @@ public class Sensor implements Comparable<Sensor> {
       } // TODO min und max neu berechnen
    }
    private static Instant getInstant(JsonObject jsonObject) {
+      if ((jsonObject instanceof JsonString)) {
+         JsonString js=(JsonString) jsonObject;
+         if (js.name.equals("Time")) try {
+            return Instant.parse(js.value+"Z");
+         } catch (Exception e) {
+            System.err.println("Unable to parse "+js.value+" : "+Instant.now());
+            e.printStackTrace();
+         }
+      }
       return Instant.now();
    }
    @Override

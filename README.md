@@ -89,7 +89,7 @@ Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung geste
 # 0.3
 - [ ] Gestrichelte Linien für das Raster
 - [x] Erweitern auf 10000 Messungen
-- [ ] Werte beim erfassen mit dem richtigen Zeitpunkt übernehmen
+- [x] Werte beim erfassen mit dem richtigen Zeitpunkt vom Sensor übernehmen
 - [ ] Doppelte Werte bereits beim Erfassen droppen
 - [ ] senkrechte Linien im Diagramm um den zeitlichen Verlauf einordnen zu können
 - [ ] speichern der MAC und IP der gefundenen Tasmotas ???
