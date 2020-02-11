@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.prefs.Preferences;
 
 import javax.swing.JList;
@@ -30,11 +31,11 @@ public class Data {
    private ScanPanel                                         scanPanel;
    TasmoList                                                 tasmolist;
    /** Liste der gefundenen Tasmotas mit ihren Daten */
-   public final TreeSet<Tasmota>                             tasmotas           =new TreeSet<Tasmota>();
+   public final ConcurrentSkipListSet<Tasmota>               tasmotas           =new ConcurrentSkipListSet<Tasmota>();
    /** Liste der bisher gefundenen Sensoren */
-   public final TreeSet<Sensor>                              sensoren           =new TreeSet<Sensor>();
-   public final TreeSet<String>                              sensorTypen        =new TreeSet<String>();
-   public final TreeSet<Tasmota>                             tasmotasMitSensoren=new TreeSet<Tasmota>();
+   public final ConcurrentSkipListSet<Sensor>                sensoren           =new ConcurrentSkipListSet<Sensor>();
+   public final ConcurrentSkipListSet<String>                sensorTypen        =new ConcurrentSkipListSet<String>();
+   public final ConcurrentSkipListSet<Tasmota>               tasmotasMitSensoren=new ConcurrentSkipListSet<Tasmota>();
    // TODO lokal zwischenspeichern
    /** Liste der offenen Suche von Tasmotas oder der offenen Refreshs */
    public final TreeSet<Tasmota>                             unconfirmed        =new TreeSet<Tasmota>();

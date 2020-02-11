@@ -3,12 +3,13 @@ package de.uhingen.kielkopf.andreas.tasmoview.sensors;
 import java.time.Instant;
 
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
+import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonString;
 
 public class Messwert implements Comparable<Messwert> {
    public final Instant    instant;
    public final JsonObject json;
-   public final double     value;
-   public Messwert(Instant i, JsonObject j, Double v) {
+   public double           value;
+   public Messwert(Instant i, JsonObject j, double v) {
       instant=i;
       json=j;
       value=v;
@@ -16,5 +17,17 @@ public class Messwert implements Comparable<Messwert> {
    @Override
    public int compareTo(Messwert o) {
       return this.instant.compareTo(o.instant);
+   }
+   static Instant getInstant(JsonObject jsonObject) {
+      if ((jsonObject instanceof JsonString)) {
+         JsonString js=(JsonString) jsonObject;
+         if (js.name.equals("Time")) try {
+            return Instant.parse(js.value+"Z");
+         } catch (Exception e) {
+            e.printStackTrace();
+         }
+      }
+      System.err.println("Unable to parse "+jsonObject+" : "+Instant.now());
+      return Instant.now();
    }
 }

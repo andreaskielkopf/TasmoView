@@ -59,10 +59,12 @@ public class Raster {
       midles.clear();
       minors.clear();
       for (double i=rmin; i<=rmax+rest; i+=minor) {
-         if ((i%major)<test) majors.add(i);
-         else if ((i%major)>major-test) majors.add(i);
-         else if ((i%midle)<test) midles.add(i);
-         else if ((i%midle)>midle-test) midles.add(i);
+         double j=Math.abs(i);
+         // double s=Math.signum(i);
+         if ((j%major)<test) majors.add(i);
+         else if ((j%major)>major-test) majors.add(i);
+         else if ((j%midle)<test) midles.add(i);
+         else if ((j%midle)>midle-test) midles.add(i);
          else minors.add(i);
       }
       labels.clear();

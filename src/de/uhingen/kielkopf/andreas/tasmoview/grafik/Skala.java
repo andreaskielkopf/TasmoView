@@ -91,33 +91,35 @@ public class Skala {
       abstand=raster.rmax-raster.rmin;
       if (oldw==0) return;
       if (oldh==0) return;
-      // System.out.println("recalculate "+typ+" "+raster.rmin+":"+raster.rmax);
-      pTicks.reset();
-      pRaster.reset();
-      float start=oldw*rulerpos;
-      // System.out.println("start:"+start);
-      for (Double mi:raster.getMinors()) {
-         pTicks.moveTo(start, mi);
-         pTicks.lineTo(start+MINORTICK, mi);
+      synchronized (pTicks) {
+         // System.out.println("recalculate "+typ+" "+raster.rmin+":"+raster.rmax);
+         pTicks.reset();
+         pRaster.reset();
+         float start=oldw*rulerpos;
+         // System.out.println("start:"+start);
+         for (Double mi:raster.getMinors()) {
+            pTicks.moveTo(start, mi);
+            pTicks.lineTo(start+MINORTICK, mi);
+         }
+         for (Double mi:raster.getMidles()) {
+            pTicks.moveTo(start, mi);
+            pTicks.lineTo(start+MIDLETICK, mi);
+            // ra.moveTo(0, mi);
+            // ra.lineTo(oldw, mi);
+         }
+         for (Double mi:raster.getMajors()) {
+            pTicks.moveTo(start, mi);
+            pTicks.lineTo(start+MAJORTICK, mi);
+            pRaster.moveTo(0, mi);
+            pRaster.lineTo(oldw, mi);
+            // System.out.println(mi);
+         }
+         double sy=(oldh-20d)/abstand;
+         at2=AffineTransform.getScaleInstance(1, sy);
+         at2.translate(0, -raster.rmin);
+         pRaster.transform(at2);
+         pTicks.transform(at2);
       }
-      for (Double mi:raster.getMidles()) {
-         pTicks.moveTo(start, mi);
-         pTicks.lineTo(start+MIDLETICK, mi);
-         // ra.moveTo(0, mi);
-         // ra.lineTo(oldw, mi);
-      }
-      for (Double mi:raster.getMajors()) {
-         pTicks.moveTo(start, mi);
-         pTicks.lineTo(start+MAJORTICK, mi);
-         pRaster.moveTo(0, mi);
-         pRaster.lineTo(oldw, mi);
-         // System.out.println(mi);
-      }
-      double sy=(oldh-20d)/abstand;
-      at2=AffineTransform.getScaleInstance(1, sy);
-      at2.translate(0, -raster.rmin);
-      pRaster.transform(at2);
-      pTicks.transform(at2);
    }
    /** berechne die Grenzwerte für min und max neu */
    public void recalculateGrenzwerte() {
@@ -137,12 +139,14 @@ public class Skala {
       // g2d.transform(at1);
       g2d.setColor(color.darker());
       g2d.setFont(new Font("Dialog", Font.PLAIN, 19));
-      // System.out.println(typ);
-      // g2d.setStroke(new BasicStroke(1f));
-      g2d.setStroke(STROKE_DASHED);
-      if (pRaster!=null) g2d.draw(pRaster);
-      g2d.setStroke(STROKE_TICKS);
-      if (pTicks!=null) g2d.draw(pTicks);
+      synchronized (pTicks) {
+         // System.out.println(typ);
+         // g2d.setStroke(new BasicStroke(1f));
+         g2d.setStroke(STROKE_DASHED);
+         if (pRaster!=null) g2d.draw(pRaster);
+         g2d.setStroke(STROKE_TICKS);
+         if (pTicks!=null) g2d.draw(pTicks);
+      }
       // AffineTransform at3=at2.createInverse();
       // try { g2d.transform(at2.createInverse()); } catch (NoninvertibleTransformException e) { e.printStackTrace(); }
       if (raster==null) return;

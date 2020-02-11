@@ -32,6 +32,7 @@ public class SensorPanel extends JPanel {
    /** Liste der offenen Suche von Tasmotas oder der offenen Refreshs */
    final LinkedHashMap<CompletableFuture<HttpResponse<String>>, Tasmota> requests        =                         //
             new LinkedHashMap<CompletableFuture<HttpResponse<String>>, Tasmota>();
+   private JLabel                                                        lblSekunden;
    /**
     * Create the panel.
     */
@@ -57,14 +58,17 @@ public class SensorPanel extends JPanel {
          refreshPanel=new JPanel();
          refreshPanel.setBorder(
                   new TitledBorder(new LineBorder(new Color(184, 207, 229)), "Refresh", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(51, 51, 51)));
-         refreshPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+         refreshPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
          refreshPanel.add(getRefreshLabel());
          refreshPanel.add(getSpinner());
+         refreshPanel.add(getLblSekunden());
       }
       return refreshPanel;
    }
    private JLabel getRefreshLabel() {
-      if (refreshLabel==null) refreshLabel=new JLabel("Refresh Sensordata every");
+      if (refreshLabel==null) {
+         refreshLabel=new JLabel("Refresh Sensordata every");
+      }
       return refreshLabel;
    }
    private JSpinner getSpinner() {
@@ -104,5 +108,12 @@ public class SensorPanel extends JPanel {
             }
          }
       }
+   }
+   private JLabel getLblSekunden() {
+      if (lblSekunden==null) {
+         lblSekunden=new JLabel("s");
+         lblSekunden.setName("lblSekunden");
+      }
+      return lblSekunden;
    }
 }
