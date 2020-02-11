@@ -92,9 +92,11 @@ Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung geste
 - [x] Gestrichelte Linien für das Raster
 - [x] generate classfiles for java11
 - [x] FIXME: concurrent modifcation of Arraylists in Raster
+- [X] Doppelte Werte bereits beim Erfassen droppen
+- [X] FIXME: Raster zu eng bei Negativen Messwerten
+- [X] FIXME: Modifikation der Messwertskala synchronisieren während Paintevent 
+- [X] Beim komprimieren der Werte Mittelwert bilden 
 - [ ] FIXME: Versatz zwischen Raster und Wertegraph
-- [ ] FIXME: Raster zu eng bei Negativen Messwerten
-- [ ] Doppelte Werte bereits beim Erfassen droppen
 - [ ] senkrechte Linien im Diagramm um den zeitlichen Verlauf einordnen zu können
 - [ ] speichern der MAC und IP der gefundenen Tasmotas ???
 - [ ] Jeder Sensor bekommt einen Spitznamen (speichern)
@@ -118,8 +120,6 @@ Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung geste
 - [ ] 
 - [ ] 
 - [ ] ihr Vorschlag kann als Pull-Request hier eingefügt werden
-- [ ] 
-- [ ] 
 - [ ] 
 - [ ] 
 - [ ] 
