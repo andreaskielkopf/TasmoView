@@ -168,7 +168,7 @@ public class Sensor implements Comparable<Sensor> {
       return minwert;
    }
    public Path2D.Double getPath() {
-      Path2D.Double np=(java.awt.geom.Path2D.Double) path.clone();
+      Path2D.Double np=(Path2D.Double) path.clone();
       return np;
    }
    public boolean hasWerte() {
@@ -178,11 +178,13 @@ public class Sensor implements Comparable<Sensor> {
       double timescaleT=5d/((double) ChronoUnit.SECONDS.between(firstTimestamp, Instant.now()));
       if (timescaleS>timescaleT*2) timescaleS=timescaleT;
       timescaleD=timescaleS;
-      Path2D.Double p2     =new Path2D.Double();
-      int           counter=0;
+      Path2D.Double p2=new Path2D.Double();
+      {
+         p2.moveTo(0, y);
+      }
       for (Messwert mwert:werte) {
-         double x=((double) ChronoUnit.SECONDS.between(firstTimestamp, mwert.instant))*timescaleD;
-         if (0==counter++) p2.moveTo(x, mwert.value);
+         double x=firstTimestamp.until(mwert.instant, ChronoUnit.SECONDS)*timescaleD;
+         if (p2.getCurrentPoint()==null) p2.moveTo(x, mwert.value);
          else p2.lineTo(x, mwert.value);
       }
       path=p2;

@@ -33,13 +33,14 @@ public class Skala {
    Path2D.Double                pTicks       =new Path2D.Double();
    /* Das Raster als Pfad */
    Path2D.Double                pRaster      =new Path2D.Double();
-   private double               abstand;
+   // private double abstand;
    // private AffineTransform at1 =new AffineTransform();
    private AffineTransform      at2;
    Rectangle2D.Double           r            =null;
    final String                 typ;
    private AffineTransform      at3;
    private boolean              visible      =true;
+   private double               sy;
    public Skala(String t) {
       this.typ=t;
       switch (t) {
@@ -88,7 +89,7 @@ public class Skala {
    /** berechne die Pfade für die Skala und das Raster neu */
    public void calculateSkala() {
       if (raster==null) return;
-      abstand=raster.rmax-raster.rmin;
+      // abstand=raster.rmax-raster.rmin;
       if (oldw==0) return;
       if (oldh==0) return;
       synchronized (pTicks) {
@@ -114,11 +115,11 @@ public class Skala {
             pRaster.lineTo(oldw, mi);
             // System.out.println(mi);
          }
-         double sy=(oldh-20d)/abstand;
-         at2=AffineTransform.getScaleInstance(1, sy);
-         at2.translate(0, -raster.rmin);
-         pRaster.transform(at2);
-         pTicks.transform(at2);
+         // sy=((oldh-20)/(r.getHeight()+0.1d));
+         // at2=AffineTransform.getScaleInstance(1, sy);
+         // at2.translate(0, -r.getY());
+         // pRaster.transform(at2);
+         // pTicks.transform(at2);
       }
    }
    /** berechne die Grenzwerte für min und max neu */
@@ -135,42 +136,60 @@ public class Skala {
    }
    public void paintSkala(Graphics2D g2d) {
       if (!visible) return;
-      AffineTransform tmp=g2d.getTransform();
-      // g2d.transform(at1);
-      g2d.setColor(color.darker());
-      g2d.setFont(new Font("Dialog", Font.PLAIN, 19));
-      synchronized (pTicks) {
-         // System.out.println(typ);
-         // g2d.setStroke(new BasicStroke(1f));
-         g2d.setStroke(STROKE_DASHED);
-         if (pRaster!=null) g2d.draw(pRaster);
-         g2d.setStroke(STROKE_TICKS);
-         if (pTicks!=null) g2d.draw(pTicks);
-      }
-      // AffineTransform at3=at2.createInverse();
-      // try { g2d.transform(at2.createInverse()); } catch (NoninvertibleTransformException e) { e.printStackTrace(); }
       if (raster==null) return;
-      g2d.scale(1, -1);
-      float start=oldw*(rulerpos+0.025f);
-      g2d.setStroke(STROKE_LABELS);
-      for (Entry<Double, String> entry:raster.getLabels().entrySet()) {
-         float f=(float) (double) ((20-oldh)*(entry.getKey()-raster.rmin)/(raster.rmax-raster.rmin));
-         g2d.drawString(entry.getValue(), start, f);
-      }
+      AffineTransform tmp=g2d.getTransform();
       r=null;
+      // Skala berechnen mit Rechteck
       for (Sensor sensor:sensoren) if (sensor.path.getCurrentPoint()!=null) {
          if (r==null) r=(Rectangle2D.Double) sensor.path.getBounds2D().clone();
          else r.add(sensor.path.getBounds2D());
       }
       if (r!=null) {
-         g2d.scale(1, -1);
-         r.setRect(r.getX(), r.getY()-0.5d, r.getWidth(), r.getHeight()+1d);
-         double sx=((oldw-20)/(r.getWidth()+0.1d));  // Sekunden
-         double sy=((oldh-20)/(r.getHeight()+0.1d)); // °C, %...
+         if (pRaster!=null) {
+            r.setRect(r.getX(), pRaster.getBounds2D().getY(), r.getWidth(), pRaster.getBounds2D().getHeight());
+         }
+         // Skala berechnen
+         // r.setRect(r.getX(), r.getY()-0.5d, r.getWidth(), r.getHeight()+1d);
+         double sx=((oldw-20)/(r.getWidth()+0.1d)); // Sekunden
+         sy=((oldh-20)/(r.getHeight()+0.1d)); // °C, %...
          at3=AffineTransform.getScaleInstance(sx, sy);
          at3.translate(-r.getX(), -r.getY());
-         g2d.setStroke(STROKE_GRAPHS);
+         at2=AffineTransform.getScaleInstance(1, sy);
+         at2.translate(0, -r.getY());
+         g2d.setColor(color.darker());
+         synchronized (pTicks) {
+            // System.out.println(typ);
+            if (pRaster!=null) {
+               g2d.setStroke(STROKE_DASHED);
+               Path2D.Double pr=(Path2D.Double) pRaster.clone();
+               pr.transform(at2);
+               g2d.draw(pr);
+            }
+            if (pTicks!=null) {
+               g2d.setStroke(STROKE_TICKS);
+               Path2D.Double pt=(Path2D.Double) pTicks.clone();
+               pt.transform(at2);
+               g2d.draw(pt);
+            }
+         }
+         // Labels zeichnen
+         AffineTransform tmp2=g2d.getTransform();
+         // g2d.transform(at3);
+         double          ssy =-(r.getHeight()+0.1d)/(r.getHeight()); // °C, %...
+         g2d.scale(1, -1);
+         // g2d.translate(0, r.getY());
+         float start=oldw*(rulerpos+0.025f);
+         g2d.setStroke(STROKE_LABELS);
+         g2d.setFont(new Font("Dialog", Font.PLAIN, 19));
+         for (Entry<Double, String> entry:raster.getLabels().entrySet()) {
+            float f=(float) (double) ((20-oldh)*(entry.getKey()-raster.rmin)/(raster.rmax-raster.rmin));
+            g2d.drawString(entry.getValue(), start, f);
+         }
+         // g2d.scale(1, -1);
+         g2d.setTransform(tmp2);
+         // Sensordaten zeichnen
          g2d.setColor(color);
+         g2d.setStroke(STROKE_GRAPHS);
          for (Sensor sensor:sensoren) {
             Path2D.Double p=sensor.getPath();
             p.transform(at3);

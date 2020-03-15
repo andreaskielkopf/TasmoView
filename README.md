@@ -96,7 +96,7 @@ Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung geste
 - [X] FIXME: Raster zu eng bei Negativen Messwerten
 - [X] FIXME: Modifikation der Messwertskala synchronisieren während Paintevent 
 - [X] Beim komprimieren der Werte Mittelwert bilden 
-- [ ] FIXME: Versatz zwischen Raster und Wertegraph
+- [ ] FIXME: Versatz zwischen Raster und Wertegraph beheben
 - [ ] senkrechte Linien im Diagramm um den zeitlichen Verlauf einordnen zu können
 - [ ] speichern der MAC und IP der gefundenen Tasmotas ???
 - [ ] Jeder Sensor bekommt einen Spitznamen (speichern)
