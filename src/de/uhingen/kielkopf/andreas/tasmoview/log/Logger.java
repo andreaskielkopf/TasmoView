@@ -1,4 +1,4 @@
-package log;
+package de.uhingen.kielkopf.andreas.tasmoview.log;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
