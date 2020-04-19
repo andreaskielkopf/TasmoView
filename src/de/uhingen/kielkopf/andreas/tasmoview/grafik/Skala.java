@@ -25,7 +25,7 @@ public class Skala {
    public final TreeSet<Sensor> sensoren     =new TreeSet<Sensor>();
    private float                rulerpos     =0.5f;
    private Raster               raster       =null;
-   private Boolean              vertical     =true;
+   // private Boolean vertical =true;
    private int                  oldw         =1;
    private int                  oldh         =1;
    private Color                color        =Color.MAGENTA;
@@ -69,9 +69,7 @@ public class Skala {
       // neu berechnen weil sich die werte stark geändert haben
       if (raster.isRasterChanged(min, max)) calculateSkala();
    }
-   public void setVertical(boolean vertical) {
-      this.vertical=vertical;
-   }
+   // public void setVertical(boolean vertical) { this.vertical=vertical; }
    public float getRulerpos() {
       return rulerpos;
    }
@@ -158,10 +156,13 @@ public class Skala {
          g2d.drawString(entry.getValue(), start, f);
       }
       r=null;
-      for (Sensor sensor:sensoren) if (sensor.path.getCurrentPoint()!=null) {
-         if (r==null) r=(Rectangle2D.Double) sensor.path.getBounds2D().clone();
-         else r.add(sensor.path.getBounds2D());
-      }
+      for (Sensor sensor:sensoren)
+         if (sensor.path.getCurrentPoint()!=null) {
+            if (r==null)
+               r=(Rectangle2D.Double) sensor.path.getBounds2D().clone();
+            else
+               r.add(sensor.path.getBounds2D());
+         }
       if (r!=null) {
          g2d.scale(1, -1);
          r.setRect(r.getX(), r.getY()-0.5d, r.getWidth(), r.getHeight()+1d);

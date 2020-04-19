@@ -133,14 +133,16 @@ public class Tasmota implements Comparable<Tasmota> {
    /** Hole Alle Antworten ! */
    ArrayList<JsonObject> getAll() {
       ArrayList<JsonObject> c=new ArrayList<JsonObject>();
-      for (JsonObject response:complete.values()) c.addAll(response.getAll());
+      for (JsonObject response:complete.values())
+         c.addAll(response.getAll());
       return c;
    }
    /** Hole Alle Antworten mit diesem Namen in einer Liste */
-   ArrayList<JsonObject> getAll(String name) {
+   public ArrayList<JsonObject> getAll(String name) {
       ArrayList<JsonObject> c=new ArrayList<JsonObject>();
       for (JsonObject response:complete.values()) {
-         for (JsonObject o:response.getAll(name)) c.add(o);
+         for (JsonObject o:response.getAll(name))
+            c.add(o);
       }
       return c;
    }
@@ -151,7 +153,7 @@ public class Tasmota implements Comparable<Tasmota> {
       return html.replaceAll(";", "%35");
    }
    /** Hole den Text der erste Antwort mit diesem Namen */
-   String getValue(String name) {
+   public String getValue(String name) {
       ArrayList<JsonObject> l=getAll(name);
       if (l.isEmpty()) return "";
       String   s=l.get(0).toString();

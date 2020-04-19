@@ -1,10 +1,13 @@
-package de.uhingen.kielkopf.andreas.tasmoview;
+package de.uhingen.kielkopf.andreas.tasmoview.table;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
+import de.uhingen.kielkopf.andreas.tasmoview.Data;
+import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonArray;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonList;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
@@ -25,15 +28,17 @@ public class TasmoTableModell extends AbstractTableModel {
    /** Umstellen der Tabelle auf andere Daten */
    public void setTable(String name) {
       int row=-1;
-      try {
-         if (Data.data.tasmolist!=null) row=Data.data.getTasmoList().getTable().getSelectedRow();
-      } catch (NullPointerException e) {
-         e.printStackTrace();
-      }
+      /** Hier muss eine Rekursion vermieden werden ! ==> Wenn Tasmolist nicht exisitiert einfach ignorieren */
+      // try {
+      if (Data.data.tasmolist!=null) if (Data.data.tasmolist.getTable()!=null) row=Data.data.tasmolist.getTable().getSelectedRow();
+      // } catch (NullPointerException e) {
+      // e.printStackTrace();
+      // }
       String key=Tasmota.toHtmlString(name);
       if ((columnNames==null)||(key==null)) {
          LinkedHashSet<String> c=new LinkedHashSet<String>();
-         for (String string:cn) c.add(string);
+         for (String string:cn)
+            c.add(string);
          columnNames=c;
          if (key==null) {// Aufruf im Konstruktor
             fireTableStructureChanged();
@@ -42,7 +47,8 @@ public class TasmoTableModell extends AbstractTableModel {
       }
       if (!Data.data.tablenames.containsKey(key)) {// Datensatz vorbereiten
          ArrayList<JsonObject> jos=new ArrayList<JsonObject>();
-         for (Tasmota t:Data.data.tasmotas) jos.addAll(t.getAll(key));
+         for (Tasmota t:Data.data.tasmotas)
+            jos.addAll(t.getAll(key));
          createTableHeaders(key, jos);
       }
       if (Data.data.tablenames.containsKey(key)) {// Datensatz aktivieren
@@ -50,8 +56,9 @@ public class TasmoTableModell extends AbstractTableModel {
          fireTableStructureChanged();
          if (row!=-1) Data.data.getTasmoList().getTable().setRowSelectionInterval(row, row);
       }
+      berechneSplaten();
    }
-   /* BErmittle den Columnname */
+   /* Ermittle den Columnname */
    public String getColumnName(int col) {
       LinkedHashSet<String> cnames=columnNames;
       // erste Splate ist immer der Gerätename
@@ -79,10 +86,30 @@ public class TasmoTableModell extends AbstractTableModel {
       for (JsonObject jo:jos) //
          if ((jo instanceof JsonList)||(jo instanceof JsonArray))//
             for (JsonObject j:(jo instanceof JsonList) ? ((JsonList) jo).list : ((JsonArray) jo).list)//
-               if (j.name!=null) names.add(j.name);
+            if (j.name!=null) names.add(j.name);
       if (!names.isEmpty()) Data.data.tablenames.put(key, names);
    }
    public Tasmota getTasmota(int rowIndex) {
       return (Tasmota) Data.data.tasmotas.toArray()[rowIndex];
+   }
+   void berechneSplaten() {
+      if (Data.data.tasmolist!=null) {
+         JTable table=Data.data.tasmolist.getTable();
+         if (table==null) return;
+         for (int c=0; c<getColumnCount(); c++) {
+            int w =0;            // getColumnName(c).length();
+            int mw=w;
+            int rc=getRowCount();
+            for (int r=0; r<rc; r++) {
+               int l=getValueAt(r, c).toString().length();
+               if (l>mw) mw=l;
+               w+=l;
+            }
+            /** Der Wert soll zwischen dem Mittelwert und dem Maxwert liegen */
+            w=(int) (20f*(0.5f+0.5f*w/(rc+0.01f)+0.3f*mw));
+            table.getColumnModel().getColumn(c).setPreferredWidth(w);
+            System.out.print(c+":"+w+"  ");
+         }
+      }
    }
 }

@@ -19,6 +19,8 @@ import javax.swing.event.ListSelectionListener;
 
 import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
 import de.uhingen.kielkopf.andreas.tasmoview.sensors.SensorGraphPanel;
+import de.uhingen.kielkopf.andreas.tasmoview.table.TasmoList;
+import de.uhingen.kielkopf.andreas.tasmoview.table.TasmoTableModell;
 
 /** Singleton um die Daten des Programms zentral zu halten */
 public class Data {
@@ -29,7 +31,7 @@ public class Data {
    /** gemeinsam verwendetes Feld für den Username */
    private JTextField                                        userField;
    private ScanPanel                                         scanPanel;
-   TasmoList                                                 tasmolist;
+   public TasmoList                                          tasmolist;
    /** Liste der gefundenen Tasmotas mit ihren Daten */
    public final ConcurrentSkipListSet<Tasmota>               tasmotas           =new ConcurrentSkipListSet<Tasmota>();
    /** Liste der bisher gefundenen Sensoren */
@@ -66,8 +68,10 @@ public class Data {
          LinkedHashSet<String> tabelle     =new LinkedHashSet<String>();
          String                tabellenname=null;
          for (String spalte:spalten) {
-            if (tabellenname==null) tabellenname=spalte;
-            else tabelle.add(spalte);
+            if (tabellenname==null)
+               tabellenname=spalte;
+            else
+               tabelle.add(spalte);
          } // eintragen
          tablenames.put(tabellenname, tabelle);
       }
@@ -88,7 +92,7 @@ public class Data {
       }
    }
    /** Konstrukor für das gemeinsam genutzte Feld */
-   JPasswordField getPasswordField() {
+   public JPasswordField getPasswordField() {
       if (passwordField==null) {
          System.out.println(prefs.get(PASSWORD, ""));
          passwordField=new JPasswordField(prefs.get(PASSWORD, ""));
@@ -98,7 +102,7 @@ public class Data {
       return passwordField;
    }
    /** Konstrukor für das gemeinsam genutzte Feld */
-   JTextField getUserField() {
+   public JTextField getUserField() {
       if (userField==null) {
          // TODO lokal zwischenspeichern und holen
          System.out.println(prefs.get(USER, "admin"));
@@ -108,16 +112,8 @@ public class Data {
       return userField;
    }
    public ScanPanel getScanPanel() {
-      if (scanPanel==null) {
-         scanPanel=new ScanPanel();
-      }
+      if (scanPanel==null) scanPanel=new ScanPanel();
       return scanPanel;
-   }
-   public TasmoList getTasmoList() {
-      if (tasmolist==null) {
-         tasmolist=new TasmoList();
-      }
-      return tasmolist;
    }
    public JList<Sensor> getSensorList() {
       if (sensorList==null) {
@@ -138,5 +134,9 @@ public class Data {
          sensorGraphPanel.setLayout(new BorderLayout(0, 0));
       }
       return sensorGraphPanel;
+   }
+   public TasmoList getTasmoList() {
+      if (tasmolist==null) tasmolist=new TasmoList();
+      return tasmolist;
    }
 }

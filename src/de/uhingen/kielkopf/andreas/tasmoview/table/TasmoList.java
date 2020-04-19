@@ -1,4 +1,4 @@
-package de.uhingen.kielkopf.andreas.tasmoview;
+package de.uhingen.kielkopf.andreas.tasmoview.table;
 
 import java.awt.BorderLayout;
 import java.awt.Desktop;
@@ -24,6 +24,9 @@ import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+
+import de.uhingen.kielkopf.andreas.tasmoview.Data;
+import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
 
 public class TasmoList extends JPanel {
    private static final long serialVersionUID=4606263020682918366L;
@@ -146,15 +149,17 @@ public class TasmoList extends JPanel {
          Runtime rt=Runtime.getRuntime();
          if (os.contains("win")) {
             rt.exec("rundll32 url.dll,FileProtocolHandler "+("http://"+host)).waitFor();
-         } else if (os.contains("mac")||os.contains("darwin")) {
-            String[] cmd= {"open", "http://"+host};
-            rt.exec(cmd).waitFor();
-         } else if (os.contains("nix")||os.contains("nux")||os.contains("aix")) {
-            String[] cmd= {"xdg-open", "http://"+host};
-            rt.exec(cmd).waitFor();
-         } else {
-            System.err.println("Browser-start not supported:"+os);
-         }
+         } else
+            if (os.contains("mac")||os.contains("darwin")) {
+               String[] cmd= {"open", "http://"+host};
+               rt.exec(cmd).waitFor();
+            } else
+               if (os.contains("nix")||os.contains("nux")||os.contains("aix")) {
+                  String[] cmd= {"xdg-open", "http://"+host};
+                  rt.exec(cmd).waitFor();
+               } else {
+                  System.err.println("Browser-start not supported:"+os);
+               }
       }
    }
    private JPanel getPanel_1() {
