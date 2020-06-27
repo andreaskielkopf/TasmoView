@@ -167,7 +167,7 @@ public class Tasmota implements Comparable<Tasmota> {
          Tasmota tasmota=new Tasmota(i);
          if (Data.data.tasmotas.contains(tasmota)) {
             // requests retten
-            ArrayList<CompletableFuture<HttpResponse<String>>> r=tasmota.incomplete;
+            ArrayList<CompletableFuture<HttpResponse<String>>> ;
             // bisheriges Tasmota-Objekt wiederverwenden
             tasmota=Data.data.tasmotas.ceiling(tasmota);
             tasmota.incomplete.addAll(r);
