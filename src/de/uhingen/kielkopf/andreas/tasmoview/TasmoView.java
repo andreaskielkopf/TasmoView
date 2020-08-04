@@ -12,8 +12,8 @@ import javax.swing.border.TitledBorder;
 public class TasmoView {
    private JFrame      frame;
    private JLabel      cLabel;
-   private JPanel      panelT;
-   private JPanel      panelS;
+   private JPanel      panelTable;
+   private JPanel      panelScan;
    private JTabbedPane tabbedPane;
    private JPanel      panel;
    private JPanel      panel_1;
@@ -51,23 +51,23 @@ public class TasmoView {
       }
       return cLabel;
    }
-   private JPanel getPanelT() {
-      if (panelT==null) {
-         panelT=new JPanel();
-         panelT.setBorder(new TitledBorder(null, "Found Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-         panelT.setLayout(new BorderLayout(0, 0));
-         panelT.add(Data.data.getTasmoList(), BorderLayout.CENTER);
+   private JPanel getPanelTable() {
+      if (panelTable==null) {
+         panelTable=new JPanel();
+         panelTable.setBorder(new TitledBorder(null, "Found Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+         panelTable.setLayout(new BorderLayout(0, 0));
+         panelTable.add(Data.data.getTasmoList(), BorderLayout.CENTER);
       }
-      return panelT;
+      return panelTable;
    }
-   private JPanel getPanelS() {
-      if (panelS==null) {
-         panelS=new JPanel();
-         panelS.setBorder(new TitledBorder(null, "Scan for Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-         panelS.setLayout(new BorderLayout(0, 0));
-         panelS.add(Data.data.getScanPanel(), BorderLayout.NORTH);
+   private JPanel getPanelScan() {
+      if (panelScan==null) {
+         panelScan=new JPanel();
+         panelScan.setBorder(new TitledBorder(null, "Scan for Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+         panelScan.setLayout(new BorderLayout(0, 0));
+         panelScan.add(Data.data.getScanPanel(), BorderLayout.NORTH);
       }
-      return panelS;
+      return panelScan;
    }
    private JTabbedPane getTabbedPane() {
       if (tabbedPane==null) {
@@ -85,8 +85,8 @@ public class TasmoView {
       if (panel==null) {
          panel=new JPanel();
          panel.setLayout(new BorderLayout(0, 0));
-         panel.add(getPanelT(), BorderLayout.CENTER);
-         panel.add(getPanelS(), BorderLayout.NORTH);
+         panel.add(getPanelTable(), BorderLayout.CENTER);
+         panel.add(getPanelScan(), BorderLayout.NORTH);
       }
       return panel;
    }

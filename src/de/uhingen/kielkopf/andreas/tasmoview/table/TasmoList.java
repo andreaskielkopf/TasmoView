@@ -122,6 +122,7 @@ public class TasmoList extends JPanel {
          browserButton=new JButton("Browser");
          browserButton.setHorizontalTextPosition(SwingConstants.LEFT);
          browserButton.setIcon(new ImageIcon(TasmoList.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/tag-places.png")));
+         browserButton.setEnabled(false);
          browserButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                int row=getTable().getSelectedRow();

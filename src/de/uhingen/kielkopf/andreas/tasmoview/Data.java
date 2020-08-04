@@ -2,12 +2,12 @@ package de.uhingen.kielkopf.andreas.tasmoview;
 
 import java.awt.BorderLayout;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.prefs.Preferences;
 
@@ -25,36 +25,45 @@ import de.uhingen.kielkopf.andreas.tasmoview.table.TasmoTableModell;
 /** Singleton um die Daten des Programms zentral zu halten */
 public class Data {
    /** Singleton */
-   public static final Data                                  data               =new Data();
-   /** gemeinsam verwendete Passwortfeld */
-   private JPasswordField                                    passwordField;
+   public static final Data                                      data               =new Data();
+   /** gemeinsam verwendetes Passwortfeld */
+   private JPasswordField                                        passwordField;
    /** gemeinsam verwendetes Feld für den Username */
-   private JTextField                                        userField;
-   private ScanPanel                                         scanPanel;
-   public TasmoList                                          tasmolist;
+   private JTextField                                            userField;
+   private ScanPanel                                             scanPanel;
+   public TasmoList                                              tasmolist;
    /** Liste der gefundenen Tasmotas mit ihren Daten */
-   public final ConcurrentSkipListSet<Tasmota>               tasmotas           =new ConcurrentSkipListSet<Tasmota>();
-   /** Liste der bisher gefundenen Sensoren */
-   public final ConcurrentSkipListSet<Sensor>                sensoren           =new ConcurrentSkipListSet<Sensor>();
-   public final ConcurrentSkipListSet<String>                sensorTypen        =new ConcurrentSkipListSet<String>();
-   public final ConcurrentSkipListSet<Tasmota>               tasmotasMitSensoren=new ConcurrentSkipListSet<Tasmota>();
-   // TODO lokal zwischenspeichern
+   public final ConcurrentSkipListSet<Tasmota>                   tasmotas           =new ConcurrentSkipListSet<>();
    /** Liste der offenen Suche von Tasmotas oder der offenen Refreshs */
-   public final TreeSet<Tasmota>                             unconfirmed        =new TreeSet<Tasmota>();
+   // public final TreeSet<Tasmota> unconfirmed =new TreeSet<>();
+   /** Liste der gerade noch laufenden Anfragen */
+   public final ConcurrentSkipListSet<CompletableFuture<String>> anfragen           =new ConcurrentSkipListSet<CompletableFuture<String>>(
+            new Comparator<CompletableFuture<String>>() {                                                                                            //
+                                                                                                @Override
+                                                                                                public int compare(CompletableFuture<String> o1,
+                                                                                                         CompletableFuture<String> o2) {
+                                                                                                   return Integer.compare(hashCode(), o1.hashCode());
+                                                                                                }
+                                                                                             });
+   /** Liste der bisher gefundenen Sensoren */
+   public final ConcurrentSkipListSet<Sensor>                    sensoren           =new ConcurrentSkipListSet<>();
+   public final ConcurrentSkipListSet<String>                    sensorTypen        =new ConcurrentSkipListSet<>();
+   public final ConcurrentSkipListSet<Tasmota>                   tasmotasMitSensoren=new ConcurrentSkipListSet<>();
+   // TODO lokal zwischenspeichern
    /** Die eigene IP dieses Rechners */
-   public InetAddress                                        myIp               =null;
+   public InetAddress                                            myIp               =null;
    /** spezielles TableModel mit wechselnden Tabellen und Überschriften für die Infoseite */
-   public TasmoTableModell                                   dataModel          =null;
+   public TasmoTableModell                                       dataModel          =null;
    /** 2D-ArrayList mit Uberschriften für die benannten Tabellen */
-   public final LinkedHashMap<String, LinkedHashSet<String>> tablenames         =new LinkedHashMap<String, LinkedHashSet<String>>();
+   public final LinkedHashMap<String, LinkedHashSet<String>>     tablenames         =new LinkedHashMap<String, LinkedHashSet<String>>();
    /** Bitset mit den gefundenen tasmotas als Bit (nicht nochmal nach denen suchen) */
-   public final BitSet                                       found_tasmotas     =new BitSet(256);
-   private JList<Sensor>                                     sensorList;
-   private SensorGraphPanel                                  sensorGraphPanel;
+   public final BitSet                                           found_tasmotas     =new BitSet(256);
+   private JList<Sensor>                                         sensorList;
+   private SensorGraphPanel                                      sensorGraphPanel;
    // TODO lokal zwischenspeichern und holen
-   static final String                                       USER               ="user";
-   static final String                                       PASSWORD           ="password";
-   public final Preferences                                  prefs              =Preferences.userNodeForPackage(TasmoView.class);
+   static final String                                           USER               ="user";
+   static final String                                           PASSWORD           ="password";
+   public final Preferences                                      prefs              =Preferences.userNodeForPackage(TasmoView.class);
    /** Im Konstruktor werden Die festgelegte Tabellen mit ihren Überschriften definiert und eingetragen */
    private Data() {
       String[][] init= { // {"Tabellenname", "Spalte2", "Spalte3", "Spalte4", ...}
@@ -77,20 +86,11 @@ public class Data {
       }
    }
    /** Prüfe die Ausstehenden Tasmotas bis lle entweder erkannt oder verworfen sind */
-   synchronized public static void testUnconfirmed() {
-      ArrayList<Tasmota> totest=new ArrayList<Tasmota>(data.unconfirmed);
-      for (Tasmota t:totest) {
-         Boolean test=t.isTasmota();
-         if (test==null) continue;
-         data.unconfirmed.remove(t);
-         if (test) {
-            data.found_tasmotas.set(t.ipPart);
-            data.tasmotas.add(t);
-            // Tasmota-Gerät gefunden
-            System.out.println(t);
-         }
-      }
-   }
+   /*
+    * synchronized public static void testUnconfirmed() { ArrayList<Tasmota> totest=new ArrayList<Tasmota>(data.unconfirmed); for (Tasmota t:totest) { Boolean
+    * test=t.isTasmota(); if (test==null) continue; data.unconfirmed.remove(t); if (test) { data.found_tasmotas.set(t.ipPart); data.tasmotas.add(t); //
+    * Tasmota-Gerät gefunden System.out.println(t); } } }
+    */
    /** Konstrukor für das gemeinsam genutzte Feld */
    public JPasswordField getPasswordField() {
       if (passwordField==null) {

@@ -56,7 +56,7 @@ public class TasmoTableModell extends AbstractTableModel {
          fireTableStructureChanged();
          if (row!=-1) Data.data.getTasmoList().getTable().setRowSelectionInterval(row, row);
       }
-      berechneSplaten();
+      berechneSpalten();
    }
    /* Ermittle den Columnname */
    public String getColumnName(int col) {
@@ -79,7 +79,9 @@ public class TasmoTableModell extends AbstractTableModel {
    /** Inhalte live aus den Daten ermitteln */
    @Override
    public Object getValueAt(int rowIndex, int columnIndex) {
-      return getTasmota(rowIndex).getValue(getColumnName(columnIndex));
+      String cname=getColumnName(columnIndex);
+      String erg  =getTasmota(rowIndex).getValue(cname);
+      return erg;
    }
    private void createTableHeaders(String key, ArrayList<JsonObject> jos) {
       LinkedHashSet<String> names=new LinkedHashSet<String>();
@@ -92,7 +94,7 @@ public class TasmoTableModell extends AbstractTableModel {
    public Tasmota getTasmota(int rowIndex) {
       return (Tasmota) Data.data.tasmotas.toArray()[rowIndex];
    }
-   void berechneSplaten() {
+   void berechneSpalten() {
       if (Data.data.tasmolist!=null) {
          JTable table=Data.data.tasmolist.getTable();
          if (table==null) return;

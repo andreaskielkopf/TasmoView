@@ -18,7 +18,7 @@ public class Messwert implements Comparable<Messwert> {
    public int compareTo(Messwert o) {
       return this.instant.compareTo(o.instant);
    }
-   static Instant getInstant(JsonObject jsonObject) {
+   public static Instant getInstant(JsonObject jsonObject) {
       if ((jsonObject instanceof JsonString)) {
          JsonString js=(JsonString) jsonObject;
          if (js.name.equals("Time")) try {
