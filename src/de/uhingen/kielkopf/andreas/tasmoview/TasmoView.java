@@ -9,6 +9,9 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.TitledBorder;
 
+import de.uhingen.kielkopf.andreas.tasmoview.tasks.DataLogger;
+import de.uhingen.kielkopf.andreas.tasmoview.tasks.TasmoScanner;
+
 public class TasmoView {
    private JFrame      frame;
    private JLabel      cLabel;
@@ -22,10 +25,13 @@ public class TasmoView {
    /** Launch the application. */
    public static void main(String[] args) {
       EventQueue.invokeLater(new Runnable() {
+         private DataLogger datalogger;
          public void run() {
             try {
                TasmoView window=new TasmoView();
                Data.data.getScanPanel().getScanButton().doClick();
+               datalogger=new DataLogger();
+               TasmoScanner.exec.submit(datalogger);
                window.frame.setVisible(true);
             } catch (Exception e) {
                e.printStackTrace();

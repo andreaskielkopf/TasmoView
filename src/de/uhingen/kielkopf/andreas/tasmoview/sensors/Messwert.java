@@ -14,6 +14,17 @@ public class Messwert implements Comparable<Messwert> {
       json=j;
       value=v;
    }
+   static public Messwert save2Messwert(String line) {
+      return null;
+   }
+   public String save() {
+      StringBuilder sb=new StringBuilder();
+      sb.append(instant);
+      sb.append(",");
+      sb.append(value);
+      System.out.println(sb.toString());
+      return sb.toString();
+   }
    @Override
    public int compareTo(Messwert o) {
       return this.instant.compareTo(o.instant);

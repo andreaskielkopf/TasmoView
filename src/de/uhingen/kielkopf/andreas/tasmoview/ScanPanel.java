@@ -19,7 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JToggleButton;
 
-import de.uhingen.kielkopf.andreas.tasmoview.device.TasmoScanner;
+import de.uhingen.kielkopf.andreas.tasmoview.tasks.TasmoScanner;
 
 /** Grafisches Element zur Steuerung und Kontrolle des Scans nach Tasmota-Geröten im localen Netzwerk */
 public class ScanPanel extends JPanel {
@@ -122,6 +122,7 @@ public class ScanPanel extends JPanel {
    protected void scan(boolean rescan) {
       if ((tasmoScanner==null)||tasmoScanner.isDone()||tasmoScanner.isCancelled()) {
          tasmoScanner=new TasmoScanner(rescan, getProgressBar(), getScanButton(), getRefreshButton());
+         TasmoScanner.exec.submit(tasmoScanner);// automatic execute in threadpool
       }
    }
    /** Fortschrittsbalken für San und Refresh */

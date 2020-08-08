@@ -77,7 +77,7 @@ public class Tasmota implements Comparable<Tasmota> {
          URL               url   =new URI("http", hostaddress, "/cm", sb.toString(), "").toURL();
          HttpURLConnection client=(HttpURLConnection) url.openConnection();
          client.setRequestMethod("GET");
-         client.setConnectTimeout(60*1000);// 1 Minute
+         client.setConnectTimeout(5*1000);// 5 Sekunden
          BufferedReader br=new BufferedReader(new InputStreamReader(client.getInputStream()));
          while (true) {
             String line=br.readLine();

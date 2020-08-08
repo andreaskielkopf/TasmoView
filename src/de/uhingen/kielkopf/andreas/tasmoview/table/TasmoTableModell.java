@@ -110,7 +110,7 @@ public class TasmoTableModell extends AbstractTableModel {
             /** Der Wert soll zwischen dem Mittelwert und dem Maxwert liegen */
             w=(int) (20f*(0.5f+0.5f*w/(rc+0.01f)+0.3f*mw));
             table.getColumnModel().getColumn(c).setPreferredWidth(w);
-            System.out.print(c+":"+w+"  ");
+            // System.out.print(c+":"+w+" ");
          }
       }
    }

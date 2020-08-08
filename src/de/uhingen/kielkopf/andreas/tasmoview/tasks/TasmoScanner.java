@@ -1,10 +1,9 @@
-package de.uhingen.kielkopf.andreas.tasmoview.device;
+package de.uhingen.kielkopf.andreas.tasmoview.tasks;
 
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,7 +24,7 @@ public class TasmoScanner extends SwingWorker<String, String> {
    /** privates Segment mit 256 IPs */
    private static final int            MAXIMUM_IPS  =256;
    /** Zeitabstand beim Scan */
-   private static final int            ABSTAND_IN_MS=100;
+   private static final int            ABSTAND_IN_MS=200;
    /** Dies scheint ein Tasmota zu sein */
    private static final BitSet         isTasmota    =new BitSet(MAXIMUM_IPS);
    /** Dies ist sicher kein Tasmota */
@@ -54,10 +53,10 @@ public class TasmoScanner extends SwingWorker<String, String> {
       this.scanButton=scanButton;
       this.refreshButton=refreshButton;
       progressBar.setMaximum(MAXIMUM_IPS);
-      exec.submit(this);// automatic execute in threadpool
    }
    @Override
    protected String doInBackground() throws Exception {
+      Thread.currentThread().setName(this.getClass().getSimpleName());
       try {
          if (!rescan) {
             offen.set(0, MAXIMUM_IPS-1);// alle suchen
@@ -77,11 +76,24 @@ public class TasmoScanner extends SwingWorker<String, String> {
             try {
                Thread.sleep(ABSTAND_IN_MS);
             } catch (Exception ignore) {}
-            anfragen.add(new ScanFor(j));// mit autostart
+            ScanFor x=(new ScanFor(j));
+            TasmoScanner.exec.submit(x);
+            anfragen.add(x);// mit autostart
          }
-         for (ScanFor scanFor:anfragen)
-            scanFor.get();// warte bis all die Anfragen durch sind
-      } catch (InterruptedException|ExecutionException e) {
+         while (!anfragen.isEmpty()) {
+            System.out.println("");
+            System.out.print("noch offen: ");
+            ArrayList<ScanFor> cleanup=new ArrayList<>(anfragen);
+            for (ScanFor scanFor:cleanup)
+               if (scanFor.isDone())
+                  anfragen.remove(scanFor);
+               else
+                  System.out.print(Integer.toHexString(scanFor.j)+"-");
+            // scanFor.get();// warte bis all die Anfragen durch sind
+            Thread.sleep(1000);
+         }
+         // anfragen.clear();
+      } catch (InterruptedException e) {
          e.printStackTrace();
          throw e;
       }
@@ -89,8 +101,8 @@ public class TasmoScanner extends SwingWorker<String, String> {
    }
    @Override
    protected void process(List<String> chunks) {
-      for (String s:chunks)
-         progressBar.setString(s);
+      // for (String s:chunks)
+      // progressBar.setString(s);
       if (progressBar.getMaximum()!=256) progressBar.setMaximum(256);
    }
    @Override
@@ -112,16 +124,20 @@ public class TasmoScanner extends SwingWorker<String, String> {
       private final Integer j;
       public ScanFor(Integer j) {
          this.j=j;
-         exec.submit(this);// automatic execute in threadpool
+         // Thread.currentThread().setName(this.getClass().getSimpleName()+" "+j);
+         System.out.print("^");
       }
       @Override
       protected String doInBackground() throws Exception {
+         Thread.currentThread().setName(this.getClass().getSimpleName()+" "+j);
          scanFor(j);
          offen.clear(j);
          return null;
       }
       @Override
       protected void done() {
+         System.out.print("v");
+         progressBar.setString(Integer.toString(j));
          progressBar.setValue(offen.size()-offen.cardinality());
       }
       /**
@@ -135,12 +151,12 @@ public class TasmoScanner extends SwingWorker<String, String> {
             Tasmota tasmota=new Tasmota(i);
             if (Data.data.tasmotas.contains(tasmota)) tasmota=Data.data.tasmotas.ceiling(tasmota);
             // Data.data.unconfirmed.add(tasmota); // System.out.println(tasmota);
-            System.out.print(" "+i);
+            // System.out.print(" "+i);
             ArrayList<String> erg=tasmota.request(Tasmota.SUCHANFRAGE);
             if (erg.size()>1) {// Es ist eine Antwort gekommen
                Data.data.tasmotas.add(tasmota);
                // Data.data.unconfirmed.remove(tasmota);
-               System.out.println(">>"+i);
+               // System.out.println(">>"+i);
                if (tasmota.process(erg)) {
                   isTasmota.set(i);
                   publish(tasmota);

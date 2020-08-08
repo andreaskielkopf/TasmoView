@@ -2,6 +2,7 @@ package de.uhingen.kielkopf.andreas.tasmoview.sensors;
 
 import java.awt.Color;
 import java.awt.geom.Path2D;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonValue;
 
 public class Sensor implements Comparable<Sensor> {
    public static Instant      firstTimestamp=null;
-   public static final int    MAXWERTE      =1000;       // 0;
+   public static final int    MAXWERTE      =1000;
    public static final String STATUS_8      ="Status 8";
    // private static Instant lastTimestamp =null;
    public static double       timescaleS    =5d/MAXWERTE;
@@ -45,6 +46,7 @@ public class Sensor implements Comparable<Sensor> {
                      Data.data.getSensorGraphPanel().setSensors(Data.data.sensoren);
                   }
                   System.out.println(tasmota+s.name);
+                  tasmota.sensoren.add(s);
                }
          }
       if (s!=null) Data.data.tasmotasMitSensoren.add(tasmota);
@@ -69,23 +71,19 @@ public class Sensor implements Comparable<Sensor> {
       }
    }
    public static void antwortAuswerten(ArrayList<String> sl, Tasmota tasm) {
-      try {
-         // Tasmota tasm=entry.getValue();
-         // ArrayList<String> sl =entry.getKey().get();
-         String     s =sl.get(1);
-         JsonObject j0=JsonObject.interpret(s);
-         if (j0==null) return; // synchronized (Data.data.sensoren) {
-         for (Sensor sensor:Data.data.sensoren) {
-            if (sensor.tasmota!=tasm) continue;
-            JsonObject j1=j0.getJsonObject(sensor.kennung);
-            if (j1==null) continue;
-            Instant i=Messwert.getInstant(j0.getJsonObject("Time"));
-            sensor.addWert(i, j1);
-            // System.out.println(sensor.tasmota.name.toString()+j1);
-         } // }
-      } catch (InterruptedException|ExecutionException e) {
-         e.printStackTrace();
-      }
+      // Tasmota tasm=entry.getValue();
+      // ArrayList<String> sl =entry.getKey().get();
+      String     s =sl.get(1);
+      JsonObject j0=JsonObject.interpret(s);
+      if (j0==null) return; // synchronized (Data.data.sensoren) {
+      for (Sensor sensor:Data.data.sensoren) {
+         if (sensor.tasmota!=tasm) continue;
+         JsonObject j1=j0.getJsonObject(sensor.kennung);
+         if (j1==null) continue;
+         Instant i=Messwert.getInstant(j0.getJsonObject("Time"));
+         sensor.addWert(i, j1);
+         // System.out.println(sensor.tasmota.name.toString()+j1);
+      } // }
    }
    private final String                         name;
    public final Tasmota                         tasmota;
@@ -93,10 +91,12 @@ public class Sensor implements Comparable<Sensor> {
    public final String                          typ;
    private double                               maxwert;
    private double                               minwert;
+   public Path                                  pfad        =null;
    public Path2D.Double                         path        =new Path2D.Double();
    private double                               timescaleD  =5d/MAXWERTE;
    private ArrayList<Messwert>                  untersuchung=new ArrayList<Messwert>();
    public final ConcurrentSkipListSet<Messwert> werte       =new ConcurrentSkipListSet<Messwert>();
+   public final ConcurrentSkipListSet<Messwert> saveWerte   =new ConcurrentSkipListSet<Messwert>();
    private int                                  countdown;
    // private final <Messwert> puffer =new <Messwert>();
    /**
@@ -111,11 +111,9 @@ public class Sensor implements Comparable<Sensor> {
     */
    private Sensor(Tasmota tasmota, String name, String kennung, String typ/* , JsonObject einheit, TreeMap<Date, Messwert> werte */) {
       super();
-      // name.isBlank();
       this.name=name;
       this.tasmota=tasmota;
       this.typ=typ;
-      // System.out.println(typ);
       this.kennung=kennung;
    }
    /** ein neuer Messwert dieses Sensors wird eingetragen */
@@ -124,12 +122,24 @@ public class Sensor implements Comparable<Sensor> {
       Double value=j0.getDoubleValue(typ);
       if (value==null) return;
       Messwert mwert=new Messwert(instant, j0, value);
-      /** doppelte Messwerte zusammenfassen und Spitzen entfernen */
+      /** dreifache Messwerte zu 2 zusammenfassen und Spitzen/Jitter entfernen */
       if (werte.size()>1) {
          Messwert tmp=werte.pollLast(); // letzten provisorisch entfernen
          if (werte.last().value!=mwert.value) werte.add(tmp); // doch wieder einfügen
       }
       werte.add(mwert);
+      {
+         /**
+          * Wenn zumindest 2 Werte da sind, - den letzten rausholen - den vorletzten mit dem aktuellen Wert vergleichen - wenn sie ungleich sind, alle Werte
+          * erhalten - wenn sie gleich sind, den Zwischenwert entfernt lassen Das ist entweder ein Ausreisser, oder Jitter, oder 3 Konstante Werte
+          * hintereinander
+          */
+         if (saveWerte.size()>1) {
+            Messwert letzter=saveWerte.pollLast(); // letzten provisorisch entfernen
+            if (saveWerte.last().value!=mwert.value) saveWerte.add(letzter);
+         }
+         saveWerte.add(mwert);
+      }
       boolean recalculateSkala=true;
       double  x               =((double) ChronoUnit.SECONDS.between(firstTimestamp, instant))*timescaleD;
       if (path.getCurrentPoint()==null) {
