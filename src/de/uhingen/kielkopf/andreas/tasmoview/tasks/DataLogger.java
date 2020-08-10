@@ -61,12 +61,10 @@ public class DataLogger extends SwingWorker<Boolean, Long> {
                try (BufferedWriter bw=Files.newBufferedWriter(sensor.pfad, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.WRITE,
                         StandardOpenOption.APPEND)) {
                   System.out.print("l");
-                  while (sensor.saveWerte.size()>2) {
+                  while (sensor.saveWerte.size()>3) {
                      bw.append(sensor.saveWerte.pollFirst().save()); // hole den ältesten Wert
                      bw.newLine();
-                     // if (sensor.saveWerte.size()<=2) break;
                   }
-                  // bw.close();
                } // automatic close
             } catch (IOException e) {
                e.printStackTrace();

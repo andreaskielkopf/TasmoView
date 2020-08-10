@@ -89,6 +89,7 @@ public class Sensor implements Comparable<Sensor> {
    public final Tasmota                         tasmota;
    public final String                          kennung;
    public final String                          typ;
+   public final Color                           color;
    private double                               maxwert;
    private double                               minwert;
    public Path                                  pfad        =null;
@@ -115,6 +116,28 @@ public class Sensor implements Comparable<Sensor> {
       this.tasmota=tasmota;
       this.typ=typ;
       this.kennung=kennung;
+      this.color=createcolor();
+   }
+   static final double FARB_RADIUS=0.7d/2d;
+   static final float  FARB_BASIS =0.95f;
+   static final double FARB_STEP  =2d*Math.PI/5.3d;
+   private Color createcolor() {
+      double winkel=0;
+      for (Sensor s:Data.data.sensoren) {
+         // System.out.println(s.typ);
+         if (s.typ.equals(typ)) winkel+=FARB_STEP;
+      }
+      System.out.println(typ+" Winkel= "+((int) (180*winkel/Math.PI))%360);
+      float sin=(float) (FARB_RADIUS*(Math.sin(winkel)+1d));
+      float cos=(float) (FARB_RADIUS*(Math.cos(winkel)+1d));
+      switch (typ) {
+      case "Temperature":
+         return new Color(FARB_BASIS, sin, cos);// RED
+      case "Humidity":
+         return new Color(sin, cos, FARB_BASIS);// BLUE
+      default:
+         return new Color(cos, FARB_BASIS, sin);// GREEN
+      }
    }
    /** ein neuer Messwert dieses Sensors wird eingetragen */
    public synchronized void addWert(Instant instant, JsonObject j0) {

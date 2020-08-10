@@ -41,7 +41,7 @@ public class SensorScanner extends SwingWorker<String, String> {
       HashSet<ScanOf> scans=new HashSet<>();
       Thread.currentThread().setName(this.getClass().getSimpleName());
       while (true) {
-         int test=1;
+         // int test=1;
          for (Tasmota tasmota:Data.data.tasmotasMitSensoren) {
             ScanOf x=new ScanOf(tasmota);
             scans.add(x);
@@ -78,19 +78,19 @@ public class SensorScanner extends SwingWorker<String, String> {
       @Override
       protected Tasmota doInBackground() throws Exception {
          Thread.currentThread().setName(this.getClass().getSimpleName()+" "+tasm.ipPart);
-         int test=1;
+         // int test=1;
          if (tasm==null) return null;
          if (tasm.sensoren.isEmpty()) return null;
          try {
+            Instant           i  =Instant.now();
             ArrayList<String> sl =tasm.request(Sensor.STATUS_8);
-            Instant           i0 =Instant.now();
             String            erg=sl.get(1);
             JsonObject        j0 =JsonObject.interpret(erg);
             for (Sensor sensor:tasm.sensoren) {
                JsonObject j1=j0.getJsonObject(sensor.kennung);
                if (j1==null) continue;
                // Instant i=Messwert.getInstant(j0.getJsonObject("Time"));
-               sensor.addWert(i0, j1);
+               sensor.addWert(i, j1);
                System.out.print(".");
             }
          } catch (Exception e) {

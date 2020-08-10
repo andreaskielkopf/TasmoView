@@ -175,6 +175,7 @@ public class Skala {
          for (Sensor sensor:sensoren) {
             Path2D.Double p=sensor.getPath();
             p.transform(at3);
+            g2d.setColor(sensor.color);
             g2d.draw(p);
          }
       }

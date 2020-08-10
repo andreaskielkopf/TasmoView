@@ -20,11 +20,11 @@ import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
  * @author andreas T=Endergebniss, V=Zwischenergebnisse
  */
 public class TasmoScanner extends SwingWorker<String, String> {
-   public static final ExecutorService exec         =Executors.newWorkStealingPool();
+   public static final ExecutorService exec         =Executors.newWorkStealingPool(100);
    /** privates Segment mit 256 IPs */
    private static final int            MAXIMUM_IPS  =256;
    /** Zeitabstand beim Scan */
-   private static final int            ABSTAND_IN_MS=200;
+   private static final int            ABSTAND_IN_MS=100;
    /** Dies scheint ein Tasmota zu sein */
    private static final BitSet         isTasmota    =new BitSet(MAXIMUM_IPS);
    /** Dies ist sicher kein Tasmota */
@@ -73,14 +73,19 @@ public class TasmoScanner extends SwingWorker<String, String> {
          ArrayList<ScanFor> anfragen=new ArrayList<>();
          for (Integer j:searchlist) {
             publish(Integer.toString(j));
+            int offen=0;
+            for (ScanFor scanFor:anfragen)
+               if (!scanFor.isDone()) offen++;
             try {
-               Thread.sleep(ABSTAND_IN_MS);
+               Thread.sleep(ABSTAND_IN_MS*offen);
             } catch (Exception ignore) {}
             ScanFor x=(new ScanFor(j));
             TasmoScanner.exec.submit(x);
             anfragen.add(x);// mit autostart
          }
+         int runde=60;// Maximal eine Minute warten
          while (!anfragen.isEmpty()) {
+            if (--runde<1) break;
             System.out.println("");
             System.out.print("noch offen: ");
             ArrayList<ScanFor> cleanup=new ArrayList<>(anfragen);
@@ -89,10 +94,11 @@ public class TasmoScanner extends SwingWorker<String, String> {
                   anfragen.remove(scanFor);
                else
                   System.out.print(Integer.toHexString(scanFor.j)+"-");
-            // scanFor.get();// warte bis all die Anfragen durch sind
             Thread.sleep(1000);
          }
-         // anfragen.clear();
+         for (ScanFor scanFor:anfragen)
+            scanFor.cancel(true);
+         anfragen.clear();
       } catch (InterruptedException e) {
          e.printStackTrace();
          throw e;
@@ -114,6 +120,8 @@ public class TasmoScanner extends SwingWorker<String, String> {
       } else {
          refreshButton.setSelected(false);
       }
+      scanButton.setEnabled(true);
+      refreshButton.setEnabled(true);
    }
    private class ScanFor extends SwingWorker<String, Tasmota> {
       @Override
