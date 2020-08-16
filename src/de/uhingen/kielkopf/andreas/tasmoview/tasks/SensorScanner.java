@@ -1,13 +1,18 @@
 package de.uhingen.kielkopf.andreas.tasmoview.tasks;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
+import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SwingWorker;
 
 import de.uhingen.kielkopf.andreas.tasmoview.Data;
+import de.uhingen.kielkopf.andreas.tasmoview.TasmoView;
 import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
 import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
@@ -18,10 +23,23 @@ import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
  * @author andreas T=Endergebniss, V=Zwischenergebnisse
  */
 public class SensorScanner extends SwingWorker<String, String> {
-   // public static final ExecutorService exec=Executors.newWorkStealingPool(25);
-   private final JSpinner sensorRefreshSpinner;
+   @Override
+   protected void process(List<String> chunks) {
+      if (lastRead!=null) {
+         for (String text:chunks) {
+            lastRead.setText(text);
+            System.out.println(text);
+         }
+         lastRead.repaint(100);
+      }
+   }
+   private final JSpinner                 sensorRefreshSpinner;
+   private final JLabel                   lastRead;
+   private static final DateTimeFormatter tf=DateTimeFormatter.ofPattern("EE HH:mm:ss");
    /**
     * Erzeuge und starte eine Task die nach einer Anzahl von 256 Geräten sucht
+    * 
+    * @param jLabel
     * 
     * @param rescan
     *           erneuere die Infos ohne neue Geräte zu suchen
@@ -32,20 +50,37 @@ public class SensorScanner extends SwingWorker<String, String> {
     * @param refreshButton
     *           Refreshbutton
     */
-   public SensorScanner(JSpinner sensorRefreshSpinner) {
+   public SensorScanner(JSpinner sensorRefreshSpinner, JLabel lastRead) {
       this.sensorRefreshSpinner=sensorRefreshSpinner;
-      // Thread.currentThread().setName(this.getClass().getSimpleName());
+      this.lastRead=lastRead;
    }
    @Override
    protected String doInBackground() throws Exception {
       HashSet<ScanOf> scans=new HashSet<>();
       Thread.currentThread().setName(this.getClass().getSimpleName());
+      int wartezeit=10;
       while (true) {
-         // int test=1;
          for (Tasmota tasmota:Data.data.tasmotasMitSensoren) {
             ScanOf x=new ScanOf(tasmota);
             scans.add(x);
             TasmoScanner.exec.submit(x);// automatic execute in threadpool
+         }
+         try {
+            wartezeit=(int) sensorRefreshSpinner.getValue();
+         } catch (Exception ignore1) {
+            ignore1.printStackTrace();
+         }
+         if (!TasmoView.keepRunning) return null;
+         String text=" ";
+         try {
+            text+=tf.format(LocalDateTime.now());
+         } catch (Exception e1) {
+            e1.printStackTrace();
+         }
+         try {
+            Thread.sleep(1000l*wartezeit);
+         } catch (RuntimeException|InterruptedException ignore) {
+            ignore.printStackTrace();
          }
          HashSet<ScanOf> cleanup=new HashSet<SensorScanner.ScanOf>(scans);
          for (ScanOf s:cleanup) {
@@ -55,12 +90,8 @@ public class SensorScanner extends SwingWorker<String, String> {
                e.printStackTrace();
             }
          }
-         int wartezeit=(int) sensorRefreshSpinner.getValue();
-         try {
-            Thread.sleep(1000l*wartezeit);
-         } catch (RuntimeException|InterruptedException ignore) {
-            ignore.printStackTrace();
-         }
+         text+="("+cleanup.size()+":"+(cleanup.size()-scans.size())+")";
+         publish(text);
          System.out.println();
          System.out.print("S");
       }
@@ -78,7 +109,6 @@ public class SensorScanner extends SwingWorker<String, String> {
       @Override
       protected Tasmota doInBackground() throws Exception {
          Thread.currentThread().setName(this.getClass().getSimpleName()+" "+tasm.ipPart);
-         // int test=1;
          if (tasm==null) return null;
          if (tasm.sensoren.isEmpty()) return null;
          try {

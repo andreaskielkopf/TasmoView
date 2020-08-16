@@ -34,8 +34,6 @@ public class Data {
    public TasmoList                                              tasmolist;
    /** Liste der gefundenen Tasmotas mit ihren Daten */
    public final ConcurrentSkipListSet<Tasmota>                   tasmotas           =new ConcurrentSkipListSet<>();
-   /** Liste der offenen Suche von Tasmotas oder der offenen Refreshs */
-   // public final TreeSet<Tasmota> unconfirmed =new TreeSet<>();
    /** Liste der gerade noch laufenden Anfragen */
    public final ConcurrentSkipListSet<CompletableFuture<String>> anfragen           =new ConcurrentSkipListSet<CompletableFuture<String>>(
             new Comparator<CompletableFuture<String>>() {                                                                                            //
@@ -49,7 +47,6 @@ public class Data {
    public final ConcurrentSkipListSet<Sensor>                    sensoren           =new ConcurrentSkipListSet<>();
    public final ConcurrentSkipListSet<String>                    sensorTypen        =new ConcurrentSkipListSet<>();
    public final ConcurrentSkipListSet<Tasmota>                   tasmotasMitSensoren=new ConcurrentSkipListSet<>();
-   // TODO lokal zwischenspeichern
    /** Die eigene IP dieses Rechners */
    public InetAddress                                            myIp               =null;
    /** spezielles TableModel mit wechselnden Tabellen und Überschriften für die Infoseite */
@@ -86,11 +83,6 @@ public class Data {
       }
    }
    /** Prüfe die Ausstehenden Tasmotas bis lle entweder erkannt oder verworfen sind */
-   /*
-    * synchronized public static void testUnconfirmed() { ArrayList<Tasmota> totest=new ArrayList<Tasmota>(data.unconfirmed); for (Tasmota t:totest) { Boolean
-    * test=t.isTasmota(); if (test==null) continue; data.unconfirmed.remove(t); if (test) { data.found_tasmotas.set(t.ipPart); data.tasmotas.add(t); //
-    * Tasmota-Gerät gefunden System.out.println(t); } } }
-    */
    /** Konstrukor für das gemeinsam genutzte Feld */
    public JPasswordField getPasswordField() {
       if (passwordField==null) {
@@ -118,7 +110,6 @@ public class Data {
    public JList<Sensor> getSensorList() {
       if (sensorList==null) {
          sensorList=new JList<Sensor>();
-         // sensorList.setVisibleRowCount(10);
          sensorList.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
                List<Sensor> sl=getSensorList().getSelectedValuesList();

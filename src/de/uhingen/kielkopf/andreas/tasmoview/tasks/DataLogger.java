@@ -9,33 +9,79 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
+import javax.swing.JLabel;
+import javax.swing.JSpinner;
 import javax.swing.SwingWorker;
 
 import de.uhingen.kielkopf.andreas.tasmoview.Data;
+import de.uhingen.kielkopf.andreas.tasmoview.TasmoView;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonString;
 import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
 
-public class DataLogger extends SwingWorker<Boolean, Long> {
-   static private final int        intervallSekunden=2*60;
-   private Path                    savePath;
-   private final DateTimeFormatter dtf;
-   public DataLogger() {
-      this.savePath=FileSystems.getDefault().getPath("TasmoView").toAbsolutePath();
-      dtf=DateTimeFormatter.ofPattern("yyyyMMdd");
+/**
+ * @author andreas kielkopf
+ * @date 2020.08.13
+ * 
+ *       Thread um alle Sensordaten von Zeit zu Zeit zu speichern Die Zeit ist übver die GUI einstellbar, und der letzte Zeitpunkt wird in der GUI angezeigt
+ */
+public class DataLogger extends SwingWorker<Boolean, LocalDateTime> {
+   private static final Path              savePath=FileSystems.getDefault().getPath("TasmoView").toAbsolutePath();
+   private static final DateTimeFormatter df      =DateTimeFormatter.ofPattern("yyyyMMdd");
+   private static final DateTimeFormatter tf      =DateTimeFormatter.ofPattern("EE HH:mm:ss");
+   private final JSpinner                 saveSpinner;
+   private final JLabel                   lastSaved;
+   private static DataLogger              singleton;
+   public DataLogger(JSpinner saveSpinner, JLabel lastSaved) {
+      this.saveSpinner=saveSpinner;
+      this.lastSaved=lastSaved;
       System.out.println("Savepath="+savePath);
    }
    @Override
+   protected void process(List<LocalDateTime> chunks) {
+      if (lastSaved!=null) for (LocalDateTime td:chunks)
+         lastSaved.setText(" "+tf.format(td));
+   }
+   @Override
    protected Boolean doInBackground() throws Exception {
+      singleton=this;
+      Runtime.getRuntime().addShutdownHook(new Thread() {
+         @Override
+         public void run() {
+            try {
+               System.out.println("Shutdown-Hook running 1");
+               TasmoView.keepRunning=false;
+               System.out.println("Shutdown-Hook running 2");
+               DataLogger dl=DataLogger.singleton;
+               if (dl!=null) System.out.println(DataLogger.saveNow(0));
+            } catch (Exception e) {
+               e.printStackTrace();
+            }
+         }
+      });
       Thread.currentThread().setName(this.getClass().getSimpleName());
-      while (true) {
+      int sekunden=5*60;
+      while (TasmoView.keepRunning) {
          try {
-            Thread.sleep(1000l*intervallSekunden);
+            if (saveSpinner!=null) sekunden=60*(int) saveSpinner.getValue();
+         } catch (Exception ignore1) {
+            ignore1.printStackTrace();
+         }
+         try {
+            Thread.sleep(1000l*sekunden);
          } catch (InterruptedException ignore) {}
-         System.out.println("L");
+         LocalDateTime ldt=saveNow(3);
+         if (ldt!=null) publish(ldt);
+      }
+      return null;
+   }
+   static public LocalDateTime saveNow(int rest) {
+      System.out.println("L");
+      synchronized (singleton) {
          System.out.print("L");
-         String date=dtf.format(LocalDateTime.now());
+         String date=df.format(LocalDateTime.now());
          for (Sensor sensor:Data.data.sensoren) {
             try {
                if (sensor.saveWerte.isEmpty()) continue;
@@ -61,15 +107,17 @@ public class DataLogger extends SwingWorker<Boolean, Long> {
                try (BufferedWriter bw=Files.newBufferedWriter(sensor.pfad, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.WRITE,
                         StandardOpenOption.APPEND)) {
                   System.out.print("l");
-                  while (sensor.saveWerte.size()>3) {
+                  while (sensor.saveWerte.size()>rest) {
                      bw.append(sensor.saveWerte.pollFirst().save()); // hole den ältesten Wert
                      bw.newLine();
                   }
+                  return (LocalDateTime.now());
                } // automatic close
             } catch (IOException e) {
                e.printStackTrace();
             }
          }
+         return null;
       }
    }
 }

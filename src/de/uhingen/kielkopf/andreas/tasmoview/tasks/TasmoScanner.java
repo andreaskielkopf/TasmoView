@@ -12,6 +12,7 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingWorker;
 
 import de.uhingen.kielkopf.andreas.tasmoview.Data;
+import de.uhingen.kielkopf.andreas.tasmoview.TasmoView;
 import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
 
 /**
@@ -72,6 +73,7 @@ public class TasmoScanner extends SwingWorker<String, String> {
          Collections.shuffle(searchlist);// zufällige Reihenfolge
          ArrayList<ScanFor> anfragen=new ArrayList<>();
          for (Integer j:searchlist) {
+            if (!TasmoView.keepRunning) return null;
             publish(Integer.toString(j));
             int offen=0;
             for (ScanFor scanFor:anfragen)
@@ -107,8 +109,6 @@ public class TasmoScanner extends SwingWorker<String, String> {
    }
    @Override
    protected void process(List<String> chunks) {
-      // for (String s:chunks)
-      // progressBar.setString(s);
       if (progressBar.getMaximum()!=256) progressBar.setMaximum(256);
    }
    @Override
@@ -132,7 +132,6 @@ public class TasmoScanner extends SwingWorker<String, String> {
       private final Integer j;
       public ScanFor(Integer j) {
          this.j=j;
-         // Thread.currentThread().setName(this.getClass().getSimpleName()+" "+j);
          System.out.print("^");
       }
       @Override
@@ -158,13 +157,9 @@ public class TasmoScanner extends SwingWorker<String, String> {
          try {
             Tasmota tasmota=new Tasmota(i);
             if (Data.data.tasmotas.contains(tasmota)) tasmota=Data.data.tasmotas.ceiling(tasmota);
-            // Data.data.unconfirmed.add(tasmota); // System.out.println(tasmota);
-            // System.out.print(" "+i);
             ArrayList<String> erg=tasmota.request(Tasmota.SUCHANFRAGE);
             if (erg.size()>1) {// Es ist eine Antwort gekommen
                Data.data.tasmotas.add(tasmota);
-               // Data.data.unconfirmed.remove(tasmota);
-               // System.out.println(">>"+i);
                if (tasmota.process(erg)) {
                   isTasmota.set(i);
                   publish(tasmota);

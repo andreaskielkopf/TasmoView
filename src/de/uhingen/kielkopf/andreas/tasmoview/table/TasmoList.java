@@ -28,6 +28,21 @@ import javax.swing.event.ListSelectionListener;
 import de.uhingen.kielkopf.andreas.tasmoview.Data;
 import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
 
+/**
+ * 
+ * @author andreas kielkopf
+ * @date 2019
+ * 
+ *       Ein Panel mit der Liste einiger Tasmota-Geräte die bei einem Scan gefunden wurden
+ * 
+ *       Im oberen Teil findet sich eine Auswahl an möglichen Ansichten der Tabelle die als Knöpfe ausgebildet sind. Jede Ansicht zeigt unterschiedliche Daten
+ *       der Geräte an.
+ * 
+ *       Die Ansichten sind nicht vorgegeben, sondern werden von dem bestimmt, was das jeweilige Gerät als JSON-Daten übermittelt. Daraus werden sowohl die
+ *       Titel, alos auch die breiten der Spalten ermittelt
+ * 
+ *       Wenn eine Reihe ausgewählt ist, kann das betreffende Gerät auf Knopfdruck mit dem Browser geöffnet werden
+ */
 public class TasmoList extends JPanel {
    private static final long serialVersionUID=4606263020682918366L;
    private JScrollPane       scrollPane;
