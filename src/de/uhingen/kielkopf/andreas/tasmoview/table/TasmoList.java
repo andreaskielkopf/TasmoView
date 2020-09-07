@@ -158,7 +158,9 @@ public class TasmoList extends JPanel {
          unpw.append(Data.data.getUserField().getText());
          unpw.append(":");
          unpw.append(Data.data.getPasswordField().getPassword());
-         Desktop.getDesktop().browse(new URI("http", unpw.toString(), host, -1, null, null, null));
+         URI uri=new URI("http", unpw.toString(), host, -1, null, null, null);
+         Desktop.getDesktop().browse(uri);
+         /// http://andreas:akf4sonoff@192.168.178.28
       } else {
          System.err.println("Desktop is not suportet. trying Runtime.exec");
          String  os=System.getProperty("os.name");

@@ -46,7 +46,7 @@ public class TasmoView {
    }
    private JLabel getLabelC() {
       if (cLabel==null) {
-         cLabel=new JLabel("TasmoView 0.2  ©2020 by Andreas Kielkopf (All source is included in JAR-file)   https://github.com/andreaskielkopf/TasmoView ");
+         cLabel=new JLabel("TasmoView 0.4  ©2020 by Andreas Kielkopf (All source is included in JAR-file)   https://github.com/andreaskielkopf/TasmoView ");
       }
       return cLabel;
    }

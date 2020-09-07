@@ -63,6 +63,7 @@ public class Tasmota implements Comparable<Tasmota> {
    public final ArrayList<String> request(final String anfrage) {
       final StringBuilder sb=new StringBuilder();
       // Benutzername und Passwort einbinden
+      /// http://192.168.178.181/cm?user=andreas&password=akf4sonoff&cmnd=status%200#
       sb.append("user=");
       sb.append(Data.data.getUserField().getText());
       sb.append("&password=");
