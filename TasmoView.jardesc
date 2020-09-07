@@ -14,7 +14,7 @@
         <javaElement handleIdentifier="=TasmoView/src"/>
         <folder path="/TasmoView/info"/>
         <file path="/TasmoView/README.md"/>
-        <file path="/TasmoView/TasmoView.jardesc"/>
         <file path="/TasmoView/LICENSE"/>
+        <file path="/TasmoView/TasmoView.jardesc"/>
     </selectedElements>
 </jardesc>
