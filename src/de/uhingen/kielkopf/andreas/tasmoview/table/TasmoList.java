@@ -1,4 +1,4 @@
-package de.uhingen.kielkopf.andreas.tasmoview;
+package de.uhingen.kielkopf.andreas.tasmoview.table;
 
 import java.awt.BorderLayout;
 import java.awt.Desktop;
@@ -25,6 +25,24 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import de.uhingen.kielkopf.andreas.tasmoview.Data;
+import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
+
+/**
+ * 
+ * @author andreas kielkopf
+ * @date 2019
+ * 
+ *       Ein Panel mit der Liste einiger Tasmota-Geräte die bei einem Scan gefunden wurden
+ * 
+ *       Im oberen Teil findet sich eine Auswahl an möglichen Ansichten der Tabelle die als Knöpfe ausgebildet sind. Jede Ansicht zeigt unterschiedliche Daten
+ *       der Geräte an.
+ * 
+ *       Die Ansichten sind nicht vorgegeben, sondern werden von dem bestimmt, was das jeweilige Gerät als JSON-Daten übermittelt. Daraus werden sowohl die
+ *       Titel, alos auch die breiten der Spalten ermittelt
+ * 
+ *       Wenn eine Reihe ausgewählt ist, kann das betreffende Gerät auf Knopfdruck mit dem Browser geöffnet werden
+ */
 public class TasmoList extends JPanel {
    private static final long serialVersionUID=4606263020682918366L;
    private JScrollPane       scrollPane;
@@ -119,6 +137,7 @@ public class TasmoList extends JPanel {
          browserButton=new JButton("Browser");
          browserButton.setHorizontalTextPosition(SwingConstants.LEFT);
          browserButton.setIcon(new ImageIcon(TasmoList.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/tag-places.png")));
+         browserButton.setEnabled(false);
          browserButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                int row=getTable().getSelectedRow();
@@ -139,22 +158,26 @@ public class TasmoList extends JPanel {
          unpw.append(Data.data.getUserField().getText());
          unpw.append(":");
          unpw.append(Data.data.getPasswordField().getPassword());
-         Desktop.getDesktop().browse(new URI("http", unpw.toString(), host, -1, null, null, null));
+         URI uri=new URI("http", unpw.toString(), host, -1, null, null, null);
+         Desktop.getDesktop().browse(uri);
+         /// http://andreas:akf4sonoff@192.168.178.28
       } else {
          System.err.println("Desktop is not suportet. trying Runtime.exec");
          String  os=System.getProperty("os.name");
          Runtime rt=Runtime.getRuntime();
          if (os.contains("win")) {
             rt.exec("rundll32 url.dll,FileProtocolHandler "+("http://"+host)).waitFor();
-         } else if (os.contains("mac")||os.contains("darwin")) {
-            String[] cmd= {"open", "http://"+host};
-            rt.exec(cmd).waitFor();
-         } else if (os.contains("nix")||os.contains("nux")||os.contains("aix")) {
-            String[] cmd= {"xdg-open", "http://"+host};
-            rt.exec(cmd).waitFor();
-         } else {
-            System.err.println("Browser-start not supported:"+os);
-         }
+         } else
+            if (os.contains("mac")||os.contains("darwin")) {
+               String[] cmd= {"open", "http://"+host};
+               rt.exec(cmd).waitFor();
+            } else
+               if (os.contains("nix")||os.contains("nux")||os.contains("aix")) {
+                  String[] cmd= {"xdg-open", "http://"+host};
+                  rt.exec(cmd).waitFor();
+               } else {
+                  System.err.println("Browser-start not supported:"+os);
+               }
       }
    }
    private JPanel getPanel_1() {

@@ -10,13 +10,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.prefs.BackingStoreException;
-import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -25,11 +19,11 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JToggleButton;
 
+import de.uhingen.kielkopf.andreas.tasmoview.tasks.TasmoScanner;
+
 /** Grafisches Element zur Steuerung und Kontrolle des Scans nach Tasmota-Geröten im localen Netzwerk */
 public class ScanPanel extends JPanel {
    private static final long serialVersionUID=4194405156596011563L;
-   /** Zeitabstand eim Scan */
-   private static final int  ABSTAND_IN_MS   =100;
    /** Knopf zum start/stop des scans nach neuen Geräten */
    private JToggleButton     scanButton;
    /** Anzeige der eigenen IP */
@@ -42,13 +36,14 @@ public class ScanPanel extends JPanel {
    /** Fortschrittsbalken des Scan oder Refresh */
    private JProgressBar      progressBar;
    /** Hilfsvariablen während der Suche */
-   private BitSet            tosearch        =new BitSet(256);
-   private BitSet            posible         =new BitSet(256);     // Hinweise aus der letzten Suche
+   // private BitSet tosearch =new BitSet(256);
+   // private BitSet posible =new BitSet(256); // Hinweise aus der letzten Suche
    /** Timer der die Aktionen während der Suche oder dem Refresh abwickelt */
-   private Timer             scanTimer       =null;
+   // private Timer scanTimer =null;
    /** Das gesamte ScanPanel */
    private JPanel            scanPanel;
    private JButton           btnStorePWD;
+   protected TasmoScanner    tasmoScanner;
    public ScanPanel() {
       setLayout(new BorderLayout(0, 0));
       add(getProgressBar(), BorderLayout.CENTER);
@@ -83,20 +78,13 @@ public class ScanPanel extends JPanel {
                Data.data.getTasmoList().getBrowserButton().setEnabled(false);
                JToggleButton btn=(JToggleButton) e.getSource();
                getRefreshButton().setEnabled(!btn.isSelected());
-               if (tosearch.isEmpty()) {
-                  tosearch.set(0, 256);
-                  if (Data.data.myIp!=null) tosearch.clear(Data.data.myIp.getAddress()[3]);
+               if ((tasmoScanner==null)||tasmoScanner.isDone()||tasmoScanner.isCancelled()) {
+                  scan(false);
+                  btn.setSelected(true);
+               } else {
+                  tasmoScanner.cancel(true);
+                  btn.setSelected(false);
                }
-               BitSet firstbits=(BitSet) posible.clone();
-               firstbits.and(tosearch); // nur was nicht schon bearbeitet wurde
-               BitSet secondbits=(BitSet) tosearch.clone();
-               secondbits.andNot(firstbits); // Rest
-               List<Integer> first=firstbits.stream().boxed().collect(Collectors.toList());
-               Collections.shuffle(first);
-               List<Integer> second=secondbits.stream().boxed().collect(Collectors.toList());
-               Collections.shuffle(second);
-               first.addAll(second);
-               scan(btn, first);
             }
          });
       }
@@ -116,62 +104,26 @@ public class ScanPanel extends JPanel {
                Data.data.getTasmoList().getBrowserButton().setEnabled(false);
                JToggleButton btn=(JToggleButton) e.getSource();
                getScanButton().setEnabled(!btn.isSelected());
-               if (tosearch.isEmpty()) {
-                  tosearch.set(0, 256);
-                  if (Data.data.myIp!=null) tosearch.clear(Data.data.myIp.getAddress()[3]);
+               if ((tasmoScanner==null)||tasmoScanner.isDone()||tasmoScanner.isCancelled()) {
+                  scan(true);
+                  btn.setSelected(true);
+               } else {
+                  tasmoScanner.cancel(true);
+                  btn.setSelected(false);
                }
-               BitSet        firstbits=(BitSet) Data.data.found_tasmotas.clone();
-               List<Integer> first    =firstbits.stream().boxed().collect(Collectors.toList());
-               Collections.shuffle(first);
-               scan(btn, first);
             }
          });
       }
       return refreshButton;
    }
-   /** Der eigentliche Scanvargang wird in einem Timer organisiert */
-   protected void scan(final JToggleButton btn, List<Integer> list) {
-      if (scanTimer!=null) scanTimer.cancel();
-      if (!btn.isSelected()) { return; }
-      scanTimer=new Timer("Scan4Tasmota");
-      int offset=0;
-      getProgressBar().setMaximum(list.size());
-      for (Integer i:list) { // Suche ein bestimmtes Gerät
-         final int o=++offset;
-         scanTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-               // System.out.println(i);
-               getProgressBar().setString(Integer.toString(i));
-               getProgressBar().setValue(o);
-               if (Data.data.myIp!=null) {
-                  Tasmota.scanFor(i);
-                  tosearch.clear(i);
-               }
-            }
-         }, ABSTAND_IN_MS*offset);
+   /**
+    * Der eigentliche SCAn lauft in einem extra thread
+    */
+   protected void scan(boolean rescan) {
+      if ((tasmoScanner==null)||tasmoScanner.isDone()||tasmoScanner.isCancelled()) {
+         tasmoScanner=new TasmoScanner(rescan, getProgressBar(), getScanButton(), getRefreshButton());
+         TasmoScanner.exec.submit(tasmoScanner);// automatic execute in threadpool
       }
-      // Schließe die Suche ab, indem gewartet wird, bis die Antworten da sind um sie auszuwerten
-      scanTimer.schedule(new TimerTask() {
-         @Override
-         public void run() {
-            getProgressBar().setIndeterminate(true);
-            getProgressBar().setString("please wait up to 1 minute");
-            while (!Data.data.unconfirmed.isEmpty()) {
-               Data.testUnconfirmed();
-               try {
-                  Thread.sleep(ABSTAND_IN_MS);
-               } catch (InterruptedException e) {}
-            }
-            getProgressBar().setIndeterminate(false);
-            getProgressBar().setValue(getProgressBar().getMaximum());
-            btn.setSelected(false);
-            getScanButton().setEnabled(true);
-            getRefreshButton().setEnabled(true);
-            // for (Tasmota t:Data.data.tasmotas) System.out.println(t);
-            getProgressBar().setString("ready");
-         }
-      }, ABSTAND_IN_MS*++offset);
    }
    /** Fortschrittsbalken für San und Refresh */
    private JProgressBar getProgressBar() {

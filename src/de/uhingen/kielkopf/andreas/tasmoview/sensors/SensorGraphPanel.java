@@ -16,6 +16,12 @@ import javax.swing.border.TitledBorder;
 import de.uhingen.kielkopf.andreas.tasmoview.Data;
 import de.uhingen.kielkopf.andreas.tasmoview.grafik.Skala;
 
+/**
+ * Panel das die Kurven der Gewünschten Sensoren darstellt
+ * 
+ * @author andreas
+ *
+ */
 public class SensorGraphPanel extends JPanel {
    private static final long                    serialVersionUID=8079918630139793226L;
    private CopyOnWriteArrayList<Sensor>         sensorList      =new CopyOnWriteArrayList<Sensor>();
@@ -34,8 +40,15 @@ public class SensorGraphPanel extends JPanel {
       setLayout(new BorderLayout(0, 0));
       add(getLayeredPane(), BorderLayout.CENTER);
    }
+   /**
+    * aktiviert die Kurven aller übergebenen Sensoren
+    * 
+    * @param sl
+    *           sensorliste
+    */
    public void setSensors(Collection<Sensor> sl) {
-      if (sl.isEmpty()) this.sensorList.addAll(Data.data.sensoren);
+      if ((sl==null)||sl.isEmpty())
+         this.sensorList.addAll(Data.data.sensoren);
       else {
          this.sensorList.retainAll(sl);
          this.sensorList.addAllAbsent(sl);
@@ -43,18 +56,16 @@ public class SensorGraphPanel extends JPanel {
       for (Skala skala:skalen.values()) {
          skala.sensoren.clear();
          skala.show(false);
-      } // skalen.clear();
+      }
       for (Sensor sensor:sensorList) {
          if (!skalen.containsKey(sensor.typ)) skalen.put(sensor.typ, new Skala(sensor.typ));
-         Skala sk=skalen.get(sensor.typ);
-         sk.show(true);
-         sk.sensoren.add(sensor);
+         skalen.get(sensor.typ).sensoren.add(sensor);
       }
-      for (Skala skala:skalen.values()) {
+      for (Skala skala:skalen.values())
          skala.recalculateGrenzwerte();
-         // skala.calculateSkala();
-      }
       calculate();
+      for (Sensor sensor:sensorList)
+         (skalen.get(sensor.typ)).show(true);
       repaint(1000);
    }
    @Override
@@ -70,7 +81,8 @@ public class SensorGraphPanel extends JPanel {
       }
       // Koordinatensystem links unten
       g2d.transform(at);
-      for (Skala skala:skalen.values()) skala.paintSkala(g2d);
+      for (Skala skala:skalen.values())
+         skala.paintSkala(g2d);
    }
    private void calculate() {
       if (oldw==0) return;
@@ -79,7 +91,8 @@ public class SensorGraphPanel extends JPanel {
       at.translate(0, oldh);
       at.scale(1, -1);
       at.translate(10, 10);
-      for (Skala skala:skalen.values()) skala.setSize(oldw, oldh);
+      for (Skala skala:skalen.values())
+         skala.setSize(oldw, oldh);
       getLayeredPane().setSize(oldw, oldh);
    }
    private JLayeredPane getLayeredPane() {
@@ -89,22 +102,23 @@ public class SensorGraphPanel extends JPanel {
       }
       return layerdpPane;
    }
-   /* Wenn notwendig die Skala anpassen */
+   /** Wenn notwendig die Skala anpassen */
    public void recalculateSkala(Sensor sensor) {
       if (!sensorList.contains(sensor)) return;
       Skala skala=skalen.get(sensor.typ);
       if (skala==null) return;
       Double min=null;
       Double max=null;
-      for (Sensor s:sensorList) if (s.typ.equals(sensor.typ)) {
-         if (min==null) {
-            min=s.getMinWert();
-            max=s.getMaxWert();
-         } else {
-            min=Math.min(min, s.getMinWert());
-            max=Math.max(max, s.getMaxWert());
+      for (Sensor s:sensorList)
+         if (s.typ.equals(sensor.typ)) {
+            if (min==null) {
+               min=s.getMinWert();
+               max=s.getMaxWert();
+            } else {
+               min=Math.min(min, s.getMinWert());
+               max=Math.max(max, s.getMaxWert());
+            }
          }
-      }
       if (min!=null) skala.setRaster(min, max);
       repaint(1000); // später mal neu zeichnen
    }
