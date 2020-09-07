@@ -10,26 +10,25 @@ import javax.swing.JTabbedPane;
 import javax.swing.border.TitledBorder;
 
 public class TasmoView {
-   private JFrame      frame;
-   private JLabel      cLabel;
-   private JPanel      panelT;
-   private JPanel      panelS;
-   private JTabbedPane tabbedPane;
-   private JPanel      panel;
-   private JPanel      panel_1;
-   private JPanel      panel_2;
-   private SensorPanel sensorPanel;
+   private JFrame                 frame;
+   private JLabel                 cLabel;
+   private JPanel                 panelTable;
+   private JPanel                 panelScan;
+   private JTabbedPane            tabbedPane;
+   private JPanel                 panel;
+   private JPanel                 panel_1;
+   private JPanel                 panel_2;
+   private SensorPanel            sensorPanel;
+   static public volatile boolean keepRunning=true;
    /** Launch the application. */
    public static void main(String[] args) {
-      EventQueue.invokeLater(new Runnable() {
-         public void run() {
-            try {
-               TasmoView window=new TasmoView();
-               Data.data.getScanPanel().getScanButton().doClick();
-               window.frame.setVisible(true);
-            } catch (Exception e) {
-               e.printStackTrace();
-            }
+      EventQueue.invokeLater(() -> {
+         try {
+            TasmoView window=new TasmoView();
+            Data.data.getScanPanel().getScanButton().doClick();
+            window.frame.setVisible(true);
+         } catch (Exception e) {
+            e.printStackTrace();
          }
       });
    }
@@ -47,27 +46,27 @@ public class TasmoView {
    }
    private JLabel getLabelC() {
       if (cLabel==null) {
-         cLabel=new JLabel("TasmoView 0.1   ©2020 by Andreas Kielkopf (All source is included in JAR-file)   https://github.com/andreaskielkopf/TasmoView ");
+         cLabel=new JLabel("TasmoView 0.4  ©2020 by Andreas Kielkopf (All source is included in JAR-file)   https://github.com/andreaskielkopf/TasmoView ");
       }
       return cLabel;
    }
-   private JPanel getPanelT() {
-      if (panelT==null) {
-         panelT=new JPanel();
-         panelT.setBorder(new TitledBorder(null, "Found Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-         panelT.setLayout(new BorderLayout(0, 0));
-         panelT.add(Data.data.getTasmoList(), BorderLayout.CENTER);
+   private JPanel getPanelTable() {
+      if (panelTable==null) {
+         panelTable=new JPanel();
+         panelTable.setBorder(new TitledBorder(null, "Found Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+         panelTable.setLayout(new BorderLayout(0, 0));
+         panelTable.add(Data.data.getTasmoList(), BorderLayout.CENTER);
       }
-      return panelT;
+      return panelTable;
    }
-   private JPanel getPanelS() {
-      if (panelS==null) {
-         panelS=new JPanel();
-         panelS.setBorder(new TitledBorder(null, "Scan for Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-         panelS.setLayout(new BorderLayout(0, 0));
-         panelS.add(Data.data.getScanPanel(), BorderLayout.NORTH);
+   private JPanel getPanelScan() {
+      if (panelScan==null) {
+         panelScan=new JPanel();
+         panelScan.setBorder(new TitledBorder(null, "Scan for Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+         panelScan.setLayout(new BorderLayout(0, 0));
+         panelScan.add(Data.data.getScanPanel(), BorderLayout.NORTH);
       }
-      return panelS;
+      return panelScan;
    }
    private JTabbedPane getTabbedPane() {
       if (tabbedPane==null) {
@@ -85,8 +84,8 @@ public class TasmoView {
       if (panel==null) {
          panel=new JPanel();
          panel.setLayout(new BorderLayout(0, 0));
-         panel.add(getPanelT(), BorderLayout.CENTER);
-         panel.add(getPanelS(), BorderLayout.NORTH);
+         panel.add(getPanelTable(), BorderLayout.CENTER);
+         panel.add(getPanelScan(), BorderLayout.NORTH);
       }
       return panel;
    }
