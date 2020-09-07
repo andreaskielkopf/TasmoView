@@ -1,6 +1,7 @@
 
-# TasmoView 0.4
+##### [Englisch](./README.md)
 
+# TasmoView 0.4
 Da ich einige [Tasmota-Geräte](https://tasmota.github.io/docs/#/Home) benutze, musste ich oft nach der entsprechenden IP-Adressen in meinem Netzwerk suchen. Dann habe ich TasmoManager gefunden. Das funktionierte sehr gut, aber ich musste einen MQTT-Server einrichten und jedes Gerät für die Verwendung von mqtt konfigurieren ...
 
 Um es mir (und meiner Frau) einfacher zu machen, habe ich ein kleines Programm in meiner bevorzugten Programmiersprache java geschrieben. Dieses Programm sucht Tasmota Geräte im lokalen Netzwerk per HTTP. Dies kann eventuell auch für andere nützlich sein, so dass ich dieses kleine Programm hier veröffentliche.
@@ -9,8 +10,7 @@ Das Programm ist bis heute nur in meinem lokalen Netzwerk und mit Linux (manjaro
 
 Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung gestellt. Dies bedeutet, dass alle (!) Quelldateien in dieser einen Jar-Datei enthalten sind. Trotzdem ist die JAR-Datei direkt ausführbar. (**java -jar TasmoView.jar**)
 
-### [Tasmota](https://tasmota.github.io/docs/#/Home "Project Tasmota Webpage") https://tasmota.github.io/docs/#/Home
-
+### siehe auch: [Tasmota](https://tasmota.github.io/docs/#/Home "Project Tasmota Webpage") https://tasmota.github.io/docs/#/Home
 Tasmota ist eine Open Source Firmware für ESP8266 Geräte
 * Vollständige lokale Kontrolle mit schneller Einrichtung und Aktualisierung
 * Steuerung über MQTT, Web UI, **HTTP** oder seriell
@@ -19,13 +19,12 @@ Tasmota ist eine Open Source Firmware für ESP8266 Geräte
 * Unglaublich erweiterbar und flexibel
 
 #### Vorraussetzungen:
-
 Sie können testen, ob sie bereits eine passende Java-Version auf ihrem Computer installiert haben:
 > java --version
 
 > ergibt bei mir: openjdk 11.0.8 2020-07-14
 
-Wenn die Antwort **größer als Java 8(1.8)** ist können Sie den folgenden Abschnitt überspringen. Ansonsten müssen Sie zuerst eine aktuelle Version von Java installieren. Die Java-Version 8 ist ausreichend, aber sie können auch problemlos Java 11 oder Java 13 installieren.
+Wenn die Antwort **größer als Java 8 (1.8)** ist können Sie den folgenden Abschnitt überspringen. Ansonsten müssen Sie zuerst eine aktuelle Version von Java installieren. Die Java-Version 8 ist ausreichend, aber sie können auch problemlos Java 11 oder Java 13 installieren.
 
 ##### empfohlen: Java 8, 11 oder 13
 * [OpenJDK](https://openjdk.java.net/install/,"https://openjdk.java.net/install/") https://openjdk.java.net/install/
@@ -36,11 +35,9 @@ Wenn die Antwort **größer als Java 8(1.8)** ist können Sie den folgenden Absc
 * [Oracle Java SE8](https://www.java.com/de/download/,"https://www.java.com/de/download/") https://www.java.com/de/download/
 	
 ### Download:
-
 Laden Sie die Datei [TasmoView.jar](https://github.com/andreaskielkopf/TasmoView/blob/master/TasmoView.jar "Download des Programms TasmoView") auf ihren Computer
 
 ### Installieren:
-
 Legen Sie die Datei TasmoView.jar an eine für Sie praktische Stelle im Dateisystem ihres Computers. Je nach Betriebssystem können Sie auch eine Startdatei auf ihrem Desktop anlegen mit der Sie TasmoView dann per Mausklick starten können
 
 ### Programmstart:
@@ -51,17 +48,17 @@ oder je nachdem wo Sie TasmoView.jar abgelegt haben, mit **java -jar /usr/local/
 oder **java -jar C:/Benutzer/Meinpfad/TasmoView.jar** ...
 
 ## Benutzung:
-
 Wenn das Programm startet, erscheint das Programmfenster und TasmoView beginnt im lokalen Netzwerk nach Geräten mit Tasmota Firmware zu suchen. Der Fortschrittsbalken wandert langsam von links nach rechts und im Fortschrittsbalken wird jeweils angezeigt nach welcher IP gesucht wird. Der Scanvorgang kann einige Minuten andauern.
 
 Wenn Sie schon aktive Tasmota Geräte im Netzwerk haben, sollten diese im unteren Teil des Fensters aufgelistet werden sobald sie gefunden wurden. 
 
 ![Screenshot](./info/Startup.png)
 
-* Eines der gefundenen Geräte auswählen (wird grün) und danach den Knopf Browser anklicken. Jetzt sollte dei Weboberfläche des Gerätes in Ihrem Browser erscheinen. Hier können Sie ALLE Einstellungen des jeweiligen Gerätes bearbeiten und das Gerät vollumfänglich steuern.
+* Eines der gefundenen Geräte auswählen und danach den Knopf Browser anklicken. Jetzt sollte dei Weboberfläche des Gerätes in Ihrem Browser erscheinen. Hier können Sie ALLE Einstellungen des jeweiligen Gerätes bearbeiten und das Gerät vollumfänglich steuern.
+
+![Browser](./info/Konfig.png)
 
 ## Erweiterungen:
-
 Die aktuelle Version von TasmoView hat folgende erweiterte Möglichkeiten:
 * Tabellarische Anzeige der Konfiguration der Geräte
 * Suche nach passwortgeschützten Tasmota Geräten

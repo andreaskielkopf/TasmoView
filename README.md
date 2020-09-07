@@ -1,138 +1,96 @@
 
-# TasmoView 0.3 Alpha
+##### [Deutsch](./LIESMICH.md)
 
-Tool to search [Tasmota-Devices](https://tasmota.github.io/docs/#/Home) in the local Network via HTTP
+# TasmoView 0.4
 
-Since I use some Tasmota devices, I often had to search for the corresponding IP in my network. Then I found TasmoManager. This works very well, but I had to set up an MQTT server and configure each device to use mqtt ...
+Since I use some [Tasmota devices](https://tasmota.github.io/docs/#/Home), I often had to look for the corresponding IP addresses on my network. Then I found TasmoManager. This worked very well, but I had to set up an MQTT server and configure each device to use mqtt ...
 
-To make it easier for me (and my wife), I wrote a small program in my preferred programming language java.
+To make things easier for me (and my wife), I wrote a small program in my favorite programming language, java. This program searches for Tasmota devices in the local network via HTTP. This may also be useful for others, so I am going to publish this little program here.
 
-This may also be useful for others, so I will publish this little program here.
+To date, the program has only been tested in my local network and with Linux (manjaro) as the operating system. But it should work anywhere if you have at least ** Java 8 installed **. (Testers with a different configuration are welcome)
 
-To date, the program has only been tested in my local network and with Linux (manjaro) as the operating system. But it should run anywhere if you have at least **Java11 installed**. (Testers with a different configuration are welcome)
+The program is made available as a JAR file with the sourcecode included. This means that all (!) Source files are contained in this one jar file. Nevertheless, the JAR file can be executed directly. (** java -jar TasmoView.jar **)
 
-The program is provided as a JAR file with the source code in it. This means that all (!) Source files are contained in this one jar file. Nevertheless, the JAR file can be executed directly. (**java -jar TasmoView.jar**)
+### see: [Tasmota](https://tasmota.github.io/docs/#/Home "Project Tasmota Webpage") https://tasmota.github.io/docs/#/Home
 
-# 0.1
-* The program actively searches for Tasmota devices in the local network by addressing them via http [Scan]
-* The scan can be repeated if a device is newly inserted
-* "admin" is preset as username [user]
-* If the devices are secured with a password, the password can be entered [password]
-* Password and username are then used for the scan and refresh of all devices
-* All devices found are displayed in a table
-* The status of the devices is queried and shown in a series of table views
-* The status of all devices can be updated [Refresh]
-* If a device is marked in the table, the URL of this device can be sent to the browser at the push of a button [Browser], so that the browser displays the HTML page of the device
-* The device can then be controlled and configured in the browser
-* Every Tasmota device that can be reached via the browser is also found
+Tasmota is an open source firmware for ESP8266 devices
+* Total local control with quick setup and updates
+* Control using MQTT, Web UI, **HTTP** or serial
+* Automate using timers, rules or scripts
+* Integration with home automation solutions
+* Incredibly expandable and flexible
 
-![Screenshot](./info/Browser.png)
-----
+#### Requirements:
 
-# 0.2
-- [x] save Tasmota-username and password in the local java registry (on request)
-- [x] tab for the observation of sensors with regular query of the sensor status
-- [x] Adjustable query rate for all sensors together
-- [x] Selection list for displaying the sensors of the following types
-- [x] AM2301 temperature red
-- [x] AM2301 humidity blue
-- [x] graphic diagram with the continuous temporal course of the sensor data
-- [x] horizontal lines in the diagram to better assess the values
-- [x] scales for the different types of measured values
-- [x] Crossfading of the measured value types with their own factor
-- [x] Automatic deletion of "unnecessary" measured values
-- [x] Automatic reduction of the data to 1000 measurements per sensor
+You can test whether you have already installed a suitable Java version on your computer:
+> java --version
 
-![Screenshot](./info/SensorData.png)
-----
+> gives at my pc: openjdk 11.0.8 2020-07-14
 
+If the answer is ** greater than Java 8 (1.8) ** you can skip the following section. Otherwise you have to install a current version of Java first. Java version 8 is sufficient, but you can also install Java 11 or Java 13 without any problems.
 
-Da ich einige [Tasmota-Geräte](https://tasmota.github.io/docs/#/Home) benutze, musste ich oft nach der entsprechenden IP in meinem Netzwerk suchen. Dann habe ich TasmoManager gefunden. Das funktioniert sehr gut, aber ich musste einen MQTT-Server einrichten und jedes Gerät für die Verwendung von mqtt konfigurieren ...
-
-Um es mir (und meiner Frau) einfacher zu machen, habe ich ein kleines Programm in meiner bevorzugten Programmiersprache java geschrieben. Dies kann eventuell auch für andere nützlich sein, so dass ich dieses kleine Programm hier veröffentliche.
-
-Das Programm ist bis heute nur in meinem lokalen Netzwerk und mit Linux (manjaro) als Betriebssystem getestet. Aber es sollte überall laufen wenn Sie zumindest **Java11 installiert** haben. (Tester mit anderer Konfiguration sind willkommen)
-
-Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung gestellt. Dies bedeutet, dass alle (!) Quelldateien in dieser einen Jar-Datei enthalten sind. Trotzdem ist die JAR-Datei direkt ausführbar. (**java -jar TasmoView.jar**)
-
-# 0.1
-* Das Programm sucht im lokalen Netzwerk aktiv nach Tasmota-Geräten indem es diese per http anspricht [Scan]
-* Der Scan kann wiederholt werden, wenn ein Gerät neu eingesteckt wurde
-* Als username ist "admin" voreingestellt [user]
-* Wenn die Geräte mit Passwort gesichert sind, kann das Passwort eingegeben werden [password]
-* Passwort und Username werden dann für den Scan und den Refresh aller Geräte genutzt
-* Alle gefundenen Geräte werden in einer Tabelle angezeigt 
-* Der Status der Geräte wird abgefragt und in einer Reihe von Tabellenansichten dargestellt
-* Der Status aller Geräte kann aktualisiert werden [Refresh]
-* Wird ein Gerät in der Tabelle markiert, so kann mit einem Knopfdruck [Browser] die URL dieses Gerätes an den Browser geschickt werden, so dass der Browser die HTML-Seite des Gerätes darstellt
-* Im Browser kann das Gerät dann gesteuert und konfiguriert werden
-* Jedes Tasmota-Gerät das über den Browser erreichbar ist wird auch gefunden
-
-![Screenshot](./info/Browser.png)
-----
-# 0.2
-- [x] Speichern des Tasmota-username und password in der lokalen java-Registry (auf Wunsch)
-- [x] Reiter für die Beobachtung von Sensoren mit regelmässiger Abfrage des Sensorstatus
-- [x] Einstellbare Abfragerate für alle Sensoren gemeinsam
-- [x] Auswahlliste zur Anzeige der Sensoren folgender Typen
-- [x] AM2301 Temperatur rot
-- [x] AM2301 Luftfeuchte blau
-- [x] grafisches Diagramm mit dem fortlaufenden zeitlichen Verlauf der Sensordaten
-- [x] waagerechte Linien im Diagramm um die Werte besser beurteilen zu können
-- [x] Skalen für die verschiedenen Typen der Messwerte
-- [x] Überblenden der Messwerttypen mit eigenem Faktor
-- [x] Automatisches löschen von "unnötigen" Messwerten
-- [x] Automatisches reduzieren der Daten auf 1000 Messungen je Sensor
-
-![Screenshot](./info/SensorData.png)
-----
-# 0.3
-- [x] Erweitern auf 10000 Messungen
-- [x] Werte beim erfassen mit dem richtigen Zeitpunkt vom Sensor übernehmen
-- [x] Gestrichelte Linien für das Raster
-- [x] generate classfiles for java11
-- [x] FIXME: concurrent modifcation of Arraylists in Raster
-- [X] Doppelte Werte bereits beim Erfassen droppen
-- [X] FIXME: Raster zu eng bei Negativen Messwerten
-- [X] FIXME: Modifikation der Messwertskala synchronisieren während Paintevent 
-- [X] Beim komprimieren der Werte Mittelwert bilden 
-- [ ] FIXME: Versatz zwischen Raster und Wertegraph
-- [ ] senkrechte Linien im Diagramm um den zeitlichen Verlauf einordnen zu können
-- [ ] speichern der MAC und IP der gefundenen Tasmotas ???
-- [ ] Jeder Sensor bekommt einen Spitznamen (speichern)
-- [ ] Die Farbe der Messskalen werden einstellbar
-- [ ] Die Farben der Sensoren werden einstellbar
-- [ ] weitere Sensortypen :thinking:
-- [ ] 
-- [ ] speichern der komprimierten Messungen (auf Wunsch)
-- [ ] laden von früheren Messungen
-- [ ] Einstellbare Zeitskala
-- [ ] Automatik für die Abfragerate bei schnellen Änderungen je Gerät
-- [ ] Vergleich historischer Messungen
-- [ ] Täglich selbe Zeit
-- [ ] Wöchentlich
-- [ ] Mondphasen
-- [ ] jährlich
-- [ ] Täglich nach Sonnenaufgang/Sonnenuntergang
-- [ ] X/Y-Graph mit 2 Sensoren Temperatur/Feuchte
-- [ ] Graph aus Formel
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] ihr Vorschlag kann als Pull-Request hier eingefügt werden
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-- [ ] 
-
-----
-
-Get JAVA13:
-* [OpenJDK 13](https://jdk.java.net/13/) https://jdk.java.net/13/
-* [OpenJDK 11](https://jdk.java.net/archive/) https://jdk.java.net/archive/
+##### recommended: Java 8, 11 or 13
+* [OpenJDK](https://openjdk.java.net/install/,"https://openjdk.java.net/install/") https://openjdk.java.net/install/
+* [OpenJDK Java SE 13](https://jdk.java.net/13/) https://jdk.java.net/13/
+* [OpenJDK Java SE 11](https://jdk.java.net/archive/) https://jdk.java.net/archive/
+* [OpenJDK Java SE 8](https://jdk.java.net/java-se-ri/8-MR3,"https://jdk.java.net/java-se-ri/8-MR3") https://jdk.java.net/java-se-ri/8-MR3
 * [Oracle java SE 13](https://www.oracle.com/technetwork/java/javase/downloads/index.html) https://www.oracle.com/technetwork/java/javase/downloads/index.html
+* [Oracle Java SE8](https://www.java.com/de/download/,"https://www.java.com/de/download/") https://www.java.com/de/download/
+
+### Download:
+Download the file [TasmoView.jar] (https://github.com/andreaskielkopf/TasmoView/blob/master/TasmoView.jar "Download of the TasmoView program") to your computer
+
+### Install:
+Place the TasmoView.jar file in a convenient place in your computer's file system. Depending on the operating system, you can also create a start file on your desktop with which you can then start TasmoView with a click of the mouse
+
+### Start:
+When you have saved TasmoView.jar in the current directory, start the program by entering
+> ** java -jar TasmoView.jar **
+
+or depending on where you have stored TasmoView.jar, with ** java -jar /usr/local/bin/TasmoView.jar**
+or ** java -jar C: /User/Mypath/TasmoView.jar** ...
+
+## Usage:
+When the program starts, the program window appears and TasmoView begins to search for devices with Tasmota firmware in the local network. The progress bar moves slowly from left to right and the progress bar shows which IP is being searched for. The scanning process can take a few minutes.
+
+If you already have active Tasmota devices in the network, they should be listed in the lower part of the window as soon as they are found.
+
+![Screenshot](./info/Startup.png)
+
+* Select one of the devices found, then click the Browser button. The device's web interface should now appear in your browser. Here you can edit ALL the settings of the respective device and fully control the device.
+
+![Browser](./info/Konfig.png)
+
+## Extensions:
+The current version of TasmoView has the following extended options:
+* Tabular display of the configuration of the devices
+* Search for password protected Tasmota devices
+* Cyclical reading of the sensors as long as TasmoView is active
+* Display of the history of sensor values ​​in a simple graphic
+
+### Tabular display of data
+In the "Select Report" area, you can select which device data should be displayed. These data are collected during the scan and are not updated.
+
+![Select Report](./info/Select_Report.png)
+
+The displayed data is taken directly from the JSON response of the devices and is therefore dependent on the respective Tasmota version.
+
+![Firmware](./info/Firmware.png)
+
+As a result, some data may appear multiple times in the tables. The program tries to adjust the width of the columns to match the content. But that doesn't always work perfectly. You can also use the mouse to adjust the width of the columns. These adjustments are not saved.
+
+![not perfect](./info/nicht_perfekt.png)
+
+### Search for password protected devices
+The web interface of the Tasmota devices can be protected with a user name and password. Usually the ** username is "admin" ** and the ** password is blank **.
+
+![Standard](./info/admin_nopassword.png)
+
+However, you may change one or both in the source code or in the user interface of the Tasmota devices.
+
+![Standard](./info/admin_password.png)
+
+In order for TasmoView to continue reading such devices, it must know the username and password. During the scan, only those devices will be found for which the username and password match.
+
+![own username and password](./info/username_password.png)
+
