@@ -11,10 +11,32 @@
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
-        <javaElement handleIdentifier="=TasmoView/src"/>
-        <folder path="/TasmoView/info"/>
-        <file path="/TasmoView/README.md"/>
-        <file path="/TasmoView/LICENSE"/>
+        <file path="/TasmoView/info/nicht_perfekt.png"/>
+        <file path="/TasmoView/info/username_password.png"/>
         <file path="/TasmoView/TasmoView.jardesc"/>
+        <javaElement handleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview"/>
+        <file path="/TasmoView/info/Browser.png"/>
+        <file path="/TasmoView/info/Select_Report.png"/>
+        <file path="/TasmoView/info/Scan_for_Devices.png"/>
+        <javaElement handleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview.sensors"/>
+        <file path="/TasmoView/info/SensorData.png"/>
+        <file path="/TasmoView/info/Found.png"/>
+        <javaElement handleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview.grafik"/>
+        <file path="/TasmoView/info/Autoscan.png"/>
+        <file path="/TasmoView/info/Startup.png"/>
+        <javaElement handleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview.minijson"/>
+        <file path="/TasmoView/info/Scan_for_Devices_Password.png"/>
+        <file path="/TasmoView/info/admin_nopassword.png"/>
+        <javaElement handleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview.table"/>
+        <file path="/TasmoView/LICENSE"/>
+        <javaElement handleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview.tasks"/>
+        <file path="/TasmoView/info/Firmware.png"/>
+        <file path="/TasmoView/info/Farben.png"/>
+        <file path="/TasmoView/info/admin_password.png"/>
+        <file path="/TasmoView/README.md"/>
+        <file path="/TasmoView/info/Konfig.png"/>
+        <file path="/TasmoView/info/Manualscan.png"/>
+        <file path="/TasmoView/info/Sensor.png"/>
+        <file path="/TasmoView/info/Report_Home.png"/>
     </selectedElements>
 </jardesc>

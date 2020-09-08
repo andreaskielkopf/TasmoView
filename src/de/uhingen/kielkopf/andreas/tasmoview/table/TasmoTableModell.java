@@ -20,20 +20,20 @@ public class TasmoTableModell extends AbstractTableModel {
    /** Liste zum Programmstart */
    private final String[]        cn              = {"Module", "Topic", "ButtonTopic", "Power", "PowerOnState", "LedState", "LedMask", "", ""};
    /** Dieser Eintrag kommt immer in die erste Spalte */
-   static final String           FRIENDLY_NAME   ="FriendlyName";
+   static final String           DEVICE_NAME     ="DeviceName";
    public TasmoTableModell() {
       super();
       setTable(null);
    }
-   /** Umstellen der Tabelle auf andere Daten */
+   /**
+    * Es wurde eine andere Tabelle für die Anzeige der Daten der Tasmotas ausgewählt
+    * 
+    * Umstellen der Tabelle auf andere Daten
+    */
    public void setTable(String name) {
       int row=-1;
       /** Hier muss eine Rekursion vermieden werden ! ==> Wenn Tasmolist nicht exisitiert einfach ignorieren */
-      // try {
       if (Data.data.tasmolist!=null) if (Data.data.tasmolist.getTable()!=null) row=Data.data.tasmolist.getTable().getSelectedRow();
-      // } catch (NullPointerException e) {
-      // e.printStackTrace();
-      // }
       String key=Tasmota.toHtmlString(name);
       if ((columnNames==null)||(key==null)) {
          LinkedHashSet<String> c=new LinkedHashSet<String>();
@@ -62,7 +62,7 @@ public class TasmoTableModell extends AbstractTableModel {
    public String getColumnName(int col) {
       LinkedHashSet<String> cnames=columnNames;
       // erste Splate ist immer der Gerätename
-      if (col==0) return FRIENDLY_NAME;
+      if (col==0) return DEVICE_NAME;
       // Wenn zu hohe Spalten angefragt werden
       if (col>cnames.size()) return "@";
       return (String) cnames.toArray()[col-1];
@@ -79,6 +79,7 @@ public class TasmoTableModell extends AbstractTableModel {
    /** Inhalte live aus den Daten ermitteln */
    @Override
    public Object getValueAt(int rowIndex, int columnIndex) {
+      if (columnIndex==0) { return getTasmota(rowIndex).deviceName; }
       String cname=getColumnName(columnIndex);
       String erg  =getTasmota(rowIndex).getValue(cname);
       return erg;
@@ -103,7 +104,9 @@ public class TasmoTableModell extends AbstractTableModel {
             int mw=w;
             int rc=getRowCount();
             for (int r=0; r<rc; r++) {
-               int l=getValueAt(r, c).toString().length();
+               Object v=getValueAt(r, c);
+               if (v==null) continue;
+               int l=v.toString().length();
                if (l>mw) mw=l;
                w+=l;
             }

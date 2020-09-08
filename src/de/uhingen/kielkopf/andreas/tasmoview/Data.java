@@ -82,7 +82,7 @@ public class Data {
          tablenames.put(tabellenname, tabelle);
       }
    }
-   /** Prüfe die Ausstehenden Tasmotas bis lle entweder erkannt oder verworfen sind */
+   /** Prüfe die Ausstehenden Tasmotas bis alle entweder erkannt oder verworfen sind */
    /** Konstrukor für das gemeinsam genutzte Feld */
    public JPasswordField getPasswordField() {
       if (passwordField==null) {

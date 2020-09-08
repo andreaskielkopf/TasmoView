@@ -17,8 +17,6 @@ import javax.swing.SwingWorker;
 
 import de.uhingen.kielkopf.andreas.tasmoview.Data;
 import de.uhingen.kielkopf.andreas.tasmoview.TasmoView;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonString;
 import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
 
 /**
@@ -90,9 +88,9 @@ public class DataLogger extends SwingWorker<Boolean, LocalDateTime> {
                   String tasmoName=Integer.toString(sensor.tasmota.ipPart);
                   Path   tPath    =savePath.resolve(tasmoName);
                   if (Files.notExists(tPath)) Files.createDirectories(tPath);
-                  JsonObject friendlyObj=sensor.tasmota.name.list.get(0);
-                  if (friendlyObj instanceof JsonString) {
-                     String friendlyName=((JsonString) friendlyObj).value;
+                  // JsonObject friendlyObj=sensor.tasmota.deviceName);
+                  if (sensor.tasmota.deviceName!=null) {
+                     String friendlyName=sensor.tasmota.deviceName;
                      Path   fPath       =savePath.resolve(friendlyName);
                      if (Files.notExists(fPath)) Files.createSymbolicLink(fPath, tPath);
                   }

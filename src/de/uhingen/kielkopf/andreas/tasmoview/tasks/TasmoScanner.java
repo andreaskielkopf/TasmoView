@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.prefs.BackingStoreException;
 
 import javax.swing.JProgressBar;
 import javax.swing.JToggleButton;
@@ -30,6 +31,7 @@ public class TasmoScanner extends SwingWorker<String, String> {
    private static final BitSet         isTasmota    =new BitSet(MAXIMUM_IPS);
    /** Dies ist sicher kein Tasmota */
    private static final BitSet         noTasmota    =new BitSet(MAXIMUM_IPS);
+   private static final String         GESAMTLIST   ="Tasmotas";
    private final JProgressBar          progressBar;
    private final JToggleButton         scanButton;
    private final JToggleButton         refreshButton;
@@ -71,6 +73,24 @@ public class TasmoScanner extends SwingWorker<String, String> {
          for (int i=offen.nextSetBit(0); i>=0; i=offen.nextSetBit(i+1))
             searchlist.add(i);
          Collections.shuffle(searchlist);// zufällige Reihenfolge
+         String gesamtlist=Data.data.prefs.get(GESAMTLIST, "");
+         if (!gesamtlist.isEmpty()) {
+            String[] list=gesamtlist.split(",");
+            for (String zahl:list) {
+               try {
+                  Integer z=Integer.valueOf(zahl);
+                  isTasmota.set(z);
+                  int pos=searchlist.indexOf(z);
+                  if (pos>=0) {
+                     searchlist.remove(pos);
+                     searchlist.add(z); // ans Ende anfügen
+                  }
+               } catch (NumberFormatException e) {
+                  e.printStackTrace();
+               }
+            }
+         }
+         Collections.reverse(searchlist);
          ArrayList<ScanFor> anfragen=new ArrayList<>();
          for (Integer j:searchlist) {
             if (!TasmoView.keepRunning) return null;
@@ -122,6 +142,23 @@ public class TasmoScanner extends SwingWorker<String, String> {
       }
       scanButton.setEnabled(true);
       refreshButton.setEnabled(true);
+      saveTasmotaHint();
+   }
+   private void saveTasmotaHint() {
+      try {
+         System.out.println(Data.data.prefs.get(GESAMTLIST, ""));
+         ArrayList<String> list=new ArrayList<String>();
+         for (int i=isTasmota.nextSetBit(0); i>=0; i=isTasmota.nextSetBit(i+1))
+            list.add(Integer.toString(i));
+         if (!list.isEmpty()) {
+            String gesamtTasmotas=String.join(",", list);
+            Data.data.prefs.put(GESAMTLIST, gesamtTasmotas);
+            Data.data.prefs.flush();
+            System.out.println("Tasmotas stored:"+gesamtTasmotas);
+         }
+      } catch (BackingStoreException e1) {
+         e1.printStackTrace();
+      }
    }
    private class ScanFor extends SwingWorker<String, Tasmota> {
       @Override

@@ -102,10 +102,11 @@ public class TasmoList extends JPanel {
          tableauswahl.setLayoutOrientation(JList.VERTICAL_WRAP);
          tableauswahl.setModel(new AbstractListModel<String>() {
             private static final long serialVersionUID=5605188060554114804L;
-            String[]                  values          =new String[] {                                   //
-                     "Home", "Health", "Firmware", "Wifi_", "MQTT"                                      //
-                     , "Status", "StatusPRM", "StatusFWR", "StatusLOG", "StatusMEM"                     //
-                     , "StatusNET", "StatusMQT", "StatusTIM", "StatusSNS", "StatusSTS", "Wifi", "PWM"}; //
+            String[]                  values          =new String[] {                    //
+                     "Home", "Health", "Firmware", "Wifi_", "MQTT"                       //
+                     , "Status", "StatusPRM", "StatusFWR", "StatusLOG", "StatusMEM"      //
+                     , "StatusNET", "StatusMQT", "StatusTIM", "StatusSNS", "StatusSTS"   //
+                     , "Wifi", "PWM"};                                                   //
             public int getSize() {
                return values.length;
             }
@@ -117,6 +118,7 @@ public class TasmoList extends JPanel {
          tableauswahl.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
                String key=getTableAuswahl().getSelectedValue();
+               /// Es wurde eine andere Tabellenansicht gewählt. Übergeben wird die
                if (key!=null) Data.data.dataModel.setTable(key);
             }
          });

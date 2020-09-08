@@ -10,11 +10,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonArray;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
+import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonString;
 import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
 
 public class Tasmota implements Comparable<Tasmota> {
@@ -23,7 +25,8 @@ public class Tasmota implements Comparable<Tasmota> {
    /** Text der IP des Gerätes */
    public /* final */ String                  hostaddress;
    /** Name des Gerätes nachdem es erkannt wurde */
-   public JsonArray                           name;
+   // public JsonArray friendlyNames;
+   public String                              deviceName;
    private JsonObject                         warning;
    public final ConcurrentSkipListSet<Sensor> sensoren   =new ConcurrentSkipListSet<>();
    /** unbeantwortete Anfragen */
@@ -35,7 +38,8 @@ public class Tasmota implements Comparable<Tasmota> {
    /** Alle Statusdaten auf einmal anfragen */
    public static final String                 SUCHANFRAGE="status 0";
    /** Gerätenamen erkennen */
-   private static final String                SUCHKENNUNG="FriendlyName";
+   // private static final String SUCHKENNUNG="FriendlyName";
+   private static final String[]              NAMENSSUCHE= {"DeviceName", "FriendlyName", "Hostname", "Topic", "IPAddress", "Mac",};
    /** Warnungen erkennen */
    private static final String                WARNING    ="WARNING";
    private static final String                SENSOREN   ="StatusSNS";
@@ -100,8 +104,22 @@ public class Tasmota implements Comparable<Tasmota> {
       JsonObject j=JsonObject.interpret(response.get(1));
       if (j==null) return false;
       if (SUCHANFRAGE.equals(anfrage)) {
-         JsonObject jo=j.getJsonObject(SUCHKENNUNG);
-         if (jo instanceof JsonArray) this.name=(JsonArray) jo;
+         JsonObject jo=null;
+         for (String kennung:NAMENSSUCHE) {
+            jo=j.getJsonObject(kennung);
+            if (jo==null) continue;
+            if (jo instanceof JsonString) {
+               this.deviceName=((JsonString) jo).value;
+            }
+            if (jo instanceof JsonArray) {
+               JsonArray        friendlyNames=(JsonArray) jo;
+               List<JsonObject> al           =friendlyNames.list;
+               if (al.isEmpty()) continue;
+               JsonObject dno=al.get(0);
+               if (dno instanceof JsonString) this.deviceName=((JsonString) dno).value;
+            }
+            if (deviceName.length()>2) break;
+         }
          warning=j.getJsonObject(WARNING);
          // Tasmota-Gerät verlangt Passwort
          if (warning!=null) System.out.println(response.get(1));
@@ -204,9 +222,9 @@ public class Tasmota implements Comparable<Tasmota> {
       StringBuilder sb=new StringBuilder();
       sb.append(this.getClass().getSimpleName());
       sb.append("[ip="+hostaddress);
-      if (name!=null) {
+      if (deviceName!=null) {
          sb.append(",");
-         sb.append(name);
+         sb.append(deviceName);
       }
       sb.append("]");
       // if (!incomplete.isEmpty()) sb.append(" (waiting)");

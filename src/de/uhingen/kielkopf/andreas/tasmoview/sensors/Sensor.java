@@ -16,7 +16,6 @@ import de.uhingen.kielkopf.andreas.tasmoview.Data;
 import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonList;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonString;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonValue;
 
 public class Sensor implements Comparable<Sensor> {
@@ -265,12 +264,8 @@ public class Sensor implements Comparable<Sensor> {
    @Override
    public String toString() {
       StringBuilder sb=new StringBuilder();
-      if (tasmota.name!=null) {
-         JsonObject t=tasmota.name.list.get(0);
-         if (t instanceof JsonString)
-            sb.append(((JsonString) t).value);
-         else
-            sb.append(tasmota.name.list.get(0));
+      if (tasmota.deviceName!=null) {
+         sb.append(tasmota.deviceName);
          sb.append('.');
          sb.append(kennung);
          sb.append('.');
