@@ -63,24 +63,7 @@ public class Data {
    public final Preferences                                      prefs              =Preferences.userNodeForPackage(TasmoView.class);
    /** Im Konstruktor werden Die festgelegte Tabellen mit ihren Überschriften definiert und eingetragen */
    private Data() {
-      String[][] init= { // {"Tabellenname", "Spalte2", "Spalte3", "Spalte4", ...}
-               {"Home", "Module", "Power", "Color", "LoadAvg", "LinkCount", "Uptime"},
-               {"Health", "Uptime", "BootCount", "RestartReason", "LoadAvg", "Sleep", "MqttCount", "LinkCount", "Downtime", "RSSI"},
-               {"Firmware", "Version", "Core", "SDK", "ProgramSize", "Free", "OtaUrl"},
-               {"Wifi_", "Hostname", "Mac", "IPAddress", "Gateway", "SSId", "BSSId", "Channel", "RSSI", "LinkCount", "Downtime"},
-               {"MQTT", "Topic", "FullTopic", "CommandTopic", "StatTopic", "TeleTopic", "FallbackTopic", "GroupTopic"}//
-      };
-      for (String[] spalten:init) {
-         LinkedHashSet<String> tabelle     =new LinkedHashSet<String>();
-         String                tabellenname=null;
-         for (String spalte:spalten) {
-            if (tabellenname==null)
-               tabellenname=spalte;
-            else
-               tabelle.add(spalte);
-         } // eintragen
-         tablenames.put(tabellenname, tabelle);
-      }
+      TasmoList.recalculateColumnames();
    }
    /** Prüfe die Ausstehenden Tasmotas bis alle entweder erkannt oder verworfen sind */
    /** Konstrukor für das gemeinsam genutzte Feld */

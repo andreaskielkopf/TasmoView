@@ -10,6 +10,9 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 
 import javax.swing.AbstractListModel;
 import javax.swing.ImageIcon;
@@ -27,6 +30,9 @@ import javax.swing.event.ListSelectionListener;
 
 import de.uhingen.kielkopf.andreas.tasmoview.Data;
 import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
+import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonArray;
+import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonList;
+import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
 
 /**
  * 
@@ -44,14 +50,26 @@ import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
  *       Wenn eine Reihe ausgewählt ist, kann das betreffende Gerät auf Knopfdruck mit dem Browser geöffnet werden
  */
 public class TasmoList extends JPanel {
-   private static final long serialVersionUID=4606263020682918366L;
-   private JScrollPane       scrollPane;
-   private JTable            table;
-   private JList<String>     tableauswahl;
-   private JPanel            panel;
-   private JButton           browserButton;
-   private JPanel            panel_1;
-   private JPanel            panel_2;
+   private static final long      serialVersionUID      =4606263020682918366L;
+   static public final String[]   TABELLEN_AUSWAHL_NAMEN= {                                                                      //
+            "Home", "Health", "Firmware", "Wifi_", "MQTT"                                                                        //
+            , "Status", "StatusPRM", "StatusFWR", "StatusLOG", "StatusMEM"                                                       //
+            , "StatusNET", "StatusMQT", "StatusTIM", "StatusSNS", "StatusSTS"                                                    //
+            , "Wifi", "PWM"};
+   static public final String[][] SPALTEN_UEBERSCHRIFTEN= {                                                                      //
+            {"Home", "Module", "Power", "Color", "LoadAvg", "LinkCount", "Uptime"},
+            {"Health", "Uptime", "BootCount", "RestartReason", "LoadAvg", "Sleep", "MqttCount", "LinkCount", "Downtime", "RSSI"},
+            {"Firmware", "Version", "Core", "SDK", "ProgramSize", "Free", "OtaUrl"},
+            {"Wifi_", "Hostname", "Mac", "IPAddress", "Gateway", "SSId", "BSSId", "Channel", "RSSI", "LinkCount", "Downtime"},
+            {"MQTT", "Topic", "FullTopic", "CommandTopic", "StatTopic", "TeleTopic", "FallbackTopic", "GroupTopic"}              //
+   };
+   private JScrollPane            scrollPane;
+   private JTable                 table;
+   private JList<String>          tableauswahl;
+   private JPanel                 panel;
+   private JButton                browserButton;
+   private JPanel                 panel_1;
+   private JPanel                 panel_2;
    /** Eine Tabellemit auswöhlbaren Ansichten */
    public TasmoList() {
       setLayout(new BorderLayout(0, 0));
@@ -102,16 +120,11 @@ public class TasmoList extends JPanel {
          tableauswahl.setLayoutOrientation(JList.VERTICAL_WRAP);
          tableauswahl.setModel(new AbstractListModel<String>() {
             private static final long serialVersionUID=5605188060554114804L;
-            String[]                  values          =new String[] {                    //
-                     "Home", "Health", "Firmware", "Wifi_", "MQTT"                       //
-                     , "Status", "StatusPRM", "StatusFWR", "StatusLOG", "StatusMEM"      //
-                     , "StatusNET", "StatusMQT", "StatusTIM", "StatusSNS", "StatusSTS"   //
-                     , "Wifi", "PWM"};                                                   //
             public int getSize() {
-               return values.length;
+               return TABELLEN_AUSWAHL_NAMEN.length;
             }
             public String getElementAt(int index) {
-               return values[index];
+               return TABELLEN_AUSWAHL_NAMEN[index];
             }
          });
          tableauswahl.setSelectedIndex(0);
@@ -199,5 +212,36 @@ public class TasmoList extends JPanel {
          panel_2.add(getScrollPane(), BorderLayout.CENTER);
       }
       return panel_2;
+   }
+   static public void recalculateColumnames() {
+      if ((Data.data!=null)&&(Data.data.tasmotas!=null)) {
+         LinkedHashMap<String, LinkedHashSet<String>> tabellen=new LinkedHashMap<String, LinkedHashSet<String>>();
+         for (String[] spalten:SPALTEN_UEBERSCHRIFTEN) {
+            LinkedHashSet<String> tabelle     =new LinkedHashSet<String>();
+            String                tabellenname=null;
+            for (String spalte:spalten)
+               if (tabellenname==null)
+                  tabellenname=spalte; // Der erste Eintrag ist der Tabellenname
+               else
+                  tabelle.add(spalte);// Weitere Einträge sind die Überschriften der Spalten
+            tabellen.put(tabellenname, tabelle);
+         }
+         for (String auswahl:TABELLEN_AUSWAHL_NAMEN) { // z.B. "StatusSNS"
+            LinkedHashSet<String> tabelle  =new LinkedHashSet<String>();
+            ArrayList<JsonObject> antworten=new ArrayList<JsonObject>();// bisher eingegangene Antworten
+            for (Tasmota t:Data.data.tasmotas) // von allen Geräten
+               antworten.addAll(t.getAll(auswahl));// mit "StatusSNS"
+            for (JsonObject antwort:antworten) { // für jede antwort
+               if (antwort instanceof JsonList) // die Liste holen
+                  for (JsonObject spalte:((JsonList) antwort).list)// und den Namen als Ueberschrift eintragen
+                  tabelle.add(spalte.name);
+               if (antwort instanceof JsonArray) // die Liste holen
+                  for (JsonObject spalte:((JsonArray) antwort).list)
+                  tabelle.add(spalte.name);
+            }
+            if (!tabelle.isEmpty()) tabellen.put(auswahl, tabelle);
+         }
+         Data.data.tablenames.putAll(tabellen);
+      }
    }
 }

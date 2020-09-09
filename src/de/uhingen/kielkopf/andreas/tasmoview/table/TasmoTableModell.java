@@ -28,7 +28,7 @@ public class TasmoTableModell extends AbstractTableModel {
    /**
     * Es wurde eine andere Tabelle für die Anzeige der Daten der Tasmotas ausgewählt
     * 
-    * Umstellen der Tabelle auf andere Daten
+    * Umstellen der Tabelle auf andere Daten. Der key für die Daten is jeweils der Name der Spalte
     */
    public void setTable(String name) {
       int row=-1;

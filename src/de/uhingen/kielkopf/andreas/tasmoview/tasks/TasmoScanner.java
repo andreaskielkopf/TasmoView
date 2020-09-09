@@ -15,6 +15,7 @@ import javax.swing.SwingWorker;
 import de.uhingen.kielkopf.andreas.tasmoview.Data;
 import de.uhingen.kielkopf.andreas.tasmoview.TasmoView;
 import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
+import de.uhingen.kielkopf.andreas.tasmoview.table.TasmoList;
 
 /**
  * Suche nach Tasmota-Geräten im Netzwerk
@@ -143,6 +144,7 @@ public class TasmoScanner extends SwingWorker<String, String> {
       scanButton.setEnabled(true);
       refreshButton.setEnabled(true);
       saveTasmotaHint();
+      TasmoList.recalculateColumnames();
    }
    private void saveTasmotaHint() {
       try {
