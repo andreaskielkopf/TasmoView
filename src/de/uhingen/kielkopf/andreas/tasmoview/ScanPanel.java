@@ -35,11 +35,6 @@ public class ScanPanel extends JPanel {
    private JToggleButton     refreshButton;
    /** Fortschrittsbalken des Scan oder Refresh */
    private JProgressBar      progressBar;
-   /** Hilfsvariablen während der Suche */
-   // private BitSet tosearch =new BitSet(256);
-   // private BitSet posible =new BitSet(256); // Hinweise aus der letzten Suche
-   /** Timer der die Aktionen während der Suche oder dem Refresh abwickelt */
-   // private Timer scanTimer =null;
    /** Das gesamte ScanPanel */
    private JPanel            scanPanel;
    private JButton           btnStorePWD;

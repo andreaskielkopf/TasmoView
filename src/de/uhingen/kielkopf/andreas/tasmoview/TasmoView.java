@@ -9,6 +9,8 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.TitledBorder;
 
+import de.uhingen.kielkopf.andreas.tasmoview.grafik.JPowerPane;
+
 public class TasmoView {
    private JFrame                 frame;
    private JLabel                 cLabel;
@@ -17,10 +19,15 @@ public class TasmoView {
    private JTabbedPane            tabbedPane;
    private JPanel                 panel;
    private JPanel                 panel_1;
-   private JPanel                 panel_2;
+   private JPowerPane             panel_2;
    private SensorPanel            sensorPanel;
+   private JPanel                 panel_3;
    static public volatile boolean keepRunning=true;
-   /** Launch the application. */
+   /**
+    * Launch the application.
+    * 
+    * @wbp.parser.entryPoint
+    */
    public static void main(String[] args) {
       EventQueue.invokeLater(() -> {
          try {
@@ -36,7 +43,11 @@ public class TasmoView {
    public TasmoView() {
       initialize();
    }
-   /** Initialize the contents of the frame. */
+   /**
+    * Initialize the contents of the frame.
+    * 
+    * @wbp.parser.entryPoint
+    */
    private void initialize() {
       frame=new JFrame();
       frame.setBounds(100, 100, 1200, 800);
@@ -75,8 +86,10 @@ public class TasmoView {
          tabbedPane.setEnabledAt(0, true);
          tabbedPane.addTab("Sensors", null, getPanel_1(), null);
          tabbedPane.setEnabledAt(1, true);
-         tabbedPane.addTab("New tab", null, getPanel_2(), null);
-         tabbedPane.setEnabledAt(2, false);
+         tabbedPane.addTab("Power", null, getPanel_2(), null);
+         tabbedPane.setEnabledAt(2, true);
+         tabbedPane.addTab("New tab", null, getPanel_3(), null);
+         tabbedPane.setEnabledAt(3, false);
       }
       return tabbedPane;
    }
@@ -99,10 +112,18 @@ public class TasmoView {
    }
    private JPanel getPanel_2() {
       if (panel_2==null) {
-         panel_2=new JPanel();
-         panel_2.setLayout(new BorderLayout(0, 0));
+         panel_2=new JPowerPane();
+         Data.data.powerpane=panel_2;
+         // panel_2.setLayout(new BorderLayout(0, 0));
       }
       return panel_2;
+   }
+   private JPanel getPanel_3() {
+      if (panel_3==null) {
+         panel_3=new JPanel();
+         panel_3.setLayout(new BorderLayout(0, 0));
+      }
+      return panel_3;
    }
    private SensorPanel getSensorPanel() {
       if (sensorPanel==null) {

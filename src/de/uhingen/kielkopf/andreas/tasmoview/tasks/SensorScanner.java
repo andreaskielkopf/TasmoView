@@ -3,7 +3,6 @@ package de.uhingen.kielkopf.andreas.tasmoview.tasks;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -112,10 +111,10 @@ public class SensorScanner extends SwingWorker<String, String> {
          if (tasm==null) return null;
          if (tasm.sensoren.isEmpty()) return null;
          try {
-            Instant           i  =Instant.now();
-            ArrayList<String> sl =tasm.request(Sensor.STATUS_8);
-            String            erg=sl.get(1);
-            JsonObject        j0 =JsonObject.interpret(erg);
+            Instant      i  =Instant.now();
+            List<String> sl =tasm.requests(new String[] {Sensor.STATUS_8});
+            String       erg=sl.get(1);
+            JsonObject   j0 =JsonObject.convertToJson(erg);
             for (Sensor sensor:tasm.sensoren) {
                JsonObject j1=j0.getJsonObject(sensor.kennung);
                if (j1==null) continue;

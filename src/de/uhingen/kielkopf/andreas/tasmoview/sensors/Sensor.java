@@ -56,7 +56,7 @@ public class Sensor implements Comparable<Sensor> {
          Tasmota           tasm=entry.getValue();
          ArrayList<String> sl  =entry.getKey().get();
          String            s   =sl.get(1);
-         JsonObject        j0  =JsonObject.interpret(s);
+         JsonObject        j0  =JsonObject.convertToJson(s);
          if (j0==null) return; // synchronized (Data.data.sensoren) {
          for (Sensor sensor:Data.data.sensoren) {
             if (sensor.tasmota!=tasm) continue;
@@ -74,7 +74,7 @@ public class Sensor implements Comparable<Sensor> {
       // Tasmota tasm=entry.getValue();
       // ArrayList<String> sl =entry.getKey().get();
       String     s =sl.get(1);
-      JsonObject j0=JsonObject.interpret(s);
+      JsonObject j0=JsonObject.convertToJson(s);
       if (j0==null) return; // synchronized (Data.data.sensoren) {
       for (Sensor sensor:Data.data.sensoren) {
          if (sensor.tasmota!=tasm) continue;

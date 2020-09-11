@@ -26,7 +26,8 @@ public abstract class JsonObject {
       for (JsonObject o:getAll()) {
          if (name==null) {
             if (o.name==null) return o;
-         } else if (name.equals(o.name)) return o;
+         } else
+            if (name.equals(o.name)) return o;
       }
       return null;
    }
@@ -36,7 +37,8 @@ public abstract class JsonObject {
       for (JsonObject o:getAll()) {
          if (name==null) {
             if (o.name==null) c.add(o);
-         } else if (name.equals(o.name)) c.add(o);
+         } else
+            if (name.equals(o.name)) c.add(o);
       }
       return c;
    }
@@ -48,11 +50,11 @@ public abstract class JsonObject {
       return null;
    }
    /** Zerteile den String in hierarchische JsonObjekte */
-   public static final JsonObject interpret(String part) {
-      if (JsonValue.isValue(part)) return new JsonValue(part);
-      if (JsonString.isString(part)) return new JsonString(part);
+   public static final JsonObject convertToJson(String part) {
+      if (isValue(part)) return new JsonValue(part);
+      if (isString(part)) return new JsonString(part);
       if (isList(part)) return new JsonList(part);
-      if (JsonArray.isArray(part)) return new JsonArray(part);
+      if (isArray(part)) return new JsonArray(part);
       return null;
    }
    /** teste ob der String irgendwie asymetrisch ist */

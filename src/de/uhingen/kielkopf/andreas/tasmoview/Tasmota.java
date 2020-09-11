@@ -9,40 +9,49 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Comparator;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonArray;
+import javax.swing.DefaultListModel;
+
+import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonContainer;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
 import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonString;
 import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
 
+/**
+ * Repräsentation eines kompletten Geräts mit Tasmota Firmware
+ */
 public class Tasmota implements Comparable<Tasmota> {
-   /** Nummer des Gerätes */
+   /** IP-Nummer des Gerätes im lokalen Netzwerk (nur letzter Teil) */
    public final int                           ipPart;
-   /** Text der IP des Gerätes */
+   /** Text der kompletten IP des Gerätes */
    public /* final */ String                  hostaddress;
-   /** Name des Gerätes nachdem es erkannt wurde */
-   // public JsonArray friendlyNames;
+   /** Name des Gerätes nachdem es erkannt wurde (DeviceName oder anderer passender Text z.B. FriendlyName) */
    public String                              deviceName;
+   public String                              moduleTyp;
+   private static final String[]              NAMENSSUCHE    = {"DeviceName", "FriendlyName", "Hostname", "Topic", "IPAddress", "Mac",};
    private JsonObject                         warning;
-   public final ConcurrentSkipListSet<Sensor> sensoren   =new ConcurrentSkipListSet<>();
-   /** unbeantwortete Anfragen */
-   // private final ArrayList<CompletableFuture<Object>> incomplete =new ArrayList<CompletableFuture<Object>>();
-   /** beantwortete Anfragen */
-   // private final TreeMap<String, JsonObject> complete =new TreeMap<String, JsonObject>();
-   /** verarbeitete Anfragen werden hier eingelagert (Anfragetext,Antwort als JSON) */
-   public final TreeMap<String, JsonObject>   jsontree   =new TreeMap<String, JsonObject>();
+   /** Liste aller Sensoren dieses Geräts */
+   public final ConcurrentSkipListSet<Sensor> sensoren       =new ConcurrentSkipListSet<>();
+   /** verarbeitete Anfragen werden hier eingelagert (Anfragetext,Antwort als JSON) neuere Anfragen ersetzen jeweils alte Anfragen */
+   public final SortedMap<String, JsonObject> jsontree       =new ConcurrentSkipListMap<>();
    /** Alle Statusdaten auf einmal anfragen */
-   public static final String                 SUCHANFRAGE="status 0";
-   /** Gerätenamen erkennen */
-   // private static final String SUCHKENNUNG="FriendlyName";
-   private static final String[]              NAMENSSUCHE= {"DeviceName", "FriendlyName", "Hostname", "Topic", "IPAddress", "Mac",};
+   public static final String                 SUCHANFRAGE    ="status 0";
+   public static final String                 CMD_PREFIX     ="cmnd=";
+   public static final String                 USER_PREFIX    ="user=";
+   public static final String                 PASSWORD_PREFIX="password=";
+   public static final String                 UND            ="&";
+   public static final String[]               ZUSATZ_FRAGEN  = {"module", "Gpio", "state", "template", "rule1", "Timer1", "timer2", "timer3", "timer4"};
    /** Warnungen erkennen */
-   private static final String                WARNING    ="WARNING";
-   private static final String                SENSOREN   ="StatusSNS";
+   private static final String                WARNING        ="WARNING";
+   private static final String                SENSOREN       ="StatusSNS";
    /**
     * Lege ein Tasmota-Objekt probeweise an und fange an zu testen ob es antwortet
     * 
@@ -54,117 +63,147 @@ public class Tasmota implements Comparable<Tasmota> {
       nextIp[3]=(byte) i;
       try {
          hostaddress=InetAddress.getByAddress(nextIp).getHostAddress();
-         // incomplete.add(request(SUCHANFRAGE));
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
+      } catch (IOException e) {}
    }
    /**
-    * fordere eine bestimmte Übertragung an und gibt sie zurück sobald sie da ist
+    * fordere eine bestimmte Übertragung an und gibt die Antwort(en) in einer Liste zurück sobald sie da ist
     * 
     * @return Stringliste mit Frage und Antwort oder nur der Frage
     */
-   public final ArrayList<String> request(final String anfrage) {
-      final StringBuilder sb=new StringBuilder();
-      // Benutzername und Passwort einbinden
-      /// http://192.168.178.181/cm?user=andreas&password=akf4sonoff&cmnd=status%200#
-      sb.append("user=");
-      sb.append(Data.data.getUserField().getText());
-      sb.append("&password=");
-      sb.append(Data.data.getPasswordField().getPassword());
-      sb.append("&cmnd=");
-      // Anfrage einbinden
-      sb.append(anfrage);
-      // return CompletableFuture.supplyAsync(() -> {
+   public final List<String> requests(final String[] anfragen) {
       ArrayList<String> sl=new ArrayList<String>();
-      sl.add("&cmnd="+anfrage);
-      try {
-         URL               url   =new URI("http", hostaddress, "/cm", sb.toString(), "").toURL();
-         HttpURLConnection client=(HttpURLConnection) url.openConnection();
-         client.setRequestMethod("GET");
-         client.setConnectTimeout(5*1000);// 5 Sekunden
-         BufferedReader br=new BufferedReader(new InputStreamReader(client.getInputStream()));
-         while (true) {
-            String line=br.readLine();
-            if (line==null) break;
-            sl.add(line);
-         }
-      } catch (IOException|URISyntaxException ignore) {
-         // e.printStackTrace(); // System.out.println("--"+sb.toString()); // return null;
+      for (String anfrage:anfragen) {
+         final StringBuilder sb=new StringBuilder();
+         // Benutzername und Passwort einbinden
+         /// http://192.168.178.181/cm?user=andreas&password=akf4sonoff&cmnd=status%200#
+         sb.append(USER_PREFIX);
+         sb.append(Data.data.getUserField().getText());
+         sb.append(UND);
+         sb.append(PASSWORD_PREFIX);
+         sb.append(Data.data.getPasswordField().getPassword());
+         sb.append(UND);
+         sb.append(CMD_PREFIX);
+         sb.append(anfrage); // Anfrage einbinden
+         sl.add(UND+anfrage);
+         try {
+            URL               url   =new URI("http", hostaddress, "/cm", sb.toString(), "").toURL();
+            HttpURLConnection client=(HttpURLConnection) url.openConnection();
+            client.setRequestMethod("GET");
+            client.setConnectTimeout(5*1000);// 5 Sekunden
+            BufferedReader br=new BufferedReader(new InputStreamReader(client.getInputStream()));
+            while (true) {
+               String line=br.readLine();
+               if (line==null) break;
+               sl.add(line);
+            }
+         } catch (IOException|URISyntaxException ignore) {}
       }
       return sl;
-      // });
    }
-   public final boolean process(ArrayList<String> response) {
-      if (response.size()<2) return false;
-      int i=response.get(0).lastIndexOf("&cmnd=");
-      if (i<0) return false;
-      String anfrage=response.get(0).substring(i+6);
-      if (anfrage.length()<1) return false;
-      JsonObject j=JsonObject.interpret(response.get(1));
-      if (j==null) return false;
-      if (SUCHANFRAGE.equals(anfrage)) {
-         JsonObject jo=null;
-         for (String kennung:NAMENSSUCHE) {
-            jo=j.getJsonObject(kennung);
-            if (jo==null) continue;
-            if (jo instanceof JsonString) {
-               this.deviceName=((JsonString) jo).value;
-            }
-            if (jo instanceof JsonArray) {
-               JsonArray        friendlyNames=(JsonArray) jo;
-               List<JsonObject> al           =friendlyNames.list;
-               if (al.isEmpty()) continue;
-               JsonObject dno=al.get(0);
-               if (dno instanceof JsonString) this.deviceName=((JsonString) dno).value;
-            }
-            if (deviceName.length()>2) break;
+   public final boolean process(List<String> response) {
+      boolean hatInhalt=false;
+      for (String zeile:response)
+         if (!zeile.startsWith(UND)) {
+            hatInhalt=true;
+            break;
          }
-         warning=j.getJsonObject(WARNING);
-         // Tasmota-Gerät verlangt Passwort
-         if (warning!=null) System.out.println(response.get(1));
+      if (!hatInhalt) return false; // keine Antwort enthalten
+      String     anfrage="";
+      JsonObject j      =null;
+      for (String zeile:response) {
+         if (zeile==null) continue;
+         if (zeile.isEmpty()) continue;
+         if (zeile.startsWith(UND)) {// anfrage ermittelt
+            anfrage=zeile.substring(1);
+         } else { // antwort verarbeiten
+            j=JsonObject.convertToJson(zeile);
+            if (j==null) continue;
+            jsontree.put(anfrage, j);
+            register(anfrage, j);
+            if (SUCHANFRAGE.equals(anfrage)) namensSuche(); // nur bei einmaliger statusabfrege "status 0"
+            warning=j.getJsonObject(WARNING); // Tasmota-Gerät verlangt Passwort
+            if (warning!=null) System.out.println(zeile);
+         }
       }
-      jsontree.put(anfrage, j);
-      // complete.put(anfrage, j);
-      register(anfrage, j);
-      // Data.data.dataModel.fireTableDataChanged();
-      return true;
+      return (j!=null);
    }
-   /** versuche die offenen Anfragen zu verarbeiten */
-   /*
-    * public final void process() { if (incomplete.isEmpty()) return; ArrayList<CompletableFuture<Object>> tocheck=new
-    * ArrayList<CompletableFuture<Object>>(incomplete); for (CompletableFuture<Object> cf:tocheck) { try { if (!cf.isDone()) continue; incomplete.remove(cf); if
-    * (cf.isCancelled()||cf.isCompletedExceptionally()) continue; Object response=cf.get(); System.out.println(response.getClass().getName());
-    * System.out.println(response.toString()); String q =response.toString(); // request().uri().getQuery(); // System.out.println(q); int i
-    * =q.lastIndexOf("&cmnd="); String anfrage=null; if (i>0) anfrage=q.substring(i+6); JsonObject j=JsonObject.interpret(response.toString()/* body() ); if
-    * (j!=null) { if (SUCHANFRAGE.equals(anfrage)) { JsonObject jo=j.getJsonObject(SUCHKENNUNG); if (jo instanceof JsonArray) name=(JsonArray) jo;
-    * warning=j.getJsonObject(WARNING); // Tasmota-Gerät verlangt Passwort if (warning!=null) System.out.println(this); } jsontree.put(anfrage, j);
-    * complete.put(anfrage, j); register(anfrage, j); Data.data.dataModel.fireTableDataChanged(); } } catch (InterruptedException|ExecutionException e) {
-    * e.printStackTrace(); } } }
-    */
+   /** Suche im vorhandenen Jsontree nach einem passenden deviceNamen und trage ihn als Devicename ein */
+   void namensSuche() {
+      JsonObject suchTree=jsontree.get(SUCHANFRAGE);
+      if (suchTree==null) return;
+      suchschleife: for (String kennung:NAMENSSUCHE) {// versuche einen Namen für das Gerät zu finden
+         for (JsonObject jsonObject:suchTree.getAll(kennung))
+            if (jsonObject instanceof JsonString) {
+               this.deviceName=((JsonString) jsonObject).value;
+               if (deviceName==null) continue;
+               if (deviceName.isEmpty()) continue;
+               break suchschleife;
+            } else
+               if (jsonObject instanceof JsonContainer) {
+                  for (JsonObject jsonObject2:((JsonContainer) jsonObject).list)
+                     if (jsonObject2 instanceof JsonString) {
+                        this.deviceName=((JsonString) jsonObject2).value;
+                        if (deviceName==null) continue;
+                        if (deviceName.isEmpty()) continue;
+                        break suchschleife;
+                     }
+               }
+      }
+   }
    /** Anfrage eintragen */
    final void register(String anfrage, JsonObject json) {
       boolean changed=false;
-      if (!Data.data.tablenames.containsKey(anfrage)) {
-         LinkedHashSet<String> kennungen=new LinkedHashSet<String>();
-         Data.data.tablenames.put(anfrage, kennungen);
+      if (SUCHANFRAGE.equals(anfrage)) {
+         if (json instanceof JsonContainer) for (JsonObject subTabelle:((JsonContainer) json).list)
+            if (subTabelle instanceof JsonContainer) changed|=registerTabelle((JsonContainer) subTabelle);
+      } else {
+         json.name=anfrage;
+         // List("{\""+anfrage+"\":"+json.toString()+"");
+         if (json instanceof JsonContainer) changed|=registerTabelle((JsonContainer) json);
       }
-      LinkedHashSet<String> k=Data.data.tablenames.get(anfrage);
-      for (JsonObject jo:json.getAll()) {
-         if (jo.name==null) continue;
-         if (jo.name.equalsIgnoreCase(anfrage)) continue;
-         if (jo.name.equalsIgnoreCase(SENSOREN)) Sensor.addSensors(this, jo);
-         if (k.contains(jo.name)) continue;
-         k.add(jo.name);
-         changed=true;
+      if (changed) {
+         DefaultListModel<String> dlm=(DefaultListModel<String>) Data.data.tasmolist.getTableAuswahl().getModel();
+         for (Entry<String, ConcurrentSkipListSet<String>> entry:Data.data.tableNames.entrySet())
+            if (!entry.getValue().isEmpty()) if (!dlm.contains(entry.getKey())) dlm.addElement(entry.getKey());
+         Data.data.dataModel.setTable(anfrage);
       }
-      if (changed) Data.data.dataModel.setTable(anfrage);
    }
-   /** Ist das ein Tasmota-Gerät ? */
-   /*
-    * public Boolean isTasmota() { // Zeit um Antworten zu bearbeiten process(); if (name!=null) return true; if (incomplete.isEmpty()) return false; return
-    * null; }
-    */
+   static private final Pattern IS_NUMBER=Pattern.compile("[0-9]+");
+   /** registriert die Empfangenen Elemente als Spaltennamen */
+   final boolean registerTabelle(JsonContainer tabelle) {
+      String name=tabelle.name;
+      if (name==null) for (JsonObject j:tabelle.getAll()) {
+         name=j.name;
+         if (name!=null) break;
+      }
+      boolean changed=false;
+      if (name==null) return changed;
+      ConcurrentSkipListMap<String, ConcurrentSkipListSet<String>> tabellen=Data.data.tableNames;
+      tabellen.putIfAbsent(name, new ConcurrentSkipListSet<String>(NUMMERN_SICHERER_COMPARATOR)); // neuen Typ von Tabelle eintragen falls erforderlich
+      ConcurrentSkipListSet<String> listOfColumnames=tabellen.get(name);
+      for (JsonObject j:tabelle.list) {
+         String n=j.name;
+         if (n==null) continue;// Nullwerte überspringen
+         if (n.equalsIgnoreCase(SENSOREN)) Sensor.addSensors(this, j); // Sensoren eintragen
+         if (n.equalsIgnoreCase(name)) continue;// eigenen Eintrag überspringen
+         if (IS_NUMBER.matcher(n).matches()) {
+            System.out.println("Numerisch "+n);
+            continue; // Numerische Überschriften unterdrücken
+         }
+         if (tabellen.containsKey(n)) {
+            if (j instanceof JsonContainer) {
+               System.out.println("Extra Tabelle "+j);
+               registerTabelle((JsonContainer) j);
+            }
+            continue;
+         }
+         if (listOfColumnames.add(n)) {
+            changed=true;
+            // System.out.println(name+">"+n);
+         }
+      }
+      return changed;
+   }
    /** Hole Alle Antworten ! */
    ArrayList<JsonObject> getAll() {
       ArrayList<JsonObject> c=new ArrayList<JsonObject>();
@@ -220,15 +259,51 @@ public class Tasmota implements Comparable<Tasmota> {
    @Override
    public String toString() {
       StringBuilder sb=new StringBuilder();
-      sb.append(this.getClass().getSimpleName());
-      sb.append("[ip="+hostaddress);
-      if (deviceName!=null) {
-         sb.append(",");
+      if (deviceName!=null) { // Wenn ein Name bekannt ist
          sb.append(deviceName);
+         sb.append("(");
+         sb.append(hostaddress);
+         sb.append(")");
+      } else { // Ansonsten Typ und IP
+         sb.append(this.getClass().getSimpleName());
+         sb.append("[ip="+hostaddress);
+         sb.append("]");
+         if (warning!=null) sb.append(warning);
       }
-      sb.append("]");
-      // if (!incomplete.isEmpty()) sb.append(" (waiting)");
-      if (warning!=null) sb.append(warning);
       return sb.toString();
    }
+   static final Pattern                   ZAHLEN_AM_ENDE             =Pattern.compile("\\d+$");
+   static public final Comparator<String> NUMMERN_SICHERER_COMPARATOR=                         //
+            new Comparator<String>() {
+               @Override
+               public int compare(String o1, String o2) {
+                  int normal=o1.compareTo(o2);
+                  if (normal!=0) if (o1.length()!=o2.length()) {
+                     Matcher m1=ZAHLEN_AM_ENDE.matcher(o1);
+                     Matcher m2=ZAHLEN_AM_ENDE.matcher(o2);
+                     if (m1.find()&&m2.find()) {                                               // beide enthalten Zahlen
+                        try {
+                           String r1="";
+                           int i1=-1;
+                           // if (m1.hitEnd()) {
+                           i1=Integer.valueOf(m1.group());
+                           r1=m1.replaceFirst("");
+                           // }
+                           String r2="";
+                           int i2=-1;   //
+                           m2.groupCount();
+                           // if (m2.hitEnd()) {
+                           i2=Integer.valueOf(m2.group());
+                           r2=m2.replaceFirst("");
+                           // }
+                           if (r1.equals(r2)) return Integer.compare(i1, i2);
+                        } catch (NumberFormatException e) {
+                           System.out.println(o1+":"+o2);
+                           e.printStackTrace();
+                        }
+                     }
+                  }
+                  return normal;
+               }
+            };
 }

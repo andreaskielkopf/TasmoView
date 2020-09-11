@@ -1,26 +1,33 @@
 package de.uhingen.kielkopf.andreas.tasmoview.table;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
 import de.uhingen.kielkopf.andreas.tasmoview.Data;
 import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonArray;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonList;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
 
 /** Ein Tablemodell für die veränderbare Tabelle */
 public class TasmoTableModell extends AbstractTableModel {
-   private static final long     serialVersionUID=-730406069158230203L;
+   private static final long             serialVersionUID      =-730406069158230203L;
+   static public final String[][]        SPALTEN_UEBERSCHRIFTEN= {                                                                                          //
+            {"Home", "Module", "Power", "Color", "LoadAvg", "LinkCount", "Uptime"},
+            {"Health", "Uptime", "BootCount", "RestartReason", "LoadAvg", "Sleep", "MqttCount", "LinkCount", "Downtime", "RSSI"},
+            {"Firmware", "Version", "Core", "SDK", "ProgramSize", "Free", "OtaUrl"},
+            // disabled {"Wifi_", "Hostname", "Mac", "IPAddress", "Gateway", "SSId", "BSSId", "Channel", "RSSI", "LinkCount", "Downtime"},
+            {"MQTT", "Topic", "FullTopic", "CommandTopic", "StatTopic", "TeleTopic", "FallbackTopic", "GroupTopic"},                                        //
+            {"Timers", "Timer1", "Timer2", "Timer3", "Timer4"},                                                                                             //
+            {"Timer1"},                                                                                                                                     //
+            {"Wifi"},
+            // {"GPIOs1"}, {"GPIOs2"}, {"GPIOs3"}
+   };
    /** Aktuelle Liste der Columnnames */
-   private LinkedHashSet<String> columnNames;
+   private ConcurrentSkipListSet<String> columnNames;
    /** Liste zum Programmstart */
-   private final String[]        cn              = {"Module", "Topic", "ButtonTopic", "Power", "PowerOnState", "LedState", "LedMask", "", ""};
+   private final String[]                cn                    = {"Module", "Topic", "ButtonTopic", "Power", "PowerOnState", "LedState", "LedMask", "", ""};
    /** Dieser Eintrag kommt immer in die erste Spalte */
-   static final String           DEVICE_NAME     ="DeviceName";
+   static final String                   DEVICE_NAME           ="DeviceName";
    public TasmoTableModell() {
       super();
       setTable(null);
@@ -36,7 +43,7 @@ public class TasmoTableModell extends AbstractTableModel {
       if (Data.data.tasmolist!=null) if (Data.data.tasmolist.getTable()!=null) row=Data.data.tasmolist.getTable().getSelectedRow();
       String key=Tasmota.toHtmlString(name);
       if ((columnNames==null)||(key==null)) {
-         LinkedHashSet<String> c=new LinkedHashSet<String>();
+         ConcurrentSkipListSet<String> c=new ConcurrentSkipListSet<>();
          for (String string:cn)
             c.add(string);
          columnNames=c;
@@ -45,14 +52,8 @@ public class TasmoTableModell extends AbstractTableModel {
             return;
          }
       }
-      if (!Data.data.tablenames.containsKey(key)) {// Datensatz vorbereiten
-         ArrayList<JsonObject> jos=new ArrayList<JsonObject>();
-         for (Tasmota t:Data.data.tasmotas)
-            jos.addAll(t.getAll(key));
-         createTableHeaders(key, jos);
-      }
-      if (Data.data.tablenames.containsKey(key)) {// Datensatz aktivieren
-         columnNames=Data.data.tablenames.get(key);
+      if (Data.data.tableNames.containsKey(key)) {// Datensatz aktivieren
+         columnNames=Data.data.tableNames.get(key);
          fireTableStructureChanged();
          if (row!=-1) Data.data.getTasmoList().getTable().setRowSelectionInterval(row, row);
       }
@@ -60,7 +61,7 @@ public class TasmoTableModell extends AbstractTableModel {
    }
    /* Ermittle den Columnname */
    public String getColumnName(int col) {
-      LinkedHashSet<String> cnames=columnNames;
+      ConcurrentSkipListSet<String> cnames=columnNames;
       // erste Splate ist immer der Gerätename
       if (col==0) return DEVICE_NAME;
       // Wenn zu hohe Spalten angefragt werden
@@ -84,14 +85,6 @@ public class TasmoTableModell extends AbstractTableModel {
       String erg  =getTasmota(rowIndex).getValue(cname);
       return erg;
    }
-   private void createTableHeaders(String key, ArrayList<JsonObject> jos) {
-      LinkedHashSet<String> names=new LinkedHashSet<String>();
-      for (JsonObject jo:jos) //
-         if ((jo instanceof JsonList)||(jo instanceof JsonArray))//
-            for (JsonObject j:(jo instanceof JsonList) ? ((JsonList) jo).list : ((JsonArray) jo).list)//
-            if (j.name!=null) names.add(j.name);
-      if (!names.isEmpty()) Data.data.tablenames.put(key, names);
-   }
    public Tasmota getTasmota(int rowIndex) {
       return (Tasmota) Data.data.tasmotas.toArray()[rowIndex];
    }
@@ -99,12 +92,12 @@ public class TasmoTableModell extends AbstractTableModel {
       if (Data.data.tasmolist!=null) {
          JTable table=Data.data.tasmolist.getTable();
          if (table==null) return;
-         for (int c=0; c<getColumnCount(); c++) {
-            int w =0;            // getColumnName(c).length();
+         for (int c=0; c<table.getColumnCount(); c++) {
+            int w =0;                  // getColumnName(c).length();
             int mw=w;
-            int rc=getRowCount();
+            int rc=table.getRowCount();
             for (int r=0; r<rc; r++) {
-               Object v=getValueAt(r, c);
+               Object v=table.getValueAt(r, c);
                if (v==null) continue;
                int l=v.toString().length();
                if (l>mw) mw=l;
@@ -112,6 +105,7 @@ public class TasmoTableModell extends AbstractTableModel {
             }
             /** Der Wert soll zwischen dem Mittelwert und dem Maxwert liegen */
             w=(int) (20f*(0.5f+0.5f*w/(rc+0.01f)+0.3f*mw));
+            // if (c<table.getColumnModel().getColumnCount())
             table.getColumnModel().getColumn(c).setPreferredWidth(w);
             // System.out.print(c+":"+w+" ");
          }

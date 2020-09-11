@@ -1,11 +1,9 @@
 package de.uhingen.kielkopf.andreas.tasmoview.minijson;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 
-public class JsonArray extends JsonObject {
-   public final List<JsonObject> list=new ArrayList<>();
+public class JsonArray extends JsonContainer {
    public JsonArray(String s) {
       super();
       String  rest;
@@ -23,8 +21,10 @@ public class JsonArray extends JsonObject {
          String            s3   ="";
          for (String s2:rest.split(KOMMA)) {
             if (s3.isEmpty()) {
-               if (JsonObject.isPaarweise(s2)) split.add(s2);
-               else s3=s2;
+               if (JsonObject.isPaarweise(s2))
+                  split.add(s2);
+               else
+                  s3=s2;
             } else {
                s3=s3+KOMMA+s2;
                if (JsonObject.isPaarweise(s3)) {
@@ -34,18 +34,10 @@ public class JsonArray extends JsonObject {
             }
          }
          if (!s3.isEmpty()) split.add(s3);
-         for (String part:split) list.add(JsonObject.interpret(part));
+         for (String part:split)
+            list.add(JsonObject.convertToJson(part));
       }
       validate(rest, s, this);
-   }
-   public JsonObject getJsonObject(int i) {
-      return list.get(i);
-   }
-   public ArrayList<JsonObject> getAll() {
-      ArrayList<JsonObject> c=new ArrayList<JsonObject>();
-      c.add(this);
-      for (JsonObject jsonObject:list) c.addAll(jsonObject.getAll());
-      return c;
    }
    @Override
    public String toString() {
@@ -58,8 +50,10 @@ public class JsonArray extends JsonObject {
       sb.append('[');
       boolean first=true;
       for (JsonObject j:list) {
-         if (first) first=false;
-         else sb.append(KOMMA);
+         if (first)
+            first=false;
+         else
+            sb.append(KOMMA);
          sb.append(j);
       }
       sb.append(']');

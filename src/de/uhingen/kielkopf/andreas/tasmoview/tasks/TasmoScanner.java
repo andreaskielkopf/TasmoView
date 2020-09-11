@@ -145,6 +145,7 @@ public class TasmoScanner extends SwingWorker<String, String> {
       refreshButton.setEnabled(true);
       saveTasmotaHint();
       TasmoList.recalculateColumnames();
+      if ((Data.data!=null)&&(Data.data.powerpane!=null)) Data.data.powerpane.recalculateListe();
    }
    private void saveTasmotaHint() {
       try {
@@ -166,7 +167,9 @@ public class TasmoScanner extends SwingWorker<String, String> {
       @Override
       protected void process(List<Tasmota> chunks) {
          Data.data.dataModel.fireTableDataChanged();
-         Data.data.tasmolist.repaint(1000);
+         // Data.data.tasmolist.repaint(1000);
+         // TasmoList.recalculateColumnames();
+         if ((Data.data!=null)&&(Data.data.powerpane!=null)) Data.data.powerpane.recalculateListe();
       }
       private final Integer j;
       public ScanFor(Integer j) {
@@ -196,11 +199,15 @@ public class TasmoScanner extends SwingWorker<String, String> {
          try {
             Tasmota tasmota=new Tasmota(i);
             if (Data.data.tasmotas.contains(tasmota)) tasmota=Data.data.tasmotas.ceiling(tasmota);
-            ArrayList<String> erg=tasmota.request(Tasmota.SUCHANFRAGE);
+            List<String> erg=tasmota.requests(new String[] {Tasmota.SUCHANFRAGE});
             if (erg.size()>1) {// Es ist eine Antwort gekommen
                Data.data.tasmotas.add(tasmota);
                if (tasmota.process(erg)) {
                   isTasmota.set(i);
+                  List<String> antwort=tasmota.requests(Tasmota.ZUSATZ_FRAGEN);
+                  if (antwort.size()>Tasmota.ZUSATZ_FRAGEN.length) {
+                     tasmota.process(antwort);
+                  }
                   publish(tasmota);
                } else
                   noTasmota.set(i);
