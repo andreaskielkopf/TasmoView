@@ -36,7 +36,7 @@ public class JPowerPane extends JPanel implements ActionListener {
    private JLabel              labelDeviceName;
    private JPanel              panel_3;
    private JPanel              panel_4;
-   private JList<Tasmota>      list;
+   private JList<Tasmota>      powerJlist;
    private JLabel              lblNewLabel_1;
    private ArrayList<PowerBox> boxList         =new ArrayList<>();
    static private final String FRIENDLY_NAME   ="FriendlyName";
@@ -96,7 +96,7 @@ public class JPowerPane extends JPanel implements ActionListener {
          panel_3.setBorder(new TitledBorder(null, "select Device", TitledBorder.LEADING, TitledBorder.TOP, null, null));
          panel_3.setName("panel_3");
          panel_3.setLayout(new BorderLayout(10, 10));
-         panel_3.add(getList(), BorderLayout.CENTER);
+         panel_3.add(getPowerJList(), BorderLayout.CENTER);
          panel_3.add(getLblNewLabel_1(), BorderLayout.NORTH);
       }
       return panel_3;
@@ -111,18 +111,19 @@ public class JPowerPane extends JPanel implements ActionListener {
       }
       return panel_4;
    }
-   private JList<Tasmota> getList() {
-      if (list==null) {
-         list=new JList<Tasmota>(new DefaultListModel<Tasmota>());
-         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-         list.addListSelectionListener(new ListSelectionListener() {
+   private JList<Tasmota> getPowerJList() {
+      if (powerJlist==null) {
+         powerJlist=new JList<Tasmota>(new DefaultListModel<Tasmota>());
+         powerJlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+         powerJlist.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(final ListSelectionEvent e) {
-               if (!e.getValueIsAdjusting()) recalculatePowerBox();
+               if (!e.getValueIsAdjusting())
+                  recalculatePowerBox();
             }
          });
-         list.setName("list");
+         powerJlist.setName("list");
       }
-      return list;
+      return powerJlist;
    }
    private JLabel getLblNewLabel_1() {
       if (lblNewLabel_1==null) {
@@ -135,15 +136,16 @@ public class JPowerPane extends JPanel implements ActionListener {
    }
    public void recalculateListe() {
       if ((Data.data!=null)&&(Data.data.tasmotas!=null)) {
-         DefaultListModel<Tasmota> m=(DefaultListModel<Tasmota>) getList().getModel();
+         DefaultListModel<Tasmota> m=(DefaultListModel<Tasmota>) getPowerJList().getModel();
          m.clear();
          for (Tasmota tasmota:Data.data.tasmotas)
             m.addElement(tasmota);
       }
    }
    private void recalculatePowerBox() {
-      Tasmota tasm=getList().getSelectedValue();
-      if (tasm==null) return;
+      Tasmota tasm=getPowerJList().getSelectedValue();
+      if (tasm==null)
+         return;
       getLabelDeviceName().setText(tasm.deviceName);
       if (tasm.moduleTyp==null) {
          JsonObject jm=tasm.jsontree.get("module");
@@ -151,7 +153,8 @@ public class JPowerPane extends JPanel implements ActionListener {
             JsonObject j2=((JsonList) jm).list.get(0);
             if (j2 instanceof JsonList) {
                JsonObject j4=((JsonList) j2).list.get(0);
-               if (j4 instanceof JsonString) tasm.moduleTyp=((JsonString) j4).value;
+               if (j4 instanceof JsonString)
+                  tasm.moduleTyp=((JsonString) j4).value;
             }
          }
          System.out.println(tasm.moduleTyp);
@@ -159,12 +162,15 @@ public class JPowerPane extends JPanel implements ActionListener {
       getLabelModul().setText(tasm.moduleTyp);
       LinkedHashSet<String> boxNameList=new LinkedHashSet<>();
       for (JsonObject j0:tasm.getAll(FRIENDLY_NAME))
-         if (j0 instanceof JsonArray) for (JsonObject j1:((JsonArray) j0).list)
-            if (j1 instanceof JsonString) boxNameList.add(((JsonString) j1).value);
+         if (j0 instanceof JsonArray)
+            for (JsonObject j1:((JsonArray) j0).list)
+               if (j1 instanceof JsonString)
+                  boxNameList.add(((JsonString) j1).value);
       JPanel p=getPanel_2();
       p.removeAll();
       boxList.clear();
-      if (boxNameList.isEmpty()) return;
+      if (boxNameList.isEmpty())
+         return;
       if ((boxNameList.size()>1)||(!tasm.getAll("POWER").isEmpty())||(!tasm.getAll("POWER1").isEmpty())) {
          int boxNr=1;
          for (String boxName:boxNameList) {
@@ -174,7 +180,7 @@ public class JPowerPane extends JPanel implements ActionListener {
             box.setNr(boxNr);
             box.setStatus(" ? ");
             box.getButton().addActionListener(this);
-            TasmoScanner.exec.submit(new SetPower(box));// automatic execute in threadpool
+            TasmoScanner.pool.submit(new SetPower(box));// automatic execute in threadpool
             p.add(box);
             boxNr++;
          }
@@ -184,11 +190,13 @@ public class JPowerPane extends JPanel implements ActionListener {
    }
    @Override
    public void actionPerformed(ActionEvent e) {
-      Tasmota tasmota=getList().getSelectedValue();
-      if (tasmota==null) return;
+      Tasmota tasmota=getPowerJList().getSelectedValue();
+      if (tasmota==null)
+         return;
       Object source=e.getSource();
       for (PowerBox box:boxList)
-         if (box.getButton().equals(source)) TasmoScanner.exec.submit(new SetPower(box));// automatic execute in threadpool
+         if (box.getButton().equals(source))
+            TasmoScanner.pool.submit(new SetPower(box));// automatic execute in threadpool
    }
    private class SetPower extends SwingWorker<String, PowerBox> {
       static final String ANTWORT="";
@@ -198,13 +206,16 @@ public class JPowerPane extends JPanel implements ActionListener {
       }
       @Override
       protected String doInBackground() throws Exception {
-         Tasmota tasm=getList().getSelectedValue();
-         if (tasm==null) return ANTWORT;
+         Tasmota tasm=getPowerJList().getSelectedValue();
+         if (tasm==null)
+            return ANTWORT;
          Thread.currentThread().setName(this.getClass().getSimpleName()+" "+tasm.ipPart);
-         if (box==null) return ANTWORT;
+         if (box==null)
+            return ANTWORT;
          try {
             String befehl="power"+Integer.toString(box.getNr()); // Abfrage
-            if (box.warAktiv) befehl+=" 2";// statt dessen toggle
+            if (box.warAktiv)
+               befehl+=" 2";// statt dessen toggle
             return tasm.requests(new String[] {befehl}).get(1);
          } catch (Exception e) {}
          return ANTWORT;
@@ -216,7 +227,8 @@ public class JPowerPane extends JPanel implements ActionListener {
             System.out.print(erg);
             if (erg instanceof JsonList) {
                JsonObject j1=((JsonList) erg).list.get(0);
-               if (j1 instanceof JsonString) box.setStatus(((JsonString) j1).value);
+               if (j1 instanceof JsonString)
+                  box.setStatus(((JsonString) j1).value);
             }
          } catch (InterruptedException|ExecutionException e) {}
       }

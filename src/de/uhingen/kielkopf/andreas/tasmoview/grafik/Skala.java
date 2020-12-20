@@ -22,7 +22,7 @@ public class Skala {
    static private int           MIDLETICK    =15;
    static private int           MAJORTICK    =20;
    // private static final long serialVersionUID=-1232799680846666655L;
-   public final TreeSet<Sensor> sensoren     =new TreeSet<Sensor>();
+   public final TreeSet<Sensor> graphSensoren=new TreeSet<Sensor>();
    private float                rulerpos     =0.5f;
    private Raster               raster       =null;
    // private Boolean vertical =true;
@@ -121,10 +121,10 @@ public class Skala {
    }
    /** berechne die Grenzwerte für min und max neu */
    public void recalculateGrenzwerte() {
-      if (sensoren.isEmpty()) return;
-      double min=sensoren.first().getMinWert();
-      double max=sensoren.first().getMaxWert();
-      for (Sensor sensor:sensoren) {
+      if (graphSensoren.isEmpty()) return;
+      double min=graphSensoren.first().getMinWert();
+      double max=graphSensoren.first().getMaxWert();
+      for (Sensor sensor:graphSensoren) {
          min=Math.min(min, sensor.getMinWert());
          max=Math.max(max, sensor.getMaxWert());
       }
@@ -156,7 +156,7 @@ public class Skala {
          g2d.drawString(entry.getValue(), start, f);
       }
       r=null;
-      for (Sensor sensor:sensoren)
+      for (Sensor sensor:graphSensoren)
          if (sensor.path.getCurrentPoint()!=null) {
             if (r==null)
                r=(Rectangle2D.Double) sensor.path.getBounds2D().clone();
@@ -172,7 +172,7 @@ public class Skala {
          at3.translate(-r.getX(), -r.getY());
          g2d.setStroke(STROKE_GRAPHS);
          g2d.setColor(color);
-         for (Sensor sensor:sensoren) {
+         for (Sensor sensor:graphSensoren) {
             Path2D.Double p=sensor.getPath();
             p.transform(at3);
             g2d.setColor(sensor.color);

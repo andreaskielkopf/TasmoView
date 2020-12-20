@@ -44,9 +44,9 @@ public class SensorPanel extends JPanel {
       add(getRefreshPanel(), BorderLayout.NORTH);
       add(Data.data.getSensorGraphPanel(), BorderLayout.CENTER);
       sensorscanner=new SensorScanner(getRefreshSpinner(), getLblLastRead());
-      TasmoScanner.exec.submit(sensorscanner);
+      TasmoScanner.pool.submit(sensorscanner);
       datalogger=new DataLogger(getSaveSpinner(), getLblLastSaved());
-      TasmoScanner.exec.submit(datalogger);
+      TasmoScanner.pool.submit(datalogger);
    }
    private JPanel getSensorSelectPanel() {
       if (selectionPanel==null) {
@@ -54,7 +54,7 @@ public class SensorPanel extends JPanel {
          selectionPanel.setName("selectionPanel");
          selectionPanel.setBorder(new TitledBorder(null, "Display", TitledBorder.LEADING, TitledBorder.TOP, null, null));
          selectionPanel.setLayout(new BorderLayout(0, 0));
-         selectionPanel.add(Data.data.getSensorList(), BorderLayout.CENTER);
+         selectionPanel.add(Data.data.getSensorJList(), BorderLayout.CENTER);
       }
       return selectionPanel;
    }

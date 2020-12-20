@@ -80,7 +80,7 @@ public class DataLogger extends SwingWorker<Boolean, LocalDateTime> {
       synchronized (singleton) {
          System.out.print("L");
          String date=df.format(LocalDateTime.now());
-         for (Sensor sensor:Data.data.sensoren) {
+         for (Sensor sensor:Data.data.gesamtSensoren) {
             try {
                if (sensor.saveWerte.isEmpty()) continue;
                if (sensor.pfad==null) {

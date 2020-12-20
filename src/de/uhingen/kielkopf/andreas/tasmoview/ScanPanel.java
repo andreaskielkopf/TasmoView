@@ -51,11 +51,13 @@ public class ScanPanel extends JPanel {
          try (final DatagramSocket socket=new DatagramSocket()) {
             socket.connect(InetAddress.getByName("8.8.8.1"), 10003);
             Data.data.myIp=socket.getLocalAddress();
-            if (Data.data.myIp!=null) ipLabel.setText("from "+Data.data.myIp.getHostAddress());
+            if (Data.data.myIp!=null)
+               ipLabel.setText("from "+Data.data.myIp.getHostAddress());
          } catch (SocketException|UnknownHostException e) {
             e.printStackTrace();
          }
-         if (Data.data.myIp==null) System.err.println("Die IP konnte nicht ermittelt werden");
+         if (Data.data.myIp==null)
+            System.err.println("Die IP konnte nicht ermittelt werden");
       }
       return ipLabel;
    }
@@ -117,7 +119,7 @@ public class ScanPanel extends JPanel {
    protected void scan(boolean rescan) {
       if ((tasmoScanner==null)||tasmoScanner.isDone()||tasmoScanner.isCancelled()) {
          tasmoScanner=new TasmoScanner(rescan, getProgressBar(), getScanButton(), getRefreshButton());
-         TasmoScanner.exec.submit(tasmoScanner);// automatic execute in threadpool
+         TasmoScanner.pool.submit(tasmoScanner);// automatic execute in threadpool
       }
    }
    /** Fortschrittsbalken für San und Refresh */

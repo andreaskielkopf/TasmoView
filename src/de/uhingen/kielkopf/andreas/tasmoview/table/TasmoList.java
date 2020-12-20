@@ -51,7 +51,7 @@ public class TasmoList extends JPanel {
    // "Home", "Health", "Firmware", "Wifi_", "MQTT", "Wifi", "PWM"};
    private JScrollPane       scrollPane;
    private JTable            table;
-   private JList<String>     tableauswahl;
+   private JList<String>     tableAuswahlJList;
    private JPanel            panel;
    private JButton           browserButton;
    private JPanel            panel_1;
@@ -95,19 +95,18 @@ public class TasmoList extends JPanel {
       return table;
    }
    public JList<String> getTableAuswahl() {
-      if (tableauswahl==null) {
-         tableauswahl=new JList<String>();
-         tableauswahl.setFixedCellWidth(120);
-         tableauswahl.setFixedCellHeight(25);
-         tableauswahl.setBorder(new TitledBorder(null, "Select Report", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-         tableauswahl.setSize(new Dimension(100, 20));
-         tableauswahl.setFont(new Font("Dialog", Font.BOLD, 15));
-         tableauswahl.setVisibleRowCount(3);
-         tableauswahl.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-         tableauswahl.setLayoutOrientation(JList.VERTICAL_WRAP);
-         tableauswahl.setModel(new DefaultListModel<String>());
-         tableauswahl.setSelectedIndex(0);
-         tableauswahl.addListSelectionListener(new ListSelectionListener() {
+      if (tableAuswahlJList==null) {
+         tableAuswahlJList=new JList<String>(new DefaultListModel<String>());
+         tableAuswahlJList.setFixedCellWidth(120);
+         tableAuswahlJList.setFixedCellHeight(25);
+         tableAuswahlJList.setBorder(new TitledBorder(null, "Select Report", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+         tableAuswahlJList.setSize(new Dimension(100, 20));
+         tableAuswahlJList.setFont(new Font("Dialog", Font.BOLD, 15));
+         tableAuswahlJList.setVisibleRowCount(3);
+         tableAuswahlJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+         tableAuswahlJList.setLayoutOrientation(JList.VERTICAL_WRAP);
+         tableAuswahlJList.setSelectedIndex(0);
+         tableAuswahlJList.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
                String key=getTableAuswahl().getSelectedValue();
                /// Es wurde eine andere Tabellenansicht gewählt. Übergeben wird die
@@ -115,7 +114,7 @@ public class TasmoList extends JPanel {
             }
          });
       }
-      return tableauswahl;
+      return tableAuswahlJList;
    }
    private JPanel getPanel() {
       if (panel==null) {

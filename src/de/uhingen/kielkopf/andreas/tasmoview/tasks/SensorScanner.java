@@ -62,14 +62,15 @@ public class SensorScanner extends SwingWorker<String, String> {
          for (Tasmota tasmota:Data.data.tasmotasMitSensoren) {
             ScanOf x=new ScanOf(tasmota);
             scans.add(x);
-            TasmoScanner.exec.submit(x);// automatic execute in threadpool
+            TasmoScanner.pool.submit(x);// automatic execute in threadpool
          }
          try {
             wartezeit=(int) sensorRefreshSpinner.getValue();
          } catch (Exception ignore1) {
             ignore1.printStackTrace();
          }
-         if (!TasmoView.keepRunning) return null;
+         if (!TasmoView.keepRunning)
+            return null;
          String text=" ";
          try {
             text+=tf.format(LocalDateTime.now());
@@ -84,7 +85,8 @@ public class SensorScanner extends SwingWorker<String, String> {
          HashSet<ScanOf> cleanup=new HashSet<SensorScanner.ScanOf>(scans);
          for (ScanOf s:cleanup) {
             try {
-               if (s.isDone()) scans.remove(s);
+               if (s.isDone())
+                  scans.remove(s);
             } catch (Exception e) {
                e.printStackTrace();
             }
@@ -108,16 +110,19 @@ public class SensorScanner extends SwingWorker<String, String> {
       @Override
       protected Tasmota doInBackground() throws Exception {
          Thread.currentThread().setName(this.getClass().getSimpleName()+" "+tasm.ipPart);
-         if (tasm==null) return null;
-         if (tasm.sensoren.isEmpty()) return null;
+         if (tasm==null)
+            return null;
+         if (tasm.lokaleSensoren.isEmpty())
+            return null;
          try {
             Instant      i  =Instant.now();
             List<String> sl =tasm.requests(new String[] {Sensor.STATUS_8});
             String       erg=sl.get(1);
             JsonObject   j0 =JsonObject.convertToJson(erg);
-            for (Sensor sensor:tasm.sensoren) {
+            for (Sensor sensor:tasm.lokaleSensoren) {
                JsonObject j1=j0.getJsonObject(sensor.kennung);
-               if (j1==null) continue;
+               if (j1==null)
+                  continue;
                // Instant i=Messwert.getInstant(j0.getJsonObject("Time"));
                sensor.addWert(i, j1);
                System.out.print(".");

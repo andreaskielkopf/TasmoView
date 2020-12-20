@@ -1,6 +1,5 @@
 - [ ] FIXME: Versatz zwischen Raster und Wertegraph
 - [ ] senkrechte Linien im Diagramm um den zeitlichen Verlauf einordnen zu können
-- [ ] speichern der MAC und IP der gefundenen Tasmotas ???
 - [ ] Jeder Sensor bekommt einen Spitznamen (speichern)
 - [ ] Die Farbe der Messskalen werden einstellbar
 - [ ] Die Farben der Sensoren werden einstellbar
@@ -24,7 +23,6 @@
 
 - [ ] FIXME: offset between grid and value graph
 - [ ] vertical lines in the diagram to be able to classify the course over time
-- [ ] save the MAC and IP of the Tasmotas found ???
 - [ ] Each sensor gets a nickname (save)
 - [ ] The color of the measuring scales can be set
 - [ ] The colors of the sensors are adjustable
@@ -44,6 +42,20 @@
 - [ ]
 - [ ]
 - [ ] ** Your suggestion can be inserted here as a pull request **
+
+# Version 0.5
+
+- [x] speichern IP der gefundenen Tasmotas und schnellsuche
+- [x] Reiter "Power" hinzugefügt
+- [x] Modultyp mit Namen in Tabelle anzeigen
+- [x] Timer1..4 in Tabelle anzeigen
+- [x] Rule1 in Tabelle anzeigen
+- [x] template in Tabelle anzeigen
+- [x] genutzte GPIOs in Tabelle anzeigen
+- [x] Tabellenspalten sortiert nach Überschrift
+- [x] "state" in Tabelle anzeigen
+- [x] update der Tabelle bei Refresh
+  
 
 ----
 # Version 0.4

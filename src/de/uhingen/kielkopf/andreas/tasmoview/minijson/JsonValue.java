@@ -18,9 +18,7 @@ public class JsonValue extends JsonObject {
       validate(value, s, this);
    }
    public final Double getDoubleValue() {
-      if (d==null) {
-         d=Double.valueOf(value);
-      }
+      if (d==null) d=((value==null)||value.equals("null")) ? 0d : Double.valueOf(value);
       return d;
    }
    @Override

@@ -23,7 +23,7 @@ import de.uhingen.kielkopf.andreas.tasmoview.table.TasmoList;
  * @author andreas T=Endergebniss, V=Zwischenergebnisse
  */
 public class TasmoScanner extends SwingWorker<String, String> {
-   public static final ExecutorService exec         =Executors.newWorkStealingPool(100);
+   public static final ExecutorService pool         =Executors.newWorkStealingPool();
    /** privates Segment mit 256 IPs */
    private static final int            MAXIMUM_IPS  =256;
    /** Zeitabstand beim Scan */
@@ -94,21 +94,24 @@ public class TasmoScanner extends SwingWorker<String, String> {
          Collections.reverse(searchlist);
          ArrayList<ScanFor> anfragen=new ArrayList<>();
          for (Integer j:searchlist) {
-            if (!TasmoView.keepRunning) return null;
+            if (!TasmoView.keepRunning)
+               return null;
             publish(Integer.toString(j));
             int offen=0;
             for (ScanFor scanFor:anfragen)
-               if (!scanFor.isDone()) offen++;
+               if (!scanFor.isDone())
+                  offen++;
             try {
                Thread.sleep(ABSTAND_IN_MS*offen);
             } catch (Exception ignore) {}
             ScanFor x=(new ScanFor(j));
-            TasmoScanner.exec.submit(x);
+            TasmoScanner.pool.submit(x);
             anfragen.add(x);// mit autostart
          }
          int runde=60;// Maximal eine Minute warten
          while (!anfragen.isEmpty()) {
-            if (--runde<1) break;
+            if (--runde<1)
+               break;
             System.out.println("");
             System.out.print("noch offen: ");
             ArrayList<ScanFor> cleanup=new ArrayList<>(anfragen);
@@ -130,7 +133,8 @@ public class TasmoScanner extends SwingWorker<String, String> {
    }
    @Override
    protected void process(List<String> chunks) {
-      if (progressBar.getMaximum()!=256) progressBar.setMaximum(256);
+      if (progressBar.getMaximum()!=256)
+         progressBar.setMaximum(256);
    }
    @Override
    protected void done() {
@@ -145,7 +149,8 @@ public class TasmoScanner extends SwingWorker<String, String> {
       refreshButton.setEnabled(true);
       saveTasmotaHint();
       TasmoList.recalculateColumnames();
-      if ((Data.data!=null)&&(Data.data.powerpane!=null)) Data.data.powerpane.recalculateListe();
+      if ((Data.data!=null)&&(Data.data.powerpane!=null))
+         Data.data.powerpane.recalculateListe();
    }
    private void saveTasmotaHint() {
       try {
@@ -169,7 +174,8 @@ public class TasmoScanner extends SwingWorker<String, String> {
          Data.data.dataModel.fireTableDataChanged();
          // Data.data.tasmolist.repaint(1000);
          // TasmoList.recalculateColumnames();
-         if ((Data.data!=null)&&(Data.data.powerpane!=null)) Data.data.powerpane.recalculateListe();
+         if ((Data.data!=null)&&(Data.data.powerpane!=null))
+            Data.data.powerpane.recalculateListe();
       }
       private final Integer j;
       public ScanFor(Integer j) {
@@ -198,7 +204,8 @@ public class TasmoScanner extends SwingWorker<String, String> {
       private final void scanFor(int i) {
          try {
             Tasmota tasmota=new Tasmota(i);
-            if (Data.data.tasmotas.contains(tasmota)) tasmota=Data.data.tasmotas.ceiling(tasmota);
+            if (Data.data.tasmotas.contains(tasmota))
+               tasmota=Data.data.tasmotas.ceiling(tasmota);
             List<String> erg=tasmota.requests(new String[] {Tasmota.SUCHANFRAGE});
             if (erg.size()>1) {// Es ist eine Antwort gekommen
                Data.data.tasmotas.add(tasmota);

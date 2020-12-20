@@ -48,18 +48,18 @@ public class SensorGraphPanel extends JPanel {
     */
    public void setSensors(Collection<Sensor> sl) {
       if ((sl==null)||sl.isEmpty())
-         this.sensorList.addAll(Data.data.sensoren);
+         this.sensorList.addAll(Data.data.gesamtSensoren);
       else {
          this.sensorList.retainAll(sl);
          this.sensorList.addAllAbsent(sl);
       }
       for (Skala skala:skalen.values()) {
-         skala.sensoren.clear();
+         skala.graphSensoren.clear();
          skala.show(false);
       }
       for (Sensor sensor:sensorList) {
          if (!skalen.containsKey(sensor.typ)) skalen.put(sensor.typ, new Skala(sensor.typ));
-         skalen.get(sensor.typ).sensoren.add(sensor);
+         skalen.get(sensor.typ).graphSensoren.add(sensor);
       }
       for (Skala skala:skalen.values())
          skala.recalculateGrenzwerte();

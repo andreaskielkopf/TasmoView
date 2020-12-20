@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.prefs.Preferences;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -43,7 +44,7 @@ public class Data {
                }
             });
    /** Liste der bisher gefundenen Sensoren */
-   public final ConcurrentSkipListSet<Sensor>                                sensoren           =new ConcurrentSkipListSet<>();
+   public final ConcurrentSkipListSet<Sensor>                                gesamtSensoren           =new ConcurrentSkipListSet<>();
    public final ConcurrentSkipListSet<String>                                sensorTypen        =new ConcurrentSkipListSet<>();
    public final ConcurrentSkipListSet<Tasmota>                               tasmotasMitSensoren=new ConcurrentSkipListSet<>();
    /** Die eigene IP dieses Rechners */
@@ -54,7 +55,7 @@ public class Data {
    public final ConcurrentSkipListMap<String, ConcurrentSkipListSet<String>> tableNames         =new ConcurrentSkipListMap<String, ConcurrentSkipListSet<String>>();
    /** Bitset mit den gefundenen tasmotas als Bit (nicht nochmal nach denen suchen) */
    public final BitSet                                                       found_tasmotas     =new BitSet(256);
-   private JList<Sensor>                                                     sensorList;
+   private JList<Sensor>                                                     sensorJList;
    private SensorGraphPanel                                                  sensorGraphPanel;
    // TODO lokal zwischenspeichern und holen
    static final String                                                       USER               ="user";
@@ -90,17 +91,17 @@ public class Data {
       if (scanPanel==null) scanPanel=new ScanPanel();
       return scanPanel;
    }
-   public JList<Sensor> getSensorList() {
-      if (sensorList==null) {
-         sensorList=new JList<Sensor>();
-         sensorList.addListSelectionListener(new ListSelectionListener() {
+   public JList<Sensor> getSensorJList() {
+      if (sensorJList==null) {
+         sensorJList=new JList<Sensor>(new DefaultListModel<Sensor>());
+         sensorJList.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
-               List<Sensor> sl=getSensorList().getSelectedValuesList();
+               List<Sensor> sl=getSensorJList().getSelectedValuesList();
                getSensorGraphPanel().setSensors(sl);
             }
          });
       }
-      return sensorList;
+      return sensorJList;
    }
    public SensorGraphPanel getSensorGraphPanel() {
       if (sensorGraphPanel==null) {
