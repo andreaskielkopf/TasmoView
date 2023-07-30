@@ -4,11 +4,6 @@ import java.util.regex.Matcher;
 
 public class JsonString extends JsonObject {
    public final String value;
-   public JsonString(String name, String value) {
-      super();
-      this.name=name;
-      this.value=value;
-   }
    public JsonString(String s) {
       Matcher m=namedStringP.matcher(s);
       if (m.matches()) {
@@ -21,10 +16,14 @@ public class JsonString extends JsonObject {
       }
       validate(value, s, this);
    }
+   public JsonString(String name1, String value1) {
+      name=name1;
+      value=value1;
+   }
    @Override
    public String toString() {
-      StringBuilder sb=new StringBuilder();
-      if ((name!=null)&&(!name.isEmpty())) {
+      final StringBuilder sb=new StringBuilder();
+      if ((name != null) && (!name.isEmpty())) {
          sb.append('"');
          sb.append(name);
          sb.append("\":");

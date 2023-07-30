@@ -16,11 +16,27 @@ public class Messwert implements Comparable<Messwert> {
       json=j;
       value=v;
    }
+   public static Instant getInstant(JsonObject jsonObject) {
+      if ((jsonObject instanceof JsonString js)) {
+         if (js.name.equals("Time"))
+            try {
+               return Instant.parse(js.value + "Z");
+            } catch (final Exception e) {
+               e.printStackTrace();
+            }
+      }
+      System.err.println("Unable to parse " + jsonObject + " : " + Instant.now());
+      return Instant.now();
+   }
    static public Messwert save2Messwert(String line) {
       return null;
    }
+   @Override
+   public int compareTo(Messwert o) {
+      return instant.compareTo(o.instant);
+   }
    public String save() {
-      StringBuilder sb=new StringBuilder();
+      final StringBuilder sb=new StringBuilder();
       // LocalDateTime ldt=LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
       // sb.append(dtf.format(ldt));
       sb.append(instant.truncatedTo(ChronoUnit.SECONDS));
@@ -28,21 +44,5 @@ public class Messwert implements Comparable<Messwert> {
       sb.append(value);
       System.out.println(sb.toString());
       return sb.toString();
-   }
-   @Override
-   public int compareTo(Messwert o) {
-      return this.instant.compareTo(o.instant);
-   }
-   public static Instant getInstant(JsonObject jsonObject) {
-      if ((jsonObject instanceof JsonString)) {
-         JsonString js=(JsonString) jsonObject;
-         if (js.name.equals("Time")) try {
-            return Instant.parse(js.value+"Z");
-         } catch (Exception e) {
-            e.printStackTrace();
-         }
-      }
-      System.err.println("Unable to parse "+jsonObject+" : "+Instant.now());
-      return Instant.now();
    }
 }

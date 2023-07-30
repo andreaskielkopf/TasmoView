@@ -1,12 +1,12 @@
 
 ##### [Englisch](./README.md)
 
-# TasmoView 0.4
-Da ich einige [Tasmota-Geräte](https://tasmota.github.io/docs/#/Home) benutze, musste ich oft nach der entsprechenden IP-Adressen in meinem Netzwerk suchen. Dann habe ich TasmoManager gefunden. Das funktionierte sehr gut, aber ich musste einen MQTT-Server einrichten und jedes Gerät für die Verwendung von mqtt konfigurieren ...
+# TasmoView 0.5
+Da ich selbst einige [Tasmota-Geräte](https://tasmota.github.io/docs/#/Home) benutze, musste ich oft nach der entsprechenden IP-Adressen in meinem Netzwerk suchen. Dann habe ich TasmoManager gefunden. Das funktionierte sehr gut, aber ich musste einen MQTT-Server einrichten und jedes Gerät für die Verwendung von mqtt konfigurieren ...
 
 Um es mir (und meiner Frau) einfacher zu machen, habe ich ein kleines Programm in meiner bevorzugten Programmiersprache java geschrieben. Dieses Programm sucht Tasmota Geräte im lokalen Netzwerk per HTTP. Dies kann eventuell auch für andere nützlich sein, so dass ich dieses kleine Programm hier veröffentliche.
 
-Das Programm ist bis heute nur in meinem lokalen Netzwerk und mit Linux (manjaro) als Betriebssystem getestet. Aber es sollte überall laufen wenn Sie zumindest **Java 8 installiert** haben. (Tester mit anderer Konfiguration sind willkommen)
+Das Programm ist bis heute nur in meinem lokalen Netzwerk und mit Linux (manjaro) als Betriebssystem getestet. Aber es sollte überall laufen wenn Sie **Java 18 installiert** haben. (Tester mit anderer Konfiguration sind willkommen)
 
 Das Programm wird als JAR-Datei mit enthaltenen Quelltexten zur Verfügung gestellt. Dies bedeutet, dass alle (!) Quelldateien in dieser einen Jar-Datei enthalten sind. Trotzdem ist die JAR-Datei direkt ausführbar. (**java -jar TasmoView.jar**)
 
@@ -22,17 +22,13 @@ Tasmota ist eine Open Source Firmware für ESP8266 Geräte
 Sie können testen, ob sie bereits eine passende Java-Version auf ihrem Computer installiert haben:
 > java --version
 
-> ergibt bei mir: openjdk 11.0.8 2020-07-14
+> ergibt bei mir: openjdk version "18" 2022-03-22
 
-Wenn die Antwort **größer als Java 8 (1.8)** ist können Sie den folgenden Abschnitt überspringen. Ansonsten müssen Sie zuerst eine aktuelle Version von Java installieren. Die Java-Version 8 ist ausreichend, aber sie können auch problemlos Java 11 oder Java 13 installieren.
+Wenn die Antwort **größer als Java 18 ** ist können Sie den folgenden Abschnitt überspringen. Ansonsten müssen Sie zuerst eine aktuelle Version von Java installieren. Die Java-Version 18 ist ausreichend, aber sie können auch problemlos Java 19 installieren.
 
-##### empfohlen: Java 8, 11 oder 13
+##### empfohlen: Java 18 oder 19
 * [OpenJDK](https://openjdk.java.net/install/,"https://openjdk.java.net/install/") https://openjdk.java.net/install/
-* [OpenJDK Java SE 13](https://jdk.java.net/13/) https://jdk.java.net/13/
-* [OpenJDK Java SE 11](https://jdk.java.net/archive/) https://jdk.java.net/archive/
-* [OpenJDK Java SE 8](https://jdk.java.net/java-se-ri/8-MR3,"https://jdk.java.net/java-se-ri/8-MR3") https://jdk.java.net/java-se-ri/8-MR3
-* [Oracle java SE 13](https://www.oracle.com/technetwork/java/javase/downloads/index.html) https://www.oracle.com/technetwork/java/javase/downloads/index.html
-* [Oracle Java SE8](https://www.java.com/de/download/,"https://www.java.com/de/download/") https://www.java.com/de/download/
+* [OpenJDK Java 18](https://jdk.java.net/18/) https://jdk.java.net/18/
 	
 ### Download:
 Laden Sie die Datei [TasmoView.jar](https://github.com/andreaskielkopf/TasmoView/blob/master/TasmoView.jar "Download des Programms TasmoView") auf ihren Computer

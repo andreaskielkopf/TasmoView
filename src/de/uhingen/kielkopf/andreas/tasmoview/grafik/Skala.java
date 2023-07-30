@@ -14,7 +14,8 @@ import java.util.TreeSet;
 import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
 
 public class Skala {
-   static private final Stroke  STROKE_DASHED=new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] {3, 7}, 0);
+   static private final Stroke  STROKE_DASHED=new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
+            new float[] {3, 7}, 0);
    static private final Stroke  STROKE_TICKS =new BasicStroke(1.6f);
    static private final Stroke  STROKE_LABELS=new BasicStroke(2f);
    static private final Stroke  STROKE_GRAPHS=new BasicStroke(2f);
@@ -22,7 +23,7 @@ public class Skala {
    static private int           MIDLETICK    =15;
    static private int           MAJORTICK    =20;
    // private static final long serialVersionUID=-1232799680846666655L;
-   public final TreeSet<Sensor> graphSensoren=new TreeSet<Sensor>();
+   public final TreeSet<Sensor> graphSensoren=new TreeSet<>();
    private float                rulerpos     =0.5f;
    private Raster               raster       =null;
    // private Boolean vertical =true;
@@ -33,7 +34,6 @@ public class Skala {
    Path2D.Double                pTicks       =new Path2D.Double();
    /* Das Raster als Pfad */
    Path2D.Double                pRaster      =new Path2D.Double();
-   private double               abstand;
    // private AffineTransform at1 =new AffineTransform();
    private AffineTransform      at2;
    Rectangle2D.Double           r            =null;
@@ -41,99 +41,67 @@ public class Skala {
    private AffineTransform      at3;
    private boolean              visible      =true;
    public Skala(String t) {
-      this.typ=t;
-      switch (t) {
-      case "Temperature":
+      typ=t;
+      color=switch (t) {
+      case "Temperature" -> {
          rulerpos=0.2f;
-         color=Color.RED;
-         break;
-      case "Humidity":
+         yield Color.RED;
+      }
+      case "Humidity" -> {
          rulerpos=0.7f;
-         color=Color.BLUE;
-         break;
-      default:
+         yield Color.BLUE;
+      }
+      default -> {
          rulerpos=0.4f;
-         color=Color.MAGENTA;
-         break;
+         yield Color.MAGENTA;
       }
-      // setOpaque(false);
-      // setBounds(new Rectangle(0, 0, 100, 500));
-      // setLayout(new BorderLayout(0, 0));
-   }
-   /** Wenn notwendig das Raster anpassen */
-   public void setRaster(double min, double max) {
-      if (raster==null) {
-         raster=new Raster(min, max);
-         calculateSkala();
-      }
-      // neu berechnen weil sich die werte stark geändert haben
-      if (raster.isRasterChanged(min, max)) calculateSkala();
-   }
-   // public void setVertical(boolean vertical) { this.vertical=vertical; }
-   public float getRulerpos() {
-      return rulerpos;
-   }
-   public void setRulerpos(float rulerpos) {
-      this.rulerpos=rulerpos;
-      calculateSkala();
-   }
-   public void setSize(int w, int h) {
-      if ((h==oldh)&&(w==oldw)) return;
-      oldh=h;
-      oldw=w;
-      calculateSkala();
+      };
    }
    /** berechne die Pfade für die Skala und das Raster neu */
    public void calculateSkala() {
-      if (raster==null) return;
-      abstand=raster.rmax-raster.rmin;
-      if (oldw==0) return;
-      if (oldh==0) return;
+      if (raster == null)
+         return;
+      double abstand=raster.rmax - raster.rmin;
+      if ((oldw == 0) || (oldh == 0))
+         return;
       synchronized (pTicks) {
          // System.out.println("recalculate "+typ+" "+raster.rmin+":"+raster.rmax);
          pTicks.reset();
          pRaster.reset();
-         float start=oldw*rulerpos;
+         final float start=oldw * rulerpos;
          // System.out.println("start:"+start);
-         for (Double mi:raster.getMinors()) {
+         for (final double mi:raster.getMinors()) {
             pTicks.moveTo(start, mi);
-            pTicks.lineTo(start+MINORTICK, mi);
+            pTicks.lineTo(start + MINORTICK, mi);
          }
-         for (Double mi:raster.getMidles()) {
+         for (final double mi:raster.getMidles()) {
             pTicks.moveTo(start, mi);
-            pTicks.lineTo(start+MIDLETICK, mi);
+            pTicks.lineTo(start + MIDLETICK, mi);
             // ra.moveTo(0, mi);
             // ra.lineTo(oldw, mi);
          }
-         for (Double mi:raster.getMajors()) {
+         for (final double mi:raster.getMajors()) {
             pTicks.moveTo(start, mi);
-            pTicks.lineTo(start+MAJORTICK, mi);
+            pTicks.lineTo(start + MAJORTICK, mi);
             pRaster.moveTo(0, mi);
             pRaster.lineTo(oldw, mi);
             // System.out.println(mi);
          }
-         double sy=(oldh-20d)/abstand;
+         final double sy=(oldh - 20d) / abstand;
          at2=AffineTransform.getScaleInstance(1, sy);
          at2.translate(0, -raster.rmin);
          pRaster.transform(at2);
          pTicks.transform(at2);
       }
    }
-   /** berechne die Grenzwerte für min und max neu */
-   public void recalculateGrenzwerte() {
-      if (graphSensoren.isEmpty()) return;
-      double min=graphSensoren.first().getMinWert();
-      double max=graphSensoren.first().getMaxWert();
-      for (Sensor sensor:graphSensoren) {
-         min=Math.min(min, sensor.getMinWert());
-         max=Math.max(max, sensor.getMaxWert());
-      }
-      if (raster==null) return;
-      if (raster.isRasterChanged(min, max)) calculateSkala();
+   // public void setVertical(boolean vertical) { this.vertical=vertical; }
+   public float getRulerpos() {
+      return rulerpos;
    }
    public void paintSkala(Graphics2D g2d) {
-      if (!visible) return;
-      AffineTransform tmp=g2d.getTransform();
+      if (!visible)
+         return;
+      final AffineTransform tmp=g2d.getTransform();
       // g2d.transform(at1);
       g2d.setColor(color.darker());
       g2d.setFont(new Font("Dialog", Font.PLAIN, 19));
@@ -141,39 +109,43 @@ public class Skala {
          // System.out.println(typ);
          // g2d.setStroke(new BasicStroke(1f));
          g2d.setStroke(STROKE_DASHED);
-         if (pRaster!=null) g2d.draw(pRaster);
+         if (pRaster != null)
+            g2d.draw(pRaster);
          g2d.setStroke(STROKE_TICKS);
-         if (pTicks!=null) g2d.draw(pTicks);
+         if (pTicks != null)
+            g2d.draw(pTicks);
       }
       // AffineTransform at3=at2.createInverse();
       // try { g2d.transform(at2.createInverse()); } catch (NoninvertibleTransformException e) { e.printStackTrace(); }
-      if (raster==null) return;
+      if (raster == null)
+         return;
       g2d.scale(1, -1);
-      float start=oldw*(rulerpos+0.025f);
+      final float start=oldw * (rulerpos + 0.025f);
       g2d.setStroke(STROKE_LABELS);
-      for (Entry<Double, String> entry:raster.getLabels().entrySet()) {
-         float f=(float) (double) ((20-oldh)*(entry.getKey()-raster.rmin)/(raster.rmax-raster.rmin));
+      for (final Entry<Double, String> entry:raster.getLabels().entrySet()) {
+         final float f=(float) (((20 - oldh) * (entry.getKey().doubleValue() - raster.rmin))
+                  / (raster.rmax - raster.rmin));
          g2d.drawString(entry.getValue(), start, f);
       }
       r=null;
-      for (Sensor sensor:graphSensoren)
-         if (sensor.path.getCurrentPoint()!=null) {
-            if (r==null)
+      for (final Sensor sensor:graphSensoren)
+         if (sensor.path.getCurrentPoint() != null) {
+            if (r == null)
                r=(Rectangle2D.Double) sensor.path.getBounds2D().clone();
             else
                r.add(sensor.path.getBounds2D());
          }
-      if (r!=null) {
+      if (r != null) {
          g2d.scale(1, -1);
-         r.setRect(r.getX(), r.getY()-0.5d, r.getWidth(), r.getHeight()+1d);
-         double sx=((oldw-20)/(r.getWidth()+0.1d));  // Sekunden
-         double sy=((oldh-20)/(r.getHeight()+0.1d)); // °C, %...
+         r.setRect(r.getX(), r.getY() - 0.5d, r.getWidth(), r.getHeight() + 1d);
+         final double sx=((oldw - 20) / (r.getWidth() + 0.1d));  // Sekunden
+         final double sy=((oldh - 20) / (r.getHeight() + 0.1d)); // °C, %...
          at3=AffineTransform.getScaleInstance(sx, sy);
          at3.translate(-r.getX(), -r.getY());
          g2d.setStroke(STROKE_GRAPHS);
          g2d.setColor(color);
-         for (Sensor sensor:graphSensoren) {
-            Path2D.Double p=sensor.getPath();
+         for (final Sensor sensor:graphSensoren) {
+            final Path2D.Double p=sensor.getPath();
             p.transform(at3);
             g2d.setColor(sensor.color);
             g2d.draw(p);
@@ -181,11 +153,47 @@ public class Skala {
       }
       g2d.setTransform(tmp);
    }
-   @Override
-   public String toString() {
-      return "Skala [typ="+typ+"]";
+   /** berechne die Grenzwerte für min und max neu */
+   public void recalculateGrenzwerte() {
+      if (graphSensoren.isEmpty())
+         return;
+      double min=graphSensoren.first().getMinWert();
+      double max=graphSensoren.first().getMaxWert();
+      for (final Sensor sensor:graphSensoren) {
+         min=Math.min(min, sensor.getMinWert());
+         max=Math.max(max, sensor.getMaxWert());
+      }
+      if (raster == null)
+         return;
+      if (raster.isRasterChanged(min, max))
+         calculateSkala();
+   }
+   /** Wenn notwendig das Raster anpassen */
+   public void setRaster(double min, double max) {
+      if (raster == null) {
+         raster=new Raster(min, max);
+         calculateSkala();
+      }
+      // neu berechnen weil sich die werte stark geändert haben
+      if (raster.isRasterChanged(min, max))
+         calculateSkala();
+   }
+   public void setRulerpos(float rulerpos1) {
+      rulerpos=rulerpos1;
+      calculateSkala();
+   }
+   public void setSize(int w, int h) {
+      if ((h == oldh) && (w == oldw))
+         return;
+      oldh=h;
+      oldw=w;
+      calculateSkala();
    }
    public void show(boolean b) {
       visible=b;
+   }
+   @Override
+   public String toString() {
+      return "Skala [typ=" + typ + "]";
    }
 }

@@ -7,6 +7,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 
 import de.uhingen.kielkopf.andreas.tasmoview.grafik.JPowerPane;
@@ -50,38 +52,41 @@ public class TasmoView {
     */
    private void initialize() {
       frame=new JFrame();
-      frame.setBounds(100, 100, 1200, 800);
-      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      frame.setBounds(2100, 100, 1200, 800);
+      frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
       frame.getContentPane().add(getLabelC(), BorderLayout.SOUTH);
       frame.getContentPane().add(getTabbedPane(), BorderLayout.CENTER);
    }
    private JLabel getLabelC() {
-      if (cLabel==null) {
-         cLabel=new JLabel("TasmoView 0.4  ©2020 by Andreas Kielkopf (All source is included in JAR-file)   https://github.com/andreaskielkopf/TasmoView ");
+      if (cLabel == null) {
+         cLabel=new JLabel(
+                  "TasmoView 0.4  ©2020 by Andreas Kielkopf (All source is included in JAR-file)   https://github.com/andreaskielkopf/TasmoView ");
       }
       return cLabel;
    }
    private JPanel getPanelTable() {
-      if (panelTable==null) {
+      if (panelTable == null) {
          panelTable=new JPanel();
-         panelTable.setBorder(new TitledBorder(null, "Found Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+         panelTable.setBorder(
+                  new TitledBorder(null, "Found Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
          panelTable.setLayout(new BorderLayout(0, 0));
          panelTable.add(Data.data.getTasmoList(), BorderLayout.CENTER);
       }
       return panelTable;
    }
    private JPanel getPanelScan() {
-      if (panelScan==null) {
+      if (panelScan == null) {
          panelScan=new JPanel();
-         panelScan.setBorder(new TitledBorder(null, "Scan for Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+         panelScan.setBorder(
+                  new TitledBorder(null, "Scan for Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
          panelScan.setLayout(new BorderLayout(0, 0));
          panelScan.add(Data.data.getScanPanel(), BorderLayout.NORTH);
       }
       return panelScan;
    }
    private JTabbedPane getTabbedPane() {
-      if (tabbedPane==null) {
-         tabbedPane=new JTabbedPane(JTabbedPane.BOTTOM);
+      if (tabbedPane == null) {
+         tabbedPane=new JTabbedPane(SwingConstants.BOTTOM);
          tabbedPane.addTab("Scan", null, getPanel(), null);
          tabbedPane.setEnabledAt(0, true);
          tabbedPane.addTab("Sensors", null, getPanel_1(), null);
@@ -94,7 +99,7 @@ public class TasmoView {
       return tabbedPane;
    }
    private JPanel getPanel() {
-      if (panel==null) {
+      if (panel == null) {
          panel=new JPanel();
          panel.setLayout(new BorderLayout(0, 0));
          panel.add(getPanelTable(), BorderLayout.CENTER);
@@ -103,7 +108,7 @@ public class TasmoView {
       return panel;
    }
    private JPanel getPanel_1() {
-      if (panel_1==null) {
+      if (panel_1 == null) {
          panel_1=new JPanel();
          panel_1.setLayout(new BorderLayout(0, 0));
          panel_1.add(getSensorPanel(), BorderLayout.CENTER);
@@ -111,7 +116,7 @@ public class TasmoView {
       return panel_1;
    }
    private JPanel getPanel_2() {
-      if (panel_2==null) {
+      if (panel_2 == null) {
          panel_2=new JPowerPane();
          Data.data.powerpane=panel_2;
          // panel_2.setLayout(new BorderLayout(0, 0));
@@ -119,14 +124,14 @@ public class TasmoView {
       return panel_2;
    }
    private JPanel getPanel_3() {
-      if (panel_3==null) {
+      if (panel_3 == null) {
          panel_3=new JPanel();
          panel_3.setLayout(new BorderLayout(0, 0));
       }
       return panel_3;
    }
    private SensorPanel getSensorPanel() {
-      if (sensorPanel==null) {
+      if (sensorPanel == null) {
          sensorPanel=new SensorPanel();
       }
       return sensorPanel;

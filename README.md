@@ -7,7 +7,7 @@ Since I use some [Tasmota devices](https://tasmota.github.io/docs/#/Home), I oft
 
 To make things easier for me (and my wife), I wrote a small program in my favorite programming language, java. This program searches for Tasmota devices in the local network via HTTP. This may also be useful for others, so I am going to publish this little program here.
 
-To date, the program has only been tested in my local network and with Linux (manjaro) as the operating system. But it should work anywhere if you have at least ** Java 8 installed **. (Testers with a different configuration are welcome)
+To date, the program has only been tested in my local network and with Linux (manjaro) as the operating system. But it should work anywhere if you have at least ** Java 18 installed **. (Testers with a different configuration are welcome)
 
 The program is made available as a JAR file with the sourcecode included. This means that all (!) Source files are contained in this one jar file. Nevertheless, the JAR file can be executed directly. (** java -jar TasmoView.jar **)
 
@@ -25,17 +25,13 @@ Tasmota is an open source firmware for ESP8266 devices
 You can test whether you have already installed a suitable Java version on your computer:
 > java --version
 
-> gives at my pc: openjdk 11.0.8 2020-07-14
+> gives at my pc: openjdk version "18" 2022-03-22
 
-If the answer is ** greater than Java 8 (1.8) ** you can skip the following section. Otherwise you have to install a current version of Java first. Java version 8 is sufficient, but you can also install Java 11 or Java 13 without any problems.
+If the answer is ** greater than Java 18 ** you can skip the following section. Otherwise you have to install a current version of Java first. Java version 18 is sufficient, but you can also install Java 19 without any problems.
 
-##### recommended: Java 8, 11 or 13
+##### recommended: Java 18 or 19
 * [OpenJDK](https://openjdk.java.net/install/,"https://openjdk.java.net/install/") https://openjdk.java.net/install/
-* [OpenJDK Java SE 13](https://jdk.java.net/13/) https://jdk.java.net/13/
-* [OpenJDK Java SE 11](https://jdk.java.net/archive/) https://jdk.java.net/archive/
-* [OpenJDK Java SE 8](https://jdk.java.net/java-se-ri/8-MR3,"https://jdk.java.net/java-se-ri/8-MR3") https://jdk.java.net/java-se-ri/8-MR3
-* [Oracle java SE 13](https://www.oracle.com/technetwork/java/javase/downloads/index.html) https://www.oracle.com/technetwork/java/javase/downloads/index.html
-* [Oracle Java SE8](https://www.java.com/de/download/,"https://www.java.com/de/download/") https://www.java.com/de/download/
+* [OpenJDK Java 18](https://jdk.java.net/18/) https://jdk.java.net/18/
 
 ### Download:
 Download the file [TasmoView.jar] (https://github.com/andreaskielkopf/TasmoView/blob/master/TasmoView.jar "Download of the TasmoView program") to your computer

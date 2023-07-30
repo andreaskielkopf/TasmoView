@@ -3,8 +3,6 @@ package de.uhingen.kielkopf.andreas.tasmoview.grafik;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -24,7 +22,7 @@ public class PowerBox extends JPanel {
     */
    public PowerBox() {
       setLayout(new BorderLayout());
-      JPanel panel=new JPanel();
+      final JPanel panel=new JPanel();
       panel.setBorder(new TitledBorder(null, "Box", TitledBorder.LEADING, TitledBorder.TOP, null, null));
       panel.setName("panel");
       add(panel, BorderLayout.CENTER);
@@ -35,49 +33,45 @@ public class PowerBox extends JPanel {
       panel.setPreferredSize(new Dimension(200, 250));
       setPreferredSize(new Dimension(200, 250));
    }
+   public JButton getButton() {
+      if (button == null) {
+         button=new JButton("An/Aus");
+         button.addActionListener(e -> warAktiv=true);
+         button.setFont(button.getFont().deriveFont(button.getFont().getStyle() & ~Font.BOLD, 40f));
+         button.setName("btnAnaus");
+      }
+      return button;
+   }
    private JLabel getLabel() {
-      if (label==null) {
+      if (label == null) {
          label=new JLabel("Schalter 1");
          label.setHorizontalAlignment(SwingConstants.CENTER);
-         label.setFont(label.getFont().deriveFont(label.getFont().getStyle()&~Font.BOLD, 30f));
+         label.setFont(label.getFont().deriveFont(label.getFont().getStyle() & ~Font.BOLD, 30f));
          label.setName("lblS");
       }
       return label;
    }
    private JLabel getLabel_1() {
-      if (label_1==null) {
+      if (label_1 == null) {
          label_1=new JLabel("ON");
          label_1.setHorizontalAlignment(SwingConstants.CENTER);
-         label_1.setFont(label_1.getFont().deriveFont(label_1.getFont().getStyle()|Font.BOLD, 50f));
+         label_1.setFont(label_1.getFont().deriveFont(label_1.getFont().getStyle() | Font.BOLD, 50f));
          label_1.setName("lblOn");
       }
       return label_1;
    }
-   public JButton getButton() {
-      if (button==null) {
-         button=new JButton("An/Aus");
-         button.addActionListener(new ActionListener() {
-            public void actionPerformed(final ActionEvent e) {
-               warAktiv=true;
-            }
-         });
-         button.setFont(button.getFont().deriveFont(button.getFont().getStyle()&~Font.BOLD, 40f));
-         button.setName("btnAnaus");
-      }
-      return button;
-   }
-   public void setNr(int boxNr) {
-      nr=boxNr;
-   }
    public int getNr() {
       return nr;
-   }
-   public void setStatus(String status) {
-      getLabel_1().setText(status);
    }
    @Override
    public void setName(String name) {
       getLabel().setText(name);
       super.setName(name);
+   }
+   public void setNr(int boxNr) {
+      nr=boxNr;
+   }
+   public void setStatus(String status) {
+      getLabel_1().setText(status);
    }
 }

@@ -18,18 +18,20 @@ public class JsonValue extends JsonObject {
       validate(value, s, this);
    }
    public final Double getDoubleValue() {
-      if (d==null) d=((value==null)||value.equals("null")) ? 0d : Double.valueOf(value);
+      if (d == null)
+         d=((value == null) || value.isBlank() || value.equals("null")) ? Double.valueOf(0d) : Double.valueOf(value);
       return d;
    }
    @Override
    public String toString() {
-      StringBuilder sb=new StringBuilder();
-      if (name!=null&&!name.isEmpty()) {
+      final StringBuilder sb=new StringBuilder();
+      if ((name != null) && !name.isEmpty()) {
          sb.append('"');
          sb.append(name);
          sb.append("\":");
       }
-      if (value!=null) sb.append(value);
+      if (value != null)
+         sb.append(value);
       return sb.toString();
    }
 }

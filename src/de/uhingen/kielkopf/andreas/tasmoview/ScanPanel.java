@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -44,87 +42,53 @@ public class ScanPanel extends JPanel {
       add(getProgressBar(), BorderLayout.CENTER);
       add(getScanPanel(), BorderLayout.NORTH);
    }
+   private JButton getBtnStorePWD() {
+      if (btnStorePWD == null) {
+         btnStorePWD=new JButton("store User and Password");
+         btnStorePWD.addActionListener(e -> {
+            try {
+               Data.data.prefs.put(Data.USER, Data.data.getUserField().getText());
+               /**
+                * Das ist nicht 100% sicher weil der String im Speicher bleibt bis das Programm endet. Aber da das
+                * Passwort sowieso unverschlßsselt in den Preferences landet ist das nicht schlimm. Das Passwort kann
+                * eh auch aus den HTML-Anfragen extrahiert werden
+                */
+               Data.data.prefs.put(Data.PASSWORD, new String(Data.data.getPasswordField().getPassword()));
+               Data.data.prefs.flush();
+               System.out.println("Username and Password stored");
+            } catch (final BackingStoreException e1) {
+               e1.printStackTrace();
+            }
+         });
+      }
+      return btnStorePWD;
+   }
    /** Ermittle die lokale IP und trage sie zum Nutzen für alle ein */
    private JLabel getIPLabel() {
-      if (ipLabel==null) {
+      if (ipLabel == null) {
          ipLabel=new JLabel();
          try (final DatagramSocket socket=new DatagramSocket()) {
             socket.connect(InetAddress.getByName("8.8.8.1"), 10003);
             Data.data.myIp=socket.getLocalAddress();
-            if (Data.data.myIp!=null)
-               ipLabel.setText("from "+Data.data.myIp.getHostAddress());
-         } catch (SocketException|UnknownHostException e) {
+            if (Data.data.myIp != null)
+               ipLabel.setText("from " + Data.data.myIp.getHostAddress());
+         } catch (SocketException | UnknownHostException e) {
             e.printStackTrace();
          }
-         if (Data.data.myIp==null)
+         if (Data.data.myIp == null)
             System.err.println("Die IP konnte nicht ermittelt werden");
       }
       return ipLabel;
    }
-   /** Knopf um den Scan einzuleiten oder ihn abzubrechen */
-   public JToggleButton getScanButton() {
-      if (scanButton==null) {
-         scanButton=new JToggleButton("Scan");
-         scanButton.setToolTipText("Scan for new Devices");
-         scanButton.setIcon(new ImageIcon(ScanPanel.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/edit-find.png")));
-         scanButton.setSelectedIcon(new ImageIcon(ScanPanel.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/process-stop.png")));
-         scanButton.setPreferredSize(new Dimension(120, 40));
-         scanButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-         scanButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               Data.data.getTasmoList().getBrowserButton().setEnabled(false);
-               JToggleButton btn=(JToggleButton) e.getSource();
-               getRefreshButton().setEnabled(!btn.isSelected());
-               if ((tasmoScanner==null)||tasmoScanner.isDone()||tasmoScanner.isCancelled()) {
-                  scan(false);
-                  btn.setSelected(true);
-               } else {
-                  tasmoScanner.cancel(true);
-                  btn.setSelected(false);
-               }
-            }
-         });
+   private JLabel getPasswordLabel() {
+      if (passwordLabel == null) {
+         passwordLabel=new JLabel("HTML-password");
       }
-      return scanButton;
-   }
-   /** Knopf um einen Refresh einzuleiten oder abzubrechen */
-   private JToggleButton getRefreshButton() {
-      if (refreshButton==null) {
-         refreshButton=new JToggleButton("Refresh");
-         refreshButton.setToolTipText("Refresh Data on already found Devices");
-         refreshButton.setSelectedIcon(new ImageIcon(ScanPanel.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/process-stop.png")));
-         refreshButton.setIcon(new ImageIcon(ScanPanel.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/edit-find.png")));
-         refreshButton.setPreferredSize(new Dimension(140, 40));
-         refreshButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-         refreshButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               Data.data.getTasmoList().getBrowserButton().setEnabled(false);
-               JToggleButton btn=(JToggleButton) e.getSource();
-               getScanButton().setEnabled(!btn.isSelected());
-               if ((tasmoScanner==null)||tasmoScanner.isDone()||tasmoScanner.isCancelled()) {
-                  scan(true);
-                  btn.setSelected(true);
-               } else {
-                  tasmoScanner.cancel(true);
-                  btn.setSelected(false);
-               }
-            }
-         });
-      }
-      return refreshButton;
-   }
-   /**
-    * Der eigentliche SCAn lauft in einem extra thread
-    */
-   protected void scan(boolean rescan) {
-      if ((tasmoScanner==null)||tasmoScanner.isDone()||tasmoScanner.isCancelled()) {
-         tasmoScanner=new TasmoScanner(rescan, getProgressBar(), getScanButton(), getRefreshButton());
-         TasmoScanner.pool.submit(tasmoScanner);// automatic execute in threadpool
-      }
+      return passwordLabel;
    }
    /** Fortschrittsbalken für San und Refresh */
    private JProgressBar getProgressBar() {
-      if (progressBar==null) {
+      if (progressBar == null) {
          progressBar=new JProgressBar();
          progressBar.setEnabled(false);
          progressBar.setMaximum(255);
@@ -132,10 +96,62 @@ public class ScanPanel extends JPanel {
       }
       return progressBar;
    }
+   /** Knopf um einen Refresh einzuleiten oder abzubrechen */
+   private JToggleButton getRefreshButton() {
+      if (refreshButton == null) {
+         refreshButton=new JToggleButton("Refresh");
+         refreshButton.setToolTipText("Refresh Data on already found Devices");
+         refreshButton.setSelectedIcon(new ImageIcon(
+                  ScanPanel.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/process-stop.png")));
+         refreshButton.setIcon(
+                  new ImageIcon(ScanPanel.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/edit-find.png")));
+         refreshButton.setPreferredSize(new Dimension(140, 40));
+         refreshButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+         refreshButton.addActionListener(e -> {
+            Data.data.getTasmoList().getBrowserButton().setEnabled(false);
+            final JToggleButton btn=(JToggleButton) e.getSource();
+            getScanButton().setEnabled(!btn.isSelected());
+            if ((tasmoScanner == null) || tasmoScanner.isDone() || tasmoScanner.isCancelled()) {
+               scan(true);
+               btn.setSelected(true);
+            } else {
+               tasmoScanner.cancel(true);
+               btn.setSelected(false);
+            }
+         });
+      }
+      return refreshButton;
+   }
+   /** Knopf um den Scan einzuleiten oder ihn abzubrechen */
+   public JToggleButton getScanButton() {
+      if (scanButton == null) {
+         scanButton=new JToggleButton("Scan");
+         scanButton.setToolTipText("Scan for new Devices");
+         scanButton.setIcon(
+                  new ImageIcon(ScanPanel.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/edit-find.png")));
+         scanButton.setSelectedIcon(new ImageIcon(
+                  ScanPanel.class.getResource("/de/uhingen/kielkopf/andreas/tasmoview/process-stop.png")));
+         scanButton.setPreferredSize(new Dimension(120, 40));
+         scanButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+         scanButton.addActionListener(e -> {
+            Data.data.getTasmoList().getBrowserButton().setEnabled(false);
+            final JToggleButton btn=(JToggleButton) e.getSource();
+            getRefreshButton().setEnabled(!btn.isSelected());
+            if ((tasmoScanner == null) || tasmoScanner.isDone() || tasmoScanner.isCancelled()) {
+               scan(false);
+               btn.setSelected(true);
+            } else {
+               tasmoScanner.cancel(true);
+               btn.setSelected(false);
+            }
+         });
+      }
+      return scanButton;
+   }
    private JPanel getScanPanel() {
-      if (scanPanel==null) {
+      if (scanPanel == null) {
          scanPanel=new JPanel();
-         FlowLayout fl_scanPanel=new FlowLayout(FlowLayout.LEFT, 5, 5);
+         final FlowLayout fl_scanPanel=new FlowLayout(FlowLayout.LEFT, 5, 5);
          scanPanel.add(getIPLabel());
          scanPanel.setLayout(fl_scanPanel);
          scanPanel.add(getScanButton());
@@ -149,37 +165,18 @@ public class ScanPanel extends JPanel {
       return scanPanel;
    }
    private JLabel getUserLabel() {
-      if (userLabel==null) {
+      if (userLabel == null) {
          userLabel=new JLabel("HTML-user");
       }
       return userLabel;
    }
-   private JLabel getPasswordLabel() {
-      if (passwordLabel==null) {
-         passwordLabel=new JLabel("HTML-password");
+   /**
+    * Der eigentliche SCAn lauft in einem extra thread
+    */
+   protected void scan(boolean rescan) {
+      if ((tasmoScanner == null) || tasmoScanner.isDone() || tasmoScanner.isCancelled()) {
+         tasmoScanner=new TasmoScanner(rescan, getProgressBar(), getScanButton(), getRefreshButton());
+         TasmoScanner.pool.submit(tasmoScanner);// automatic execute in threadpool
       }
-      return passwordLabel;
-   }
-   private JButton getBtnStorePWD() {
-      if (btnStorePWD==null) {
-         btnStorePWD=new JButton("store User and Password");
-         btnStorePWD.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               try {
-                  Data.data.prefs.put(Data.USER, Data.data.getUserField().getText());
-                  /**
-                   * Das ist nicht 100% sicher weil der String im Speicher bleibt bis das Programm endet. Aber da das Passwort sowieso unverschlßsselt in den
-                   * Preferences landet ist das nicht schlimm. Das Passwort kann eh auch aus den HTML-Anfragen extrahiert werden
-                   */
-                  Data.data.prefs.put(Data.PASSWORD, new String(Data.data.getPasswordField().getPassword()));
-                  Data.data.prefs.flush();
-                  System.out.println("Username and Password stored");
-               } catch (BackingStoreException e1) {
-                  e1.printStackTrace();
-               }
-            }
-         });
-      }
-      return btnStorePWD;
    }
 }
