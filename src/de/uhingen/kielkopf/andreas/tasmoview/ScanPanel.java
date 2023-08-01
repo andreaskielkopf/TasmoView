@@ -1,21 +1,10 @@
 package de.uhingen.kielkopf.andreas.tasmoview;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.awt.*;
+import java.net.*;
 import java.util.prefs.BackingStoreException;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JToggleButton;
+import javax.swing.*;
 
 import de.uhingen.kielkopf.andreas.tasmoview.tasks.TasmoScanner;
 
@@ -47,14 +36,14 @@ public class ScanPanel extends JPanel {
          btnStorePWD=new JButton("store User and Password");
          btnStorePWD.addActionListener(e -> {
             try {
-               Data.data.prefs.put(Data.USER, Data.data.getUserField().getText());
+               Data.getData().prefs.put(Data.USER, Data.getData().getUserField().getText());
                /**
                 * Das ist nicht 100% sicher weil der String im Speicher bleibt bis das Programm endet. Aber da das
-                * Passwort sowieso unverschlßsselt in den Preferences landet ist das nicht schlimm. Das Passwort kann
-                * eh auch aus den HTML-Anfragen extrahiert werden
+                * Passwort sowieso unverschlßsselt in den Preferences landet ist das nicht schlimm. Das Passwort kann eh
+                * auch aus den HTML-Anfragen extrahiert werden
                 */
-               Data.data.prefs.put(Data.PASSWORD, new String(Data.data.getPasswordField().getPassword()));
-               Data.data.prefs.flush();
+               Data.getData().prefs.put(Data.PASSWORD, new String(Data.getData().getPasswordField().getPassword()));
+               Data.getData().prefs.flush();
                System.out.println("Username and Password stored");
             } catch (final BackingStoreException e1) {
                e1.printStackTrace();
@@ -69,13 +58,13 @@ public class ScanPanel extends JPanel {
          ipLabel=new JLabel();
          try (final DatagramSocket socket=new DatagramSocket()) {
             socket.connect(InetAddress.getByName("8.8.8.1"), 10003);
-            Data.data.myIp=socket.getLocalAddress();
-            if (Data.data.myIp != null)
-               ipLabel.setText("from " + Data.data.myIp.getHostAddress());
+            Data.getData().myIp=socket.getLocalAddress();
+            if (Data.getData().myIp != null)
+               ipLabel.setText("from " + Data.getData().myIp.getHostAddress());
          } catch (SocketException | UnknownHostException e) {
             e.printStackTrace();
          }
-         if (Data.data.myIp == null)
+         if (Data.getData().myIp == null)
             System.err.println("Die IP konnte nicht ermittelt werden");
       }
       return ipLabel;
@@ -108,16 +97,16 @@ public class ScanPanel extends JPanel {
          refreshButton.setPreferredSize(new Dimension(140, 40));
          refreshButton.setAlignmentX(Component.CENTER_ALIGNMENT);
          refreshButton.addActionListener(e -> {
-            Data.data.getTasmoList().getBrowserButton().setEnabled(false);
-            final JToggleButton btn=(JToggleButton) e.getSource();
-            getScanButton().setEnabled(!btn.isSelected());
-            if ((tasmoScanner == null) || tasmoScanner.isDone() || tasmoScanner.isCancelled()) {
-               scan(true);
-               btn.setSelected(true);
-            } else {
-               tasmoScanner.cancel(true);
-               btn.setSelected(false);
-            }
+            Data.getData().getTasmoList().getBrowserButton().setEnabled(false);
+            // final JToggleButton btn=(JToggleButton) e.getSource();
+            getScanButton().setEnabled(!refreshButton.isSelected());
+            // if ((tasmoScanner == null) || tasmoScanner.isDone() || tasmoScanner.isCancelled()) {
+            scan(true);
+            refreshButton.setSelected(true);
+            // } else {
+            // tasmoScanner.cancel(true);
+            // refreshButtonbtn.setSelected(false);
+            // }
          });
       }
       return refreshButton;
@@ -134,16 +123,16 @@ public class ScanPanel extends JPanel {
          scanButton.setPreferredSize(new Dimension(120, 40));
          scanButton.setAlignmentX(Component.CENTER_ALIGNMENT);
          scanButton.addActionListener(e -> {
-            Data.data.getTasmoList().getBrowserButton().setEnabled(false);
-            final JToggleButton btn=(JToggleButton) e.getSource();
-            getRefreshButton().setEnabled(!btn.isSelected());
-            if ((tasmoScanner == null) || tasmoScanner.isDone() || tasmoScanner.isCancelled()) {
-               scan(false);
-               btn.setSelected(true);
-            } else {
-               tasmoScanner.cancel(true);
-               btn.setSelected(false);
-            }
+            Data.getData().getTasmoList().getBrowserButton().setEnabled(false);
+            // final JToggleButton btn=(JToggleButton) e.getSource();
+            getRefreshButton().setEnabled(!scanButton.isSelected());
+            // if (tasmoScanner == null) || tasmoScanner.isDone() || tasmoScanner.isCancelled()) {
+            scan(false);
+            scanButton.setSelected(true);
+            // } else {
+            // tasmoScanner.cancel(true);
+            // btn.setSelected(false);
+            // }
          });
       }
       return scanButton;
@@ -157,9 +146,9 @@ public class ScanPanel extends JPanel {
          scanPanel.add(getScanButton());
          scanPanel.add(getRefreshButton());
          scanPanel.add(getUserLabel());
-         scanPanel.add(Data.data.getUserField());
+         scanPanel.add(Data.getData().getUserField());
          scanPanel.add(getPasswordLabel());
-         scanPanel.add(Data.data.getPasswordField());
+         scanPanel.add(Data.getData().getPasswordField());
          scanPanel.add(getBtnStorePWD());
       }
       return scanPanel;
@@ -174,9 +163,6 @@ public class ScanPanel extends JPanel {
     * Der eigentliche SCAn lauft in einem extra thread
     */
    protected void scan(boolean rescan) {
-      if ((tasmoScanner == null) || tasmoScanner.isDone() || tasmoScanner.isCancelled()) {
-         tasmoScanner=new TasmoScanner(rescan, getProgressBar(), getScanButton(), getRefreshButton());
-         TasmoScanner.pool.submit(tasmoScanner);// automatic execute in threadpool
-      }
+      tasmoScanner=TasmoScanner.getTasmoScanner(rescan, getProgressBar(), getScanButton(), getRefreshButton());
    }
 }

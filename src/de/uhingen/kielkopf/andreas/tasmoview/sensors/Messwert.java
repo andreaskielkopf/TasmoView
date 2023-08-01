@@ -3,8 +3,8 @@ package de.uhingen.kielkopf.andreas.tasmoview.sensors;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonString;
+import de.uhingen.kielkopf.andreas.beans.minijson.JsonObject;
+import de.uhingen.kielkopf.andreas.beans.minijson.JsonString;
 
 public class Messwert implements Comparable<Messwert> {
    public final Instant    instant;

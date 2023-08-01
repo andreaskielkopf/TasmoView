@@ -4,15 +4,10 @@ import java.awt.BorderLayout;
 import java.net.InetAddress;
 import java.util.BitSet;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.*;
 import java.util.prefs.Preferences;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import de.uhingen.kielkopf.andreas.tasmoview.grafik.JPowerPane;
 import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
@@ -23,7 +18,7 @@ import de.uhingen.kielkopf.andreas.tasmoview.table.TasmoTableModell;
 /** Singleton um die Daten des Programms zentral zu halten */
 public class Data {
    /** Singleton */
-   public static final Data                                                  data               =new Data();
+   static private Data                                                       me;
    // TODO lokal zwischenspeichern und holen
    static final String                                                       USER               ="user";
    static final String                                                       PASSWORD           ="password";
@@ -34,7 +29,7 @@ public class Data {
    private ScanPanel                                                         scanPanel;
    public TasmoList                                                          tasmolist;
    /** Liste der gefundenen Tasmotas mit ihren Daten */
-   public final ConcurrentSkipListSet<Tasmota>                               tasmotas           =new ConcurrentSkipListSet<>();
+   public final ConcurrentSkipListMap<Integer, Tasmota>                      tasmotasD          =new ConcurrentSkipListMap<>();
    /** Liste der gerade noch laufenden Anfragen */
    public final ConcurrentSkipListSet<CompletableFuture<String>>             anfragen           =                              //
             new ConcurrentSkipListSet<>((o1, o2) -> Integer.compare(hashCode(), o1.hashCode()));
@@ -55,6 +50,11 @@ public class Data {
    public final Preferences                                                  prefs              =Preferences
             .userNodeForPackage(TasmoView.class);
    public JPowerPane                                                         powerpane;
+   public static Data getData() {
+      if (me == null)
+         me=new Data();
+      return me;
+   }
    /** Im Konstruktor werden Die festgelegte Tabellen mit ihren Überschriften definiert und eingetragen */
    private Data() {
       // TasmoList.recalculateColumnames();

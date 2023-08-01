@@ -1,18 +1,13 @@
 package de.uhingen.kielkopf.andreas.tasmoview;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.io.*;
+import java.net.*;
+import java.net.http.*;
+import java.net.http.HttpRequest.Builder;
+import java.net.http.HttpResponse.BodyHandlers;
+import java.time.Duration;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.regex.Matcher;
@@ -20,126 +15,136 @@ import java.util.regex.Pattern;
 
 import javax.swing.DefaultListModel;
 
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonContainer;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonString;
+import de.uhingen.kielkopf.andreas.beans.RecordParser;
+import de.uhingen.kielkopf.andreas.beans.minijson.*;
 import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
 
 /**
  * Repräsentation eines kompletten Geräts mit Tasmota Firmware
  */
 public class Tasmota implements Comparable<Tasmota> {
+   static private ConcurrentSkipListMap<Integer, Tasmota> unsicher       =new ConcurrentSkipListMap<>();
    // private static long CONNECT_TIMEOUT=60000L;
    // private IoSession session;
    /** IP-Nummer des Gerätes im lokalen Netzwerk (nur letzter Teil) */
-   public final int                           ipPart;
-   /** Text der kompletten IP des Gerätes */
-   public /* final */ String                  hostaddress;
+   public final Integer                                   ipPart;
+   /** IP des Gerätes */
+   public InetAddress                                     hostaddress;
    /** Name des Gerätes nachdem es erkannt wurde (DeviceName oder anderer passender Text z.B. FriendlyName) */
-   public String                              deviceName;
-   public String                              moduleTyp;
-   private static final String[]              NAMENSSUCHE    = {"DeviceName", "FriendlyName", "Hostname", "Topic",
-            "IPAddress", "Mac",};
-   private JsonObject                         warning;
+   public String                                          deviceName;
+   public String                                          moduleTyp;
+   private static final String[]                          NAMENSSUCHE    = {"DeviceName", "FriendlyName", "Hostname",
+            "Topic", "IPAddress", "Mac",};
+   private JsonObject                                     warning;
    /** Liste aller Sensoren dieses Geräts */
-   public final ConcurrentSkipListSet<Sensor> lokaleSensoren =new ConcurrentSkipListSet<>();
+   public final ConcurrentSkipListSet<Sensor>             lokaleSensoren =new ConcurrentSkipListSet<>();
    /**
     * verarbeitete Anfragen werden hier eingelagert (Anfragetext,Antwort als JSON) neuere Anfragen ersetzen jeweils alte
     * Anfragen
     */
-   public final SortedMap<String, JsonObject> jsontree       =new ConcurrentSkipListMap<>();
+   public final SortedMap<String, JsonObject>             jsontree       =new ConcurrentSkipListMap<>();
+   private final Builder                                  requestBuilder;
+   private final HttpClient                               client;
+   // private boolean exists =false;
+   // static public final ConcurrentSkipListMap<Integer, Tasmota> tasmotas=new ConcurrentSkipListMap<>();
    /** Alle Statusdaten auf einmal anfragen */
-   public static final String                 SUCHANFRAGE    ="status 0";
-   public static final String                 CMD_PREFIX     ="cmnd=";
-   public static final String                 USER_PREFIX    ="user=";
-   public static final String                 PASSWORD_PREFIX="password=";
-   public static final String                 UND            ="&";
-   public static final String[]               ZUSATZ_FRAGEN  = {"module", "Gpio", "state", "template", "rule1",
-            "Timer1", "timer2", "timer3", "timer4"};
+   public static final String                             SUCHANFRAGE    ="status 0";
+   public static final String                             CMD_PREFIX     ="cmnd=";
+   public static final String                             USER_PREFIX    ="user=";
+   public static final String                             PASSWORD_PREFIX="password=";
+   public static final String                             UND            ="&";
+   public static final String[]                           ZUSATZ_FRAGEN  = {"module", "Gpio", "state", "template",
+            "rule1", "Timer1", "timer2", "timer3", "timer4"};
    /** Warnungen erkennen */
-   private static final String                WARNING        ="WARNING";
-   private static final String                SENSOREN       ="StatusSNS";
+   private static final String                            WARNING        ="WARNING";
+   private static final String                            SENSOREN       ="StatusSNS";
+   private static final String                            HTTP           ="http";
    /**
     * Lege ein Tasmota-Objekt probeweise an und fange an zu testen ob es antwortet
     * 
-    * @throws IOException
+    * @throws UnknownHostException
+    * @throws URISyntaxException
     */
-   public Tasmota(int i) {
+   public Tasmota(Integer i) throws UnknownHostException, URISyntaxException {
       ipPart=i;
-      byte[] nextIp=Data.data.myIp.getAddress();
-      nextIp[3]=(byte) i;
-      try {
-         hostaddress=InetAddress.getByAddress(nextIp).getHostAddress();
-      } catch (IOException e) {}
+      byte[] nextIp=Data.getData().myIp.getAddress();
+      nextIp[3]=ipPart.byteValue();
+      hostaddress=InetAddress.getByAddress(nextIp);// .getHostAddress();
+      client=HttpClient.newHttpClient();
+      requestBuilder=HttpRequest.newBuilder().timeout(Duration.ofSeconds(5)).GET();
    }
    /**
     * fordere eine bestimmte Übertragung an und gibt die Antwort(en) in einer Liste zurück sobald sie da ist
     * 
     * @return Stringliste mit Frage und Antwort oder nur der Frage
     */
-   public final List<String> requests(final String[] anfragen) {
-      ArrayList<String> sl=new ArrayList<String>();
+   public final List<HttpResponse<String>> requests(final String[] anfragen) {
+      ArrayList<HttpResponse<String>> sl=new ArrayList<>();
       for (String anfrage:anfragen) {
-         final StringBuilder sb=new StringBuilder();
          // Benutzername und Passwort einbinden
          /// http://192.168.178.181/cm?user=andreas&password=akf4sonoff&cmnd=status%200#
-         sb.append(USER_PREFIX);
-         sb.append(Data.data.getUserField().getText());
-         sb.append(UND);
-         sb.append(PASSWORD_PREFIX);
-         sb.append(Data.data.getPasswordField().getPassword());
-         sb.append(UND);
-         sb.append(CMD_PREFIX);
-         sb.append(anfrage); // Anfrage einbinden
-         sl.add(UND + anfrage);
+         StringBuilder sb=new StringBuilder(USER_PREFIX).append(Data.getData().getUserField().getText());
+         sb.append(UND).append(PASSWORD_PREFIX).append(Data.getData().getPasswordField().getPassword());
+         sb.append(UND).append(CMD_PREFIX).append(anfrage); // Anfrage einbinden
+         // sl.add(UND + anfrage);
          try {
-            URL               url   =new URI("http", hostaddress, "/cm", sb.toString(), "").toURL();
-            HttpURLConnection client=(HttpURLConnection) url.openConnection();
-            client.setRequestMethod("GET");
-            client.setConnectTimeout(5 * 1000);// 5 Sekunden
-            BufferedReader br=new BufferedReader(new InputStreamReader(client.getInputStream()));
-            while (true) {
-               String line=br.readLine();
-               if (line == null)
-                  break;
-               sl.add(line);
-            }
-         } catch (IOException | URISyntaxException ignore) {}
+            HttpRequest request=requestBuilder.copy()
+                     .uri(new URI(HTTP, hostaddress.getHostAddress(), "/cm", sb.toString(), "")).build();
+            // URL uril=new URI("http", hostaddress.getHostAddress(), "/cm", sb.toString(), "").toURL();
+            // HttpURLConnection client=(HttpURLConnection) url.openConnection();
+            // client.setRequestMethod("GET");
+            // client.setConnectTimeout(5 * 1000);// 5 Sekunden
+            // BufferedReader br=new BufferedReader(new InputStreamReader(client.getInputStream()));
+            // while (true) {
+            // String line=br.readLine();
+            // if (line == null)
+            // break;
+            // sl.add(line);
+            // }
+            HttpResponse<String> erg=client.send(request, BodyHandlers.ofString());
+            sl.add(erg);
+         } catch (IOException | URISyntaxException | InterruptedException ignore) {}
       }
       return sl;
    }
-   public final boolean process(List<String> response) {
-      boolean hatInhalt=false;
-      for (String zeile:response)
-         if (!zeile.startsWith(UND)) {
-            hatInhalt=true;
-            break;
-         }
-      if (!hatInhalt)
-         return false; // keine Antwort enthalten
-      String     anfrage="";
-      JsonObject j      =null;
-      for (String zeile:response) {
-         if (zeile == null)
-            continue;
-         if (zeile.isEmpty())
-            continue;
-         if (zeile.startsWith(UND)) {// anfrage ermittelt
-            anfrage=zeile.substring(1);
-         } else { // antwort verarbeiten
-            j=JsonObject.convertToJson(zeile);
-            if (j == null)
-               continue;
-            jsontree.put(anfrage, j);
-            register(anfrage, j);
-            if (SUCHANFRAGE.equals(anfrage))
-               namensSuche(); // nur bei einmaliger statusabfrege "status 0"
-            warning=j.getJsonObject(WARNING); // Tasmota-Gerät verlangt Passwort
-            if (warning != null)
-               System.out.println(zeile);
+   private final Pattern ANFRAGE_PATTERN=Pattern.compile("(?:&cmnd=)(.+)");
+   public final boolean process(List<HttpResponse<String>> erg) {
+      if (erg.isEmpty())
+         return false;
+      for (HttpResponse<String> zeile:erg) {
+         int rc=zeile.statusCode();
+         switch (rc) {
+            default:
+            case 401:
+            case 404:
+               System.err.println("Responsecode for(" + hostaddress + ")=" + rc);
+               return false;
+            case 200: // Treffer
+               break;
          }
       }
-      return (j != null);
+      String anfrage="";
+      for (HttpResponse<String> zeile:erg) {
+         if (zeile.body() == null)
+            continue;
+         if (zeile.body().isEmpty())
+            continue;
+         if (zeile.body().startsWith(UND)) {// anfrage ermittelt
+            anfrage=zeile.body().substring(1);
+         } else { // antwort verarbeiten
+            anfrage= RecordParser.getString(ANFRAGE_PATTERN.matcher(zeile.uri().getQuery())) ;
+            if (JsonObject.convertToJson(zeile.body()) instanceof JsonObject j) {
+               jsontree.put(anfrage, j);
+               register(anfrage, j);
+               if (SUCHANFRAGE.equals(anfrage))
+                  namensSuche(); // nur bei einmaliger statusabfrege "status 0"
+               warning=j.getJsonObject(WARNING); // Tasmota-Gerät verlangt Passwort
+               if (warning != null)
+                  System.out.println(zeile);
+            }
+         }
+      }
+      return true;// (j != null);
    }
    /** Suche im vorhandenen Jsontree nach einem passenden deviceNamen und trage ihn als Devicename ein */
    void namensSuche() {
@@ -184,12 +189,12 @@ public class Tasmota implements Comparable<Tasmota> {
             changed|=registerTabelle(jc);
       }
       if (changed) {
-         DefaultListModel<String> dlm=(DefaultListModel<String>) Data.data.tasmolist.getTableAuswahl().getModel();
-         for (Entry<String, ConcurrentSkipListSet<String>> entry:Data.data.tableNames.entrySet())
+         DefaultListModel<String> dlm=(DefaultListModel<String>) Data.getData().tasmolist.getTableAuswahl().getModel();
+         for (Entry<String, ConcurrentSkipListSet<String>> entry:Data.getData().tableNames.entrySet())
             if (!entry.getValue().isEmpty())
                if (!dlm.contains(entry.getKey()))
                   dlm.addElement(entry.getKey());
-         Data.data.dataModel.setTable(anfrage);
+         Data.getData().dataModel.setTable(anfrage);
       }
    }
    static private final Pattern IS_NUMBER=Pattern.compile("[0-9]+");
@@ -205,7 +210,7 @@ public class Tasmota implements Comparable<Tasmota> {
       boolean changed=false;
       if (name == null)
          return changed;
-      ConcurrentSkipListMap<String, ConcurrentSkipListSet<String>> tabellen=Data.data.tableNames;
+      ConcurrentSkipListMap<String, ConcurrentSkipListSet<String>> tabellen=Data.getData().tableNames;
       tabellen.putIfAbsent(name, new ConcurrentSkipListSet<String>(NUMMERN_SICHERER_COMPARATOR)); // neuen Typ von
                                                                                                   // Tabelle eintragen
                                                                                                   // falls erforderlich
@@ -245,10 +250,9 @@ public class Tasmota implements Comparable<Tasmota> {
    /** Hole Alle Antworten mit diesem Namen in einer Liste */
    public ArrayList<JsonObject> getAll(String name) {
       ArrayList<JsonObject> c=new ArrayList<JsonObject>();
-      for (JsonObject response:jsontree.values()) {
+      for (JsonObject response:jsontree.values())
          for (JsonObject o:response.getAll(name))
             c.add(o);
-      }
       return c;
    }
    /** statische Methode um Strings in html umzurechnen */
@@ -263,13 +267,12 @@ public class Tasmota implements Comparable<Tasmota> {
       ArrayList<JsonObject> l=getAll(name);
       if (l.isEmpty())
          return "";
-      String   s=l.get(0).toString();
-      String[] a=s.split(":");
+      String[] a=l.getFirst().toString().split(":");
       if (a.length == 2)
          return a[1];
       if (a.length == 1)
          return a[0];
-      return s.substring(a[0].length() + 1);
+      return l.getFirst().toString().substring(a[0].length() + 1);
    }
    /*
     * private void connect() { NioSocketConnector connector=new NioSocketConnector();
@@ -284,27 +287,19 @@ public class Tasmota implements Comparable<Tasmota> {
     */
    @Override
    public int compareTo(Tasmota o) {
-      return Integer.compare(this.ipPart, o.ipPart);
+      return this.ipPart.compareTo(o.ipPart);
    }
    @Override
    public int hashCode() {
-      final int prime =31;
-      int       result=1;
-      result=prime * result + ipPart;
-      return result;
+      // final int prime=31;
+      // int result=1;
+      // result=prime * result + ipPart.hashCode();
+      // return result;
+      return ipPart.hashCode();
    }
    @Override
    public boolean equals(Object obj) {
-      if (this == obj)
-         return true;
-      if (obj == null)
-         return false;
-      if (getClass() != obj.getClass())
-         return false;
-      Tasmota other=(Tasmota) obj;
-      if (ipPart != other.ipPart)
-         return false;
-      return true;
+      return (this == obj) || (obj instanceof Tasmota other && ipPart.equals(other.ipPart));
    }
    @Override
    public String toString() {
@@ -324,7 +319,7 @@ public class Tasmota implements Comparable<Tasmota> {
       return sb.toString();
    }
    static final Pattern                   ZAHLEN_AM_ENDE             =Pattern.compile("\\d+$");
-   static public final Comparator<String> NUMMERN_SICHERER_COMPARATOR=                         //
+   static public final Comparator<String> NUMMERN_SICHERER_COMPARATOR=                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //
             new Comparator<String>() {
                @Override
                public int compare(String o1, String o2) {
@@ -333,7 +328,9 @@ public class Tasmota implements Comparable<Tasmota> {
                      if (o1.length() != o2.length()) {
                         Matcher m1=ZAHLEN_AM_ENDE.matcher(o1);
                         Matcher m2=ZAHLEN_AM_ENDE.matcher(o2);
-                        if (m1.find() && m2.find()) {                                          // beide enthalten Zahlen
+                        if (m1.find() && m2.find()) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        // beide
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             // enthalten
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             // Zahlen
                            try {
                               String r1="";
                               int i1=-1;
@@ -342,7 +339,7 @@ public class Tasmota implements Comparable<Tasmota> {
                               r1=m1.replaceFirst("");
                               // }
                               String r2="";
-                              int i2=-1;   //
+                              int i2=-1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     //
                               m2.groupCount();
                               // if (m2.hitEnd()) {
                               i2=Integer.valueOf(m2.group()).intValue();
@@ -359,4 +356,25 @@ public class Tasmota implements Comparable<Tasmota> {
                   return normal;
                }
             };
+   /**
+    * @param i
+    * @return
+    * @throws UnknownHostException
+    * @throws URISyntaxException
+    */
+   public static Tasmota getTasmota(Integer i) throws UnknownHostException, URISyntaxException {
+      if (Data.getData().tasmotasD.get(i) instanceof Tasmota tasmota)
+         return tasmota;
+      if (unsicher.get(i) instanceof Tasmota tasmota)
+         return tasmota;
+      Tasmota t=new Tasmota(i);
+      unsicher.put(i, t);
+      return t;
+   }
+   /**
+    * @param b
+    */
+   // public void setExists(boolean b) {
+   // exists=b;
+   // }
 }

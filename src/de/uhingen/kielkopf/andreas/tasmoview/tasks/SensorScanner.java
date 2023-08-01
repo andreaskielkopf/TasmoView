@@ -1,19 +1,16 @@
 package de.uhingen.kielkopf.andreas.tasmoview.tasks;
 
+import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.swing.JLabel;
-import javax.swing.JSpinner;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 
-import de.uhingen.kielkopf.andreas.tasmoview.Data;
-import de.uhingen.kielkopf.andreas.tasmoview.TasmoView;
-import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
+import de.uhingen.kielkopf.andreas.beans.minijson.JsonObject;
+import de.uhingen.kielkopf.andreas.tasmoview.*;
 import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
 
 /**
@@ -35,9 +32,9 @@ public class SensorScanner extends SwingWorker<String, String> {
             if ((tasm == null) || tasm.lokaleSensoren.isEmpty())
                return null;
             final Instant      i =Instant.now();
-            final List<String> sl=tasm.requests(new String[] {Sensor.STATUS_8});
+            final List<HttpResponse<String>> sl=tasm.requests(new String[] {Sensor.STATUS_8});
             if (sl.size() > 1) {
-               final String     erg=sl.get(1);
+               final String     erg=sl.get(1).body();
                final JsonObject j0 =JsonObject.convertToJson(erg);
                for (final Sensor sensor:tasm.lokaleSensoren) {
                   final JsonObject j1=j0.getJsonObject(sensor.kennung);
@@ -79,6 +76,7 @@ public class SensorScanner extends SwingWorker<String, String> {
       sensorRefreshSpinner=sensorRefreshSpinner1;
       lastRead=lastRead1;
    }
+   @SuppressWarnings("resource")
    @Override
    protected String doInBackground() throws Exception {
       try {
@@ -86,10 +84,10 @@ public class SensorScanner extends SwingWorker<String, String> {
          Thread.currentThread().setName(this.getClass().getSimpleName());
          int wartezeit=10;
          while (true) {
-            for (final Tasmota tasmota:Data.data.tasmotasMitSensoren) {
+            for (final Tasmota tasmota:Data.getData().tasmotasMitSensoren) {
                final ScanOf x=new ScanOf(tasmota);
                scans.add(x);
-               TasmoScanner.pool.submit(x);// automatic execute in threadpool
+               TasmoScanner.getPool().submit(x);// automatic execute in threadpool
             }
             try {
                if (sensorRefreshSpinner != null)

@@ -3,17 +3,12 @@ package de.uhingen.kielkopf.andreas.tasmoview.tasks;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import javax.swing.JLabel;
-import javax.swing.JSpinner;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 
 import de.uhingen.kielkopf.andreas.tasmoview.Data;
 import de.uhingen.kielkopf.andreas.tasmoview.TasmoView;
@@ -43,7 +38,7 @@ public class DataLogger extends SwingWorker<Boolean, LocalDateTime> {
       synchronized (singleton) {
          System.out.print("L");
          final String date=df.format(LocalDateTime.now());
-         for (final Sensor sensor:Data.data.gesamtSensoren) {
+         for (final Sensor sensor:Data.getData().gesamtSensoren) {
             try {
                if (sensor.saveWerte.isEmpty())
                   continue;

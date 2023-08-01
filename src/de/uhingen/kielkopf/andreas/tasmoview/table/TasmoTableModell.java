@@ -38,13 +38,13 @@ public class TasmoTableModell extends AbstractTableModel {
       setTable(null);
    }
    static void berechneSpalten() {
-      if (Data.data.tasmolist != null) {
-         final JTable table=Data.data.tasmolist.getTable();
+      if (Data.getData().tasmolist != null) {
+         final JTable table=Data.getData().tasmolist.getTable();
          if (table == null)
             return;
          for (int c=0; c < table.getColumnModel().getColumnCount(); c++) {
-            int       w =0;                  // getColumnName(c).length();
-            int       mw=w;
+            int w=0; // getColumnName(c).length();
+            int mw=w;
             final int rc=table.getRowCount();
             for (int r=0; r < rc; r++) {
                final Object v=table.getValueAt(r, c);
@@ -82,12 +82,12 @@ public class TasmoTableModell extends AbstractTableModel {
    @Override
    /** Je gefundenem Tasmota eine Reihe */
    public int getRowCount() {
-      return Data.data.tasmotas.size();
+      return Data.getData().tasmotasD.size();
    }
    public Tasmota getTasmota(int rowIndex) {
       if (rowIndex >= getRowCount())
          return null;
-      return (Tasmota) Data.data.tasmotas.toArray()[rowIndex];
+      return (Tasmota) Data.getData().tasmotasD.values().toArray()[rowIndex];
    }
    /** Inhalte live aus den Daten ermitteln */
    @Override
@@ -106,9 +106,9 @@ public class TasmoTableModell extends AbstractTableModel {
    public void setTable(String name) {
       int row=-1;
       /** Hier muss eine Rekursion vermieden werden ! ==> Wenn Tasmolist nicht exisitiert einfach ignorieren */
-      if (Data.data.tasmolist != null)
-         if (Data.data.tasmolist.getTable() != null)
-            row=Data.data.tasmolist.getTable().getSelectedRow();
+      if (Data.getData().tasmolist != null)
+         if (Data.getData().tasmolist.getTable() != null)
+            row=Data.getData().tasmolist.getTable().getSelectedRow();
       final String key=Tasmota.toHtmlString(name);
       if ((columnNames == null) || (key == null)) {
          final ConcurrentSkipListSet<String> c=new ConcurrentSkipListSet<>();
@@ -119,11 +119,11 @@ public class TasmoTableModell extends AbstractTableModel {
             return;
          }
       }
-      if (Data.data.tableNames.containsKey(key)) {// Datensatz aktivieren
-         columnNames=Data.data.tableNames.get(key);
+      if (Data.getData().tableNames.containsKey(key)) {// Datensatz aktivieren
+         columnNames=Data.getData().tableNames.get(key);
          fireTableStructureChanged();
          if (row != -1)
-            Data.data.getTasmoList().getTable().setRowSelectionInterval(row, row);
+            Data.getData().getTasmoList().getTable().setRowSelectionInterval(row, row);
       }
       berechneSpalten();
    }

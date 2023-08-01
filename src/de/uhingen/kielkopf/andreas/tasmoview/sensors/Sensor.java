@@ -7,17 +7,13 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Map.Entry;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 import javax.swing.DefaultListModel;
 
+import de.uhingen.kielkopf.andreas.beans.minijson.*;
 import de.uhingen.kielkopf.andreas.tasmoview.Data;
 import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonContainer;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonValue;
 
 public class Sensor implements Comparable<Sensor> {
    public static Instant                        firstTimestamp=null;
@@ -72,27 +68,27 @@ public class Sensor implements Comparable<Sensor> {
                   if (j2 instanceof JsonValue jv) {
                      final String name=Integer.toString(tasmota.ipPart) + "." + j1.name + "." + jv.name;
                      // 25...AM23... Temp
-                     for (final Sensor sensor:Data.data.gesamtSensoren)
+                     for (final Sensor sensor:Data.getData().gesamtSensoren)
                         if (name.equals(sensor.name))
                            continue addSensors;
                      s=new Sensor(tasmota, name, j1.name, jv.name);
-                     Data.data.gesamtSensoren.add(s);
+                     Data.getData().gesamtSensoren.add(s);
                      tasmota.lokaleSensoren.add(s);
-                     ((DefaultListModel<Sensor>) Data.data.getSensorJList().getModel()).addElement(s);
-                     Data.data.sensorTypen.add(s.typ);
+                     ((DefaultListModel<Sensor>) Data.getData().getSensorJList().getModel()).addElement(s);
+                     Data.getData().sensorTypen.add(s.typ);
                      // Vector<Sensor> sa=new Vector<Sensor>();// TODO brauchts das noch ?
-                     // sa.addAll(Data.data.sensoren);
+                     // sa.addAll(Data.getData().sensoren);
                      // if (!sa.isEmpty()) {
-                     // Data.data.getSensorJList().setListData(sa);
-                     // Data.data.getSensorJList().revalidate();
-                     // Data.data.getSensorJList().repaint(1000);
-                     Data.data.getSensorGraphPanel().setSensors(Data.data.gesamtSensoren);
+                     // Data.getData().getSensorJList().setListData(sa);
+                     // Data.getData().getSensorJList().revalidate();
+                     // Data.getData().getSensorJList().repaint(1000);
+                     Data.getData().getSensorGraphPanel().setSensors(Data.getData().gesamtSensoren);
                      // }
                      System.out.println(tasmota + s.name);
                   }
             }
          if (s != null)
-            Data.data.tasmotasMitSensoren.add(tasmota);
+            Data.getData().tasmotasMitSensoren.add(tasmota);
       }
    }
    public static void antwortAuswerten(ArrayList<String> sl, Tasmota tasm) {
@@ -101,8 +97,8 @@ public class Sensor implements Comparable<Sensor> {
       final String     s =sl.get(1);
       final JsonObject j0=JsonObject.convertToJson(s);
       if (j0 == null)
-         return; // synchronized (Data.data.sensoren) {
-      for (final Sensor sensor:Data.data.gesamtSensoren) {
+         return; // synchronized (Data.getData().sensoren) {
+      for (final Sensor sensor:Data.getData().gesamtSensoren) {
          if (sensor.tasmota != tasm)
             continue;
          final JsonObject j1=j0.getJsonObject(sensor.kennung);
@@ -120,8 +116,8 @@ public class Sensor implements Comparable<Sensor> {
          final String            s   =sl.get(1);
          final JsonObject        j0  =JsonObject.convertToJson(s);
          if (j0 == null)
-            return; // synchronized (Data.data.sensoren) {
-         for (final Sensor sensor:Data.data.gesamtSensoren) {
+            return; // synchronized (Data.getData().sensoren) {
+         for (final Sensor sensor:Data.getData().gesamtSensoren) {
             if (sensor.tasmota != tasm)
                continue;
             final JsonObject j1=j0.getJsonObject(sensor.kennung);
@@ -194,8 +190,8 @@ public class Sensor implements Comparable<Sensor> {
                recalculateSkala=true;
             }
       if (recalculateSkala)
-         Data.data.getSensorGraphPanel().recalculateSkala(this);
-      Data.data.getSensorGraphPanel().repaint(1000);
+         Data.getData().getSensorGraphPanel().recalculateSkala(this);
+      Data.getData().getSensorGraphPanel().repaint(1000);
    }
    @Override
    public int compareTo(Sensor o) {
@@ -232,7 +228,7 @@ public class Sensor implements Comparable<Sensor> {
    }
    private Color createcolor() {
       double winkel=0;
-      for (final Sensor s:Data.data.gesamtSensoren)
+      for (final Sensor s:Data.getData().gesamtSensoren)
          if (s.typ.equals(typ))
             winkel+=FARB_STEP;
       System.out.println(typ + " Winkel= " + (((int) ((180 * winkel) / Math.PI)) % 360));

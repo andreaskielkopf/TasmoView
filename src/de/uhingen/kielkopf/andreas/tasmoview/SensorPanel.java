@@ -1,23 +1,13 @@
 package de.uhingen.kielkopf.andreas.tasmoview;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.util.TreeSet;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
-import de.uhingen.kielkopf.andreas.tasmoview.tasks.DataLogger;
-import de.uhingen.kielkopf.andreas.tasmoview.tasks.SensorScanner;
-import de.uhingen.kielkopf.andreas.tasmoview.tasks.TasmoScanner;
+import de.uhingen.kielkopf.andreas.tasmoview.tasks.*;
 
 public class SensorPanel extends JPanel {
    private static final long   serialVersionUID=-349511026033574886L;
@@ -38,15 +28,16 @@ public class SensorPanel extends JPanel {
    /**
     * Create the panel.
     */
+   @SuppressWarnings("resource")
    public SensorPanel() {
       setLayout(new BorderLayout());
       add(getSensorSelectPanel(), BorderLayout.WEST);
       add(getRefreshPanel(), BorderLayout.NORTH);
-      add(Data.data.getSensorGraphPanel(), BorderLayout.CENTER);
+      add(Data.getData().getSensorGraphPanel(), BorderLayout.CENTER);
       sensorscanner=new SensorScanner(getRefreshSpinner(), getLblLastRead());
-      TasmoScanner.pool.submit(sensorscanner);
+      TasmoScanner.getPool().submit(sensorscanner);
       datalogger=new DataLogger(getSaveSpinner(), getLblLastSaved());
-      TasmoScanner.pool.submit(datalogger);
+      TasmoScanner.getPool().submit(datalogger);
    }
    private JLabel getLblLastRead() {
       if (lblLastRead == null) {
@@ -172,7 +163,7 @@ public class SensorPanel extends JPanel {
          selectionPanel
                   .setBorder(new TitledBorder(null, "Display", TitledBorder.LEADING, TitledBorder.TOP, null, null));
          selectionPanel.setLayout(new BorderLayout(0, 0));
-         selectionPanel.add(Data.data.getSensorJList(), BorderLayout.CENTER);
+         selectionPanel.add(Data.getData().getSensorJList(), BorderLayout.CENTER);
       }
       return selectionPanel;
    }

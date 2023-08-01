@@ -4,44 +4,36 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
+import de.uhingen.kielkopf.andreas.beans.minijson.*;
 import de.uhingen.kielkopf.andreas.tasmoview.Data;
 import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonArray;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonList;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonObject;
-import de.uhingen.kielkopf.andreas.tasmoview.minijson.JsonString;
 import de.uhingen.kielkopf.andreas.tasmoview.tasks.TasmoScanner;
 
 public class JPowerPane extends JPanel implements ActionListener {
-   private class SetPower extends SwingWorker<String, PowerBox> {
-      static final String    ANTWORT="";
+   private class SetPower extends SwingWorker<HttpResponse<String>, PowerBox> {
+//      static final String    ANTWORT=null;
       private final PowerBox box;
       public SetPower(final PowerBox box1) {
          box=box1;
       }
       @Override
-      protected String doInBackground() throws Exception {
+      protected HttpResponse<String> doInBackground() throws Exception {
          try {
             final Tasmota tasm=getPowerJList().getSelectedValue();
             if (tasm == null)
-               return ANTWORT;
+               return null;
             Thread.currentThread().setName(this.getClass().getSimpleName() + " " + tasm.ipPart);
             if (box == null)
-               return ANTWORT;
+               return null;
             try {
                StringBuilder befehl=new StringBuilder("power").append(Integer.toString(box.getNr())); // Abfrage
                if (box.warAktiv)
@@ -52,12 +44,12 @@ public class JPowerPane extends JPanel implements ActionListener {
             // TODO Auto-generated catch block
             e.printStackTrace();
          }
-         return ANTWORT;
+         return null;
       }
       @Override
       protected void done() {
          try {
-            final JsonObject erg=JsonObject.convertToJson(get());
+            final JsonObject erg=JsonObject.convertToJson(get().body());
             System.out.print(erg);
             if (erg instanceof JsonList jl)
                if (jl.list.get(0) instanceof JsonString js)
@@ -89,6 +81,7 @@ public class JPowerPane extends JPanel implements ActionListener {
       panel.add(getPanel_3(), BorderLayout.WEST);
       panel.add(getPanel_4(), BorderLayout.CENTER);
    }
+   @SuppressWarnings("resource")
    @Override
    public void actionPerformed(ActionEvent e) {
       final Tasmota tasmota=getPowerJList().getSelectedValue();
@@ -97,7 +90,7 @@ public class JPowerPane extends JPanel implements ActionListener {
       final Object source=e.getSource();
       for (final PowerBox box:boxList)
          if (box.getButton().equals(source))
-            TasmoScanner.pool.submit(new SetPower(box));// automatic execute in threadpool
+            TasmoScanner.getPool().submit(new SetPower(box));// automatic execute in threadpool
    }
    private JLabel getLabelDeviceName() {
       if (labelDeviceName == null) {
@@ -179,13 +172,14 @@ public class JPowerPane extends JPanel implements ActionListener {
       return powerJlist;
    }
    public void recalculateListe() {
-      if ((Data.data != null) && (Data.data.tasmotas != null)) {
+      if (Data.getData().tasmotasD != null) {
          final DefaultListModel<Tasmota> m=(DefaultListModel<Tasmota>) getPowerJList().getModel();
          m.clear();
-         for (final Tasmota tasmota:Data.data.tasmotas)
+         for (final Tasmota tasmota:Data.getData().tasmotasD.values())
             m.addElement(tasmota);
       }
    }
+   @SuppressWarnings("resource")
    private void recalculatePowerBox() {
       final Tasmota tasm=getPowerJList().getSelectedValue();
       if (tasm == null)
@@ -219,7 +213,7 @@ public class JPowerPane extends JPanel implements ActionListener {
             box.setNr(boxNr);
             box.setStatus(" ? ");
             box.getButton().addActionListener(this);
-            TasmoScanner.pool.submit(new SetPower(box));// automatic execute in threadpool
+            TasmoScanner.getPool().submit(new SetPower(box));// automatic execute in threadpool
             p.add(box);
             boxNr++;
          }

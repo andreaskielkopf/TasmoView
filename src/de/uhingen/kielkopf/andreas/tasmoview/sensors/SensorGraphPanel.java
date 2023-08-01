@@ -1,9 +1,6 @@
 package de.uhingen.kielkopf.andreas.tasmoview.sensors;
 
-import java.awt.BorderLayout;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -107,7 +104,7 @@ public class SensorGraphPanel extends JPanel {
     */
    public void setSensors(Collection<Sensor> sl) {
       if ((sl == null) || sl.isEmpty())
-         sensorList.addAll(Data.data.gesamtSensoren);
+         sensorList.addAll(Data.getData().gesamtSensoren);
       else {
          sensorList.retainAll(sl);
          sensorList.addAllAbsent(sl);

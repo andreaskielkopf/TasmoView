@@ -1,26 +1,13 @@
 package de.uhingen.kielkopf.andreas.tasmoview.table;
 
-import java.awt.BorderLayout;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
+import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
 import de.uhingen.kielkopf.andreas.tasmoview.Data;
@@ -62,46 +49,47 @@ public class TasmoList extends JPanel {
    public static void openURL(String host) throws InterruptedException, IOException, URISyntaxException {
       if (Desktop.isDesktopSupported()) {
          final StringBuilder unpw=new StringBuilder();
-         unpw.append(Data.data.getUserField().getText());
+         unpw.append(Data.getData().getUserField().getText());
          unpw.append(":");
-         unpw.append(Data.data.getPasswordField().getPassword());
+         unpw.append(Data.getData().getPasswordField().getPassword());
          final URI uri=new URI("http", unpw.toString(), host, -1, null, null, null);
          Desktop.getDesktop().browse(uri);
          /// http://andreas:akf4sonoff@192.168.178.28
       } else {
          System.err.println("Desktop is not suportet. trying Runtime.exec");
-         final String  os=System.getProperty("os.name");
+         final String os=System.getProperty("os.name");
          final Runtime rt=Runtime.getRuntime();
-         if (os.contains("win")) {
-            rt.exec("rundll32 url.dll,FileProtocolHandler " + ("http://" + host)).waitFor();
-         } else
-            if (os.contains("mac") || os.contains("darwin")) {
-               final String[] cmd= {"open", "http://" + host};
-               rt.exec(cmd).waitFor();
-            } else
-               if (os.contains("nix") || os.contains("nux") || os.contains("aix")) {
-                  final String[] cmd= {"xdg-open", "http://" + host};
-                  rt.exec(cmd).waitFor();
-               } else {
-                  System.err.println("Browser-start not supported:" + os);
-               }
+         // rt.exec( switch (os) {
+         // case String s && s.contains("win") ->
+         // new String[] {"rundll32", "url.dll,FileProtocolHandler", "http://" + host};
+         // case String s && (s.contains("mac") || s.contains("darwin")) ->
+         // new String[] {"open", "http://" + host};
+         // case String s && (s.contains("nix") || s.contains("nux") || s.contains("aix")) ->
+         // new String[] {"xdg-open", "http://" + host};
+         // default -> throw new UnsupportedOperationException("Browser-start not supported for:" + os);
+         // }).waitFor();
+         if (os.contains("win"))
+            rt.exec(new String[] {"rundll32", "url.dll,FileProtocolHandler", "http://" + host}).waitFor();
+         else
+            if (os.contains("mac") || os.contains("darwin"))
+               rt.exec(new String[] {"open", "http://" + host}).waitFor();
+            else
+               if (os.contains("nix") || os.contains("nux") || os.contains("aix"))
+                  rt.exec(new String[] {"xdg-open", "http://" + host}).waitFor();
+               else
+                  throw new UnsupportedOperationException("Browser-start not supported for:" + os);
       }
    }
    static public void recalculateColumnames() {
-      if (Data.data == null)
-         return;
-      final ConcurrentSkipListMap<String, ConcurrentSkipListSet<String>> tabellen=Data.data.tableNames;
+      // if (Data.data == null)
+      // return;
+      final ConcurrentSkipListMap<String, ConcurrentSkipListSet<String>> tabellen=Data.getData().tableNames;
       for (final String[] spalten:TasmoTableModell.SPALTEN_UEBERSCHRIFTEN) {
          ConcurrentSkipListSet<String> tabelle=null;
          for (final String spalte:spalten)
             if (tabelle == null) { // Der erste Eintrag ist der Tabellenname
-               tabellen.putIfAbsent(spalte, new ConcurrentSkipListSet<>(Tasmota.NUMMERN_SICHERER_COMPARATOR)); // neuen
-                                                                                                               // Typ
-                                                                                                               // von
-                                                                                                               // Tabelle
-                                                                                                               // eintragen
-                                                                                                               // falls
-                                                                                                               // erforderlich
+               tabellen.putIfAbsent(spalte, new ConcurrentSkipListSet<>(Tasmota.NUMMERN_SICHERER_COMPARATOR));
+               // neuen Typ von Tabelle eintragen falls erforderlich
                tabelle=tabellen.get(spalte);
             } else {
                tabelle.add(spalte);// Weitere Einträge sind die Überschriften der Spalten
@@ -119,8 +107,8 @@ public class TasmoList extends JPanel {
             final int row=getTable().getSelectedRow();
             if (row != -1)
                try {
-                  final Tasmota t=Data.data.dataModel.getTasmota(row);
-                  openURL(t.hostaddress);
+                  final Tasmota t=Data.getData().dataModel.getTasmota(row);
+                  openURL(t.hostaddress.getHostAddress());
                } catch (InterruptedException | IOException | NullPointerException | URISyntaxException e1) {
                   e1.printStackTrace();
                }
@@ -168,14 +156,14 @@ public class TasmoList extends JPanel {
    /** Tabelle mit auswählbarem Dateninhalt */
    JTable getTable() {
       if (table == null) {
-         Data.data.dataModel=new TasmoTableModell();
-         table=new JTable(Data.data.dataModel);
+         Data.getData().dataModel=new TasmoTableModell();
+         table=new JTable(Data.getData().dataModel);
          table.setPreferredScrollableViewportSize(new Dimension(900, 400));
          table.setFont(new Font("Dialog", Font.PLAIN, 19));
          final FontMetrics fm=table.getFontMetrics(table.getFont());
          table.setRowHeight((int) (1.15f * fm.getHeight()));
          table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-         // table.setModel(Data.data.dataModel);
+         // table.setModel(Data.getData().dataModel);
          table.setFillsViewportHeight(true);
          table.getSelectionModel().addListSelectionListener(event -> {
             final boolean b=(getTable().getSelectedRow() != -1);
@@ -201,7 +189,7 @@ public class TasmoList extends JPanel {
             final String key=getTableAuswahl().getSelectedValue();
             /// Es wurde eine andere Tabellenansicht gewählt. Übergeben wird die
             if (key != null)
-               Data.data.dataModel.setTable(key);
+               Data.getData().dataModel.setTable(key);
          });
       }
       return tableAuswahlJList;

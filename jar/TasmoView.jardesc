@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<jardesc>
+    <jar path="TasmoView/jar/TasmoView.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/TasmoView/jar/TasmoView.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" mainClassHandleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview{TasmoView.java[TasmoView" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
+        <file path="/TasmoView/info/Found.png"/>
+        <javaElement handleIdentifier="=Beans/src&lt;de.uhingen.kielkopf.andreas.beans.minijson"/>
+        <file path="/TasmoView/info/Startup.png"/>
+        <file path="/TasmoView/info/Scan_for_Devices_Password.png"/>
+        <file path="/TasmoView/info/Select_Report.png"/>
+        <file path="/TasmoView/info/Farben.png"/>
+        <file path="/TasmoView/info/SensorData.png"/>
+        <file path="/TasmoView/LIESMICH.md"/>
+        <file path="/TasmoView/info/Firmware.png"/>
+        <javaElement handleIdentifier="=TasmoView/src"/>
+        <javaElement handleIdentifier="=Beans/src&lt;de.uhingen.kielkopf.andreas.beans{Version.java"/>
+        <file path="/TasmoView/LICENSE"/>
+        <file path="/TasmoView/info/Report_Home.png"/>
+        <file path="/TasmoView/README.md"/>
+        <file path="/TasmoView/info/Scan_for_Devices.png"/>
+        <file path="/TasmoView/info/Autoscan.png"/>
+        <file path="/TasmoView/info/username_password.png"/>
+        <javaElement handleIdentifier="=Beans/src&lt;de.uhingen.kielkopf.andreas.beans{RecordParser.java"/>
+        <file path="/TasmoView/info/Konfig.png"/>
+        <file path="/TasmoView/info/Browser.png"/>
+        <file path="/TasmoView/changelog.md"/>
+        <file path="/TasmoView/CODE_OF_CONDUCT.md"/>
+        <file path="/TasmoView/info/admin_password.png"/>
+        <file path="/TasmoView/info/nicht_perfekt.png"/>
+        <file path="/TasmoView/info/admin_nopassword.png"/>
+        <file path="/TasmoView/info/Manualscan.png"/>
+        <file path="/TasmoView/info/Sensor.png"/>
+    </selectedElements>
+</jardesc>

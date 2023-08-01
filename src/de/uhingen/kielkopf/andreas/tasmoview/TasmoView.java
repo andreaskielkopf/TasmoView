@@ -3,12 +3,7 @@ package de.uhingen.kielkopf.andreas.tasmoview;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.SwingConstants;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
 import de.uhingen.kielkopf.andreas.tasmoview.grafik.JPowerPane;
@@ -34,7 +29,7 @@ public class TasmoView {
       EventQueue.invokeLater(() -> {
          try {
             TasmoView window=new TasmoView();
-            Data.data.getScanPanel().getScanButton().doClick();
+            Data.getData().getScanPanel().getScanButton().doClick();
             window.frame.setVisible(true);
          } catch (Exception e) {
             e.printStackTrace();
@@ -70,7 +65,7 @@ public class TasmoView {
          panelTable.setBorder(
                   new TitledBorder(null, "Found Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
          panelTable.setLayout(new BorderLayout(0, 0));
-         panelTable.add(Data.data.getTasmoList(), BorderLayout.CENTER);
+         panelTable.add(Data.getData().getTasmoList(), BorderLayout.CENTER);
       }
       return panelTable;
    }
@@ -80,7 +75,7 @@ public class TasmoView {
          panelScan.setBorder(
                   new TitledBorder(null, "Scan for Devices", TitledBorder.LEADING, TitledBorder.TOP, null, null));
          panelScan.setLayout(new BorderLayout(0, 0));
-         panelScan.add(Data.data.getScanPanel(), BorderLayout.NORTH);
+         panelScan.add(Data.getData().getScanPanel(), BorderLayout.NORTH);
       }
       return panelScan;
    }
@@ -118,7 +113,7 @@ public class TasmoView {
    private JPanel getPanel_2() {
       if (panel_2 == null) {
          panel_2=new JPowerPane();
-         Data.data.powerpane=panel_2;
+         Data.getData().powerpane=panel_2;
          // panel_2.setLayout(new BorderLayout(0, 0));
       }
       return panel_2;
