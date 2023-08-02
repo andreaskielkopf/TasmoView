@@ -194,4 +194,13 @@ public class TasmoList extends JPanel {
       }
       return tableAuswahlJList;
    }
+//   private static void foo(Object o) {
+//      switch (o) {
+//        case Integer I: System.out.println("Integer"); break;
+//        case String s && s.length()>1: System.out.println("String > 1"); break;
+//        case String s1: System.out.println("String"); break;
+//        case X x: System.out.println("X"); break;
+//        default : System.out.println("Object");
+//      }
+//   }
 }
