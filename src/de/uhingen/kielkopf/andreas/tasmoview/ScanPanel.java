@@ -10,7 +10,7 @@ import de.uhingen.kielkopf.andreas.tasmoview.tasks.TasmoScanner;
 
 /** Grafisches Element zur Steuerung und Kontrolle des Scans nach Tasmota-Geröten im localen Netzwerk */
 public class ScanPanel extends JPanel {
-   private static final long serialVersionUID=4194405156596011563L;
+   static private final long serialVersionUID=4194405156596011563L;
    /** Knopf zum start/stop des scans nach neuen Geräten */
    private JToggleButton     scanButton;
    /** Anzeige der eigenen IP */

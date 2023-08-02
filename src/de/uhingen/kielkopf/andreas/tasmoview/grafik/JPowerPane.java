@@ -57,7 +57,7 @@ public class JPowerPane extends JPanel implements ActionListener {
          } catch (InterruptedException | ExecutionException e) {}
       }
    }
-   private static final long         serialVersionUID=-4892909628585749909L;
+   static private final long         serialVersionUID=-4892909628585749909L;
    static private final String       FRIENDLY_NAME   ="FriendlyName";
    private JPanel                    panel_1;
    private JLabel                    labelModul;

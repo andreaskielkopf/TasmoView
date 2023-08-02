@@ -6,7 +6,7 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
 public class PowerBox extends JPanel {
-   private static final long serialVersionUID=-8170872042920734021L;
+   static private final long serialVersionUID=-8170872042920734021L;
    private JLabel            label;
    private JLabel            label_1;
    private JButton           button;

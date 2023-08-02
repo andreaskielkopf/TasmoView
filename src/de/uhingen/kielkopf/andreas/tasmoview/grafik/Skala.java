@@ -16,7 +16,7 @@ public class Skala {
    static private int           MINORTICK    =7;
    static private int           MIDLETICK    =15;
    static private int           MAJORTICK    =20;
-   // private static final long serialVersionUID=-1232799680846666655L;
+   // static private final long serialVersionUID=-1232799680846666655L;
    public final TreeSet<Sensor> graphSensoren=new TreeSet<>();
    private float                rulerpos     =0.5f;
    private Raster               raster       =null;

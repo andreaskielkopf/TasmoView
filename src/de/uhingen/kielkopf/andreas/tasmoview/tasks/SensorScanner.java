@@ -19,7 +19,7 @@ import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
  * @author andreas T=Endergebniss, V=Zwischenergebnisse
  */
 public class SensorScanner extends SwingWorker<String, String> {
-   private static class ScanOf extends SwingWorker<Tasmota, Integer> {
+   static private class ScanOf extends SwingWorker<Tasmota, Integer> {
       private final Tasmota tasm;
       public ScanOf(final Tasmota tasm1) {
          tasm=tasm1;
@@ -55,7 +55,7 @@ public class SensorScanner extends SwingWorker<String, String> {
          System.out.print("-");
       }
    }
-   private static final DateTimeFormatter tf=DateTimeFormatter.ofPattern("EE HH:mm:ss");
+   static private final DateTimeFormatter tf=DateTimeFormatter.ofPattern("EE HH:mm:ss");
    private final JSpinner                 sensorRefreshSpinner;
    private final JLabel                   lastRead;
    /**

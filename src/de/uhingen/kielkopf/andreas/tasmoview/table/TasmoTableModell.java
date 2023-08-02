@@ -11,7 +11,7 @@ import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
 
 /** Ein Tablemodell für die veränderbare Tabelle */
 public class TasmoTableModell extends AbstractTableModel {
-   private static final long             serialVersionUID      =-730406069158230203L;
+   static private final long             serialVersionUID      =-730406069158230203L;
    static public final String[][]        SPALTEN_UEBERSCHRIFTEN= {                                                      //
             {"Home", "Module", "Power", "Color", "LoadAvg", "LinkCount", "Uptime"},
             {"Health", "Uptime", "BootCount", "RestartReason", "LoadAvg", "Sleep", "MqttCount", "LinkCount", "Downtime",

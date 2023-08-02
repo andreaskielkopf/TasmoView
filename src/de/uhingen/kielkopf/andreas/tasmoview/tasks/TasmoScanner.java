@@ -2,8 +2,6 @@ package de.uhingen.kielkopf.andreas.tasmoview.tasks;
 
 import static javax.swing.SwingUtilities.invokeLater;
 
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.net.http.HttpResponse;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -24,113 +22,25 @@ import de.uhingen.kielkopf.andreas.tasmoview.table.TasmoList;
  * @author andreas T=Endergebniss, V=Zwischenergebnisse
  */
 public class TasmoScanner implements Runnable {
-   static private TasmoScanner    me;
-   static private ExecutorService pool;
-   static public final ExecutorService getPool() {
-      if (pool == null) {
-         pool=Version.getVx();
-//         System.out.println("Verwende " + pool.getClass().getSimpleName());
-      }
-      return pool;
-   }
-   @SuppressWarnings("resource")
-   static public TasmoScanner getTasmoScanner(boolean rescan1, JProgressBar progressBar1, JToggleButton scanButton1,
-            JToggleButton refreshButton1) {
-      if (me == null) {
-         me=new TasmoScanner(rescan1, progressBar1, scanButton1, refreshButton1);
-         getPool().execute(me);
-      }
-      return me;
-   }
-   private final ConcurrentSkipListMap<Integer, ScanFor> laufendeAnfragen=new ConcurrentSkipListMap<>();
-   @SuppressWarnings("resource")
-   private ScanFor getScanFor(Integer j) {
-      if (!laufendeAnfragen.containsKey(j)) {
-         ScanFor scanFor1=new ScanFor(this, j);
-         laufendeAnfragen.put(j, scanFor1);
-         // System.out.println("Anfrage an:(" + j + ")");
-         getPool().execute(scanFor1); // wird auch sofort gestartet
-      }
-      return laufendeAnfragen.get(j);
-   }
-   /**
-    * Sucht nach genau einer IP im Netzwerk
-    */
-   public class ScanFor implements Runnable {
-      private final Integer j;
-      // private final TasmoScanner tasmoScanner;
-      private ScanFor(TasmoScanner ts, Integer j1) {
-         j=j1;
-         // tasmoScanner=ts;
-         System.out.print("^");
-      }
-      @Override
-      public void run() {
-         try {
-            Thread.currentThread().setName(this.getClass().getSimpleName() + " " + j);
-            scanFor(j);
-         } catch (final Exception e) {
-            e.printStackTrace();
-         } finally {
-            laufendeAnfragen.remove(j);
-            offen.clear(j);
-            done();
-         }
-      }
-      private void done() {
-         System.out.print("v");
-         progressBar.setString(j.toString());
-         progressBar.setValue(offen.size() - offen.cardinality());
-      }
-      static private final String[] SCAN_FRAGEN=new String[] {Tasmota.SUCHANFRAGE};
-      /**
-       * Suchen nach dem Gerät mit der IP i
-       *
-       * @param i
-       *           Teil der IP
-       * @throws UnknownHostException
-       * @throws URISyntaxException
-       */
-      private final void scanFor(Integer i) throws UnknownHostException, URISyntaxException {
-         Tasmota tasmota=Tasmota.getTasmota(i);
-         // System.out.println("Starte Anfrage an (" + i + ")");
-         List<HttpResponse<String>> erg=tasmota.requests(SCAN_FRAGEN);
-         if (tasmota.process(erg)) {
-            isTasmota.set(i);
-            noTasmota.clear(i);
-            List<HttpResponse<String>> antwort=tasmota.requests(Tasmota.ZUSATZ_FRAGEN);
-            if (!antwort.isEmpty())
-               tasmota.process(antwort);
-            publish(tasmota);
-         } else {
-            isTasmota.clear(i);
-            noTasmota.set(i);
-         }
-         laufendeAnfragen.remove(i);
-      }
-      /**
-       * Melde diesen Tasmota als gefunden
-       * 
-       * @param tasmota
-       */
-      private void publish(Tasmota tasmota) {
-         TasmoScanner.publish(j, tasmota);
-      }
-   }
-   /** privates Segment mit 256 IPs */
-   private static final int    MAXIMUM_IPS  =256;
    /** Zeitabstand beim Scan */
-   private static final int    ABSTAND_IN_MS=10;
-   /** Dies scheint ein Tasmota zu sein */
-   private static final BitSet isTasmota    =new BitSet(MAXIMUM_IPS);
+   static final int                                      ABSTAND_IN_MS   =10;
+   static final String                                   GESAMTLIST      ="Tasmotas";
+   /** privates Segment mit 256 IPs */
+   static final int                                      IPS_MAXIMUM     =256;
    /** Dies ist sicher kein Tasmota */
-   private static final BitSet noTasmota    =new BitSet(MAXIMUM_IPS);
-   private static final String GESAMTLIST   ="Tasmotas";
-   private final JProgressBar  progressBar;
-   private final JToggleButton scanButton;
-   private final JToggleButton refreshButton;
-   private final boolean       rescan;
-   private final BitSet        offen        =new BitSet(MAXIMUM_IPS);
+   static final BitSet                                   isNoTasmota     =new BitSet(IPS_MAXIMUM);
+   /** Noch keine Anfrage oder Antwort */
+   static final BitSet                                   isOffen         =new BitSet(IPS_MAXIMUM);
+   /** Dies scheint ein Tasmota zu sein */
+   static final BitSet                                   isTasmota       =new BitSet(IPS_MAXIMUM);
+   static private TasmoScanner                           me;
+   static private ExecutorService                        pool;
+   static private final String[]                         SCAN_FRAGEN     =new String[] {Tasmota.SUCHANFRAGE};
+   private final ConcurrentSkipListMap<Integer, ScanFor> laufendeAnfragen=new ConcurrentSkipListMap<>();
+   private final JProgressBar                            progressBar;
+   private final JToggleButton                           refreshButton;
+   private final boolean                                 rescan;
+   private final JToggleButton                           scanButton;
    /**
     * Erzeuge und starte eine Task die nach einer Anzahl von MAXIMUM_IPS Geräten sucht
     *
@@ -149,9 +59,134 @@ public class TasmoScanner implements Runnable {
       progressBar=progressBar1;
       scanButton=scanButton1;
       refreshButton=refreshButton1;
-      invokeLater(() -> progressBar1.setMaximum(MAXIMUM_IPS));
+      invokeLater(() -> progressBar1.setMaximum(IPS_MAXIMUM));
    }
-   private static void saveTasmotaHint() {
+   /**
+    * Sucht nach genau einer IP im Netzwerk
+    */
+   public record ScanFor(TasmoScanner ts, Integer nr) implements Runnable {
+      @Override
+      public void run() {
+         try {
+            Thread.currentThread().setName(this.getClass().getSimpleName() + " " + nr);
+            Tasmota tasmota=Tasmota.getTasmota(nr);
+            List<HttpResponse<String>> erg=tasmota.requests(SCAN_FRAGEN);
+            if (tasmota.process(erg)) {
+               isTasmota.set(nr);
+               isNoTasmota.clear(nr);
+               List<HttpResponse<String>> antwort=tasmota.requests(Tasmota.ZUSATZ_FRAGEN);
+               if (!antwort.isEmpty())
+                  tasmota.process(antwort);
+               Data.getData().tasmotasD.put(nr, tasmota);
+               invokeLater(() -> Data.getData().dataModel.fireTableDataChanged());
+               if (Data.getData().powerpane instanceof JPowerPane jpp)
+                  invokeLater(() -> jpp.recalculateListe());
+            } else {
+               isTasmota.clear(nr);
+               isNoTasmota.set(nr);
+            }
+            ts.laufendeAnfragen.remove(nr);
+         } catch (final Exception e) {
+            e.printStackTrace();
+         } finally {
+            ts.laufendeAnfragen.remove(nr);
+            isOffen.clear(nr);
+            // System.out.print("v");
+            ts.progressBar.setString(nr.toString());
+            ts.progressBar.setValue(isOffen.size() - isOffen.cardinality());
+         }
+      }
+   }
+   @Override
+   public void run() {
+      try {
+         Thread.currentThread().setName(this.getClass().getSimpleName());
+         if (!rescan) {
+            isOffen.set(0, IPS_MAXIMUM - 1);// alle suchen
+            isOffen.andNot(isTasmota);// ausser die schon gefunden worden sind
+            isOffen.andNot(isNoTasmota);// ausser die falsch geantwortet haben
+         } else {
+            isOffen.clear();
+            isOffen.or(isTasmota);// nur die, die schon letztes mal gefunden wurden aktualisieren
+         }
+         List<Integer> searchlist=new LinkedList<>();
+         for (int i=isOffen.nextSetBit(0); i >= 0; i=isOffen.nextSetBit(i + 1))
+            searchlist.add(Integer.valueOf(i));
+         Collections.shuffle(searchlist);// zufällige Reihenfolge
+         for (final String zahl:Data.getData().prefs.get(GESAMTLIST, "").split(",")) {
+            try { // Die bekannten Tasmotas an den beginn der Liste
+               Integer z=Integer.valueOf(zahl);
+               searchlist.remove(z);
+               searchlist.addFirst(z);
+               isTasmota.set(z.intValue());
+            } catch (final NumberFormatException ignore) { /* */ }
+         }
+         for (final Integer j:searchlist) {
+            try {
+               Thread.sleep(ABSTAND_IN_MS /* laufendeAnfragen.size() */);
+            } catch (final Exception ignore) {/* kleine Pause */}
+            if (progressBar instanceof JProgressBar p)
+               invokeLater(() -> progressBar.setString(j.toString())); // im Progressbar anzeigen
+            if (!TasmoView.keepRunning)
+               return;
+            getScanFor(j);
+         }
+         int runde=60;// Maximal eine Minute warten
+         while (!laufendeAnfragen.isEmpty()) {
+            if (--runde < 1)
+               break;
+            System.out.println("");
+            System.out.print("noch offen: ");
+            for (final ScanFor scanFor:new ArrayList<>(laufendeAnfragen.values()))
+               System.out.print(scanFor.nr + "-");
+            Thread.sleep(1000);
+         }
+      } catch (final InterruptedException e) {
+         e.printStackTrace();
+      } finally {
+         laufendeAnfragen.clear();// alle referenzen entfernen
+         invokeLater(() -> {
+            saveTasmotaHint();
+            progressBar.setValue(progressBar.getMaximum());
+            progressBar.setString("Found " + isTasmota.cardinality() + " Tasmotas");
+            if (!rescan)
+               scanButton.setSelected(false);
+            else
+               refreshButton.setSelected(false);
+            scanButton.setEnabled(true);
+            refreshButton.setEnabled(true);
+            TasmoList.recalculateColumnames();
+            if (Data.getData().powerpane instanceof JPowerPane jpp)
+               jpp.recalculateListe();
+         });
+         me=null; // Für die nächste Runde brauchts einen neuen
+      }
+   }
+   @SuppressWarnings("resource")
+   private ScanFor getScanFor(Integer j) {
+      if (!laufendeAnfragen.containsKey(j)) {
+         ScanFor scanFor1=new ScanFor(this, j);
+         laufendeAnfragen.put(j, scanFor1);
+         getPool().execute(scanFor1); // wird auch sofort gestartet
+      }
+      return laufendeAnfragen.get(j);
+   }
+   static public final ExecutorService getPool() {
+      if (pool == null) {
+         pool=Version.getVx();
+      }
+      return pool;
+   }
+   @SuppressWarnings("resource")
+   static public final TasmoScanner getTasmoScanner(boolean rescan1, JProgressBar progressBar1,
+            JToggleButton scanButton1, JToggleButton refreshButton1) {
+      if (me == null) {
+         me=new TasmoScanner(rescan1, progressBar1, scanButton1, refreshButton1);
+         getPool().execute(me);
+      }
+      return me;
+   }
+   static private void saveTasmotaHint() {
       try {
          System.out.println(Data.getData().prefs.get(GESAMTLIST, ""));
          final ArrayList<String> list=new ArrayList<>();
@@ -166,114 +201,5 @@ public class TasmoScanner implements Runnable {
       } catch (final BackingStoreException e1) {
          e1.printStackTrace();
       }
-   }
-   @Override
-   public void run() {
-      try {
-         Thread.currentThread().setName(this.getClass().getSimpleName());
-         if (!rescan) {
-            offen.set(0, MAXIMUM_IPS - 1);// alle suchen
-            offen.andNot(isTasmota);// ausser die schon gefunden worden sind
-            offen.andNot(noTasmota);// ausser die falsch geantwortet haben
-         } else {
-            offen.clear();
-            offen.or(isTasmota);// nur die, die schon letztes mal gefunden wurden aktualisieren
-         }
-         ArrayList<Integer> searchlist=new ArrayList<>();
-         for (int i=offen.nextSetBit(0); i >= 0; i=offen.nextSetBit(i + 1))
-            searchlist.add(Integer.valueOf(i));
-         Collections.shuffle(searchlist);// zufällige Reihenfolge
-         String gesamtlist=Data.getData().prefs.get(GESAMTLIST, "");
-         if (!gesamtlist.isEmpty()) { // TODO
-            String[] list=gesamtlist.split(",");
-            for (final String zahl:list) {
-               try {
-                  Integer z=Integer.valueOf(zahl);
-                  isTasmota.set(z.intValue());
-                  final int pos=searchlist.indexOf(z);
-                  if (pos >= 0) {
-                     searchlist.remove(pos);
-                     searchlist.add(z); // ans Ende anfügen
-                  }
-               } catch (final NumberFormatException e) {
-                  e.printStackTrace();
-               }
-            }
-         }
-         Collections.reverse(searchlist);
-         for (final Integer j:searchlist) {
-            if (!TasmoView.keepRunning)
-               return;
-            publish(j.toString()); // im Progressbar anzeigen
-            // int offen1=0;
-            // for (final ScanFor scanFor:lanfragen)
-            // if (!scanFor.isDone())
-            // offen1++;
-            try {
-               Thread.sleep(ABSTAND_IN_MS /* laufendeAnfragen.size() */);
-            } catch (final Exception ignore) {/* kleine Pause */}
-            getScanFor(j);
-            // anfragen.add(x);// mit autostart
-         }
-         int runde=60;// Maximal eine Minute warten
-         while (!laufendeAnfragen.isEmpty()) {
-            if (--runde < 1)
-               break;
-            System.out.println("");
-            System.out.print("noch offen: ");
-            for (final ScanFor scanFor:new ArrayList<>(laufendeAnfragen.values()))
-               System.out.print(scanFor.j + "-");
-            Thread.sleep(1000);
-         }
-         // for (final ScanFor scanFor:anfragen)
-         // scanFor.cancel(true);
-         // anfragen.clear();
-      } catch (final InterruptedException e) {
-         e.printStackTrace();
-      } finally {
-         laufendeAnfragen.clear();// referenzen entfernen
-         invokeLater(() -> done());
-      }
-      // return "fertig";
-   }
-   /**
-    * @param string
-    */
-   private void publish(String string) {
-      if (progressBar instanceof JProgressBar p)
-         invokeLater(() -> progressBar.setString(string));
-   }
-   /**
-    * Melde diesen Tasmota als gefunden
-    * 
-    * Erledigt was an der GUI angezeigt wer4den soll
-    * 
-    * @param j
-    * 
-    * @param tasmota
-    */
-   private static void publish(Integer j, Tasmota tasmota) {
-      Data.getData().tasmotasD.put(j, tasmota);
-      invokeLater(() -> Data.getData().dataModel.fireTableDataChanged());
-      if (Data.getData().powerpane instanceof JPowerPane jpp)
-         invokeLater(() -> jpp.recalculateListe());
-      // if (progressBar.getMaximum() != 256)
-      // progressBar.setMaximum(256);
-   }
-   private void done() {
-      progressBar.setValue(progressBar.getMaximum());
-      progressBar.setString("Found " + isTasmota.cardinality() + " Tasmotas");
-      if (!rescan) {
-         scanButton.setSelected(false);
-      } else {
-         refreshButton.setSelected(false);
-      }
-      scanButton.setEnabled(true);
-      refreshButton.setEnabled(true);
-      saveTasmotaHint();
-      TasmoList.recalculateColumnames();
-      if (Data.getData().powerpane instanceof JPowerPane jpp)
-         jpp.recalculateListe();
-      me=null; // Für die nächste Runde brauchts einen neuen
    }
 }

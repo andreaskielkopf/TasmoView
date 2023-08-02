@@ -19,7 +19,7 @@ public class Sensor implements Comparable<Sensor> {
    public static Instant                        firstTimestamp=null;
    public static final int                      MAXWERTE      =1000;
    public static final String                   STATUS_8      ="Status 8";
-   // private static Instant lastTimestamp =null;
+   // static private Instant lastTimestamp =null;
    public static double                         timescaleS    =5d / MAXWERTE;
    static final double                          FARB_RADIUS   =0.7d / 2d;
    static final float                           FARB_BASIS    =0.95f;

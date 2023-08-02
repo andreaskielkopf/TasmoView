@@ -29,7 +29,7 @@ import de.uhingen.kielkopf.andreas.tasmoview.Tasmota;
  *       Wenn eine Reihe ausgewählt ist, kann das betreffende Gerät auf Knopfdruck mit dem Browser geöffnet werden
  */
 public class TasmoList extends JPanel {
-   private static final long serialVersionUID=4606263020682918366L;
+   static private final long serialVersionUID=4606263020682918366L;
    // static public final String[] TABELLEN_AUSWAHL_NAMEN= { //
    // "Home", "Health", "Firmware", "Wifi_", "MQTT", "Wifi", "PWM"};
    private JScrollPane       scrollPane;
@@ -194,7 +194,7 @@ public class TasmoList extends JPanel {
       }
       return tableAuswahlJList;
    }
-//   private static void foo(Object o) {
+//   static private void foo(Object o) {
 //      switch (o) {
 //        case Integer I: System.out.println("Integer"); break;
 //        case String s && s.length()>1: System.out.println("String > 1"); break;

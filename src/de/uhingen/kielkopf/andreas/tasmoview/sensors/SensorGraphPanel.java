@@ -20,7 +20,7 @@ import de.uhingen.kielkopf.andreas.tasmoview.grafik.Skala;
  *
  */
 public class SensorGraphPanel extends JPanel {
-   private static final long                          serialVersionUID=8079918630139793226L;
+   static private final long                          serialVersionUID=8079918630139793226L;
    private final CopyOnWriteArrayList<Sensor>         sensorList      =new CopyOnWriteArrayList<>();
    // private Skala zeitSkala =new Skala("Zeit");
    private JLayeredPane                               layerdpPane;

@@ -18,17 +18,17 @@
         <file path="/TasmoView/info/Select_Report.png"/>
         <file path="/TasmoView/info/Farben.png"/>
         <file path="/TasmoView/info/SensorData.png"/>
+        <javaElement handleIdentifier="=Beans/src&lt;de.uhingen.kielkopf.andreas.beans{Version.java"/>
         <file path="/TasmoView/LIESMICH.md"/>
         <file path="/TasmoView/info/Firmware.png"/>
+        <javaElement handleIdentifier="=Beans/src&lt;de.uhingen.kielkopf.andreas.beans{RecordParser.java"/>
         <javaElement handleIdentifier="=TasmoView/src"/>
-        <javaElement handleIdentifier="=Beans/src&lt;de.uhingen.kielkopf.andreas.beans{Version.java"/>
         <file path="/TasmoView/LICENSE"/>
         <file path="/TasmoView/info/Report_Home.png"/>
         <file path="/TasmoView/README.md"/>
         <file path="/TasmoView/info/Scan_for_Devices.png"/>
         <file path="/TasmoView/info/Autoscan.png"/>
         <file path="/TasmoView/info/username_password.png"/>
-        <javaElement handleIdentifier="=Beans/src&lt;de.uhingen.kielkopf.andreas.beans{RecordParser.java"/>
         <file path="/TasmoView/info/Konfig.png"/>
         <file path="/TasmoView/info/Browser.png"/>
         <file path="/TasmoView/changelog.md"/>

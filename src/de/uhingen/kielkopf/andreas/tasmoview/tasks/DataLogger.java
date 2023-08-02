@@ -22,10 +22,10 @@ import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
  *       Zeitpunkt wird in der GUI angezeigt
  */
 public class DataLogger extends SwingWorker<Boolean, LocalDateTime> {
-   private static final Path              savePath=FileSystems.getDefault().getPath("TasmoView").toAbsolutePath();
-   private static final DateTimeFormatter df      =DateTimeFormatter.ofPattern("yyyyMMdd");
-   private static final DateTimeFormatter tf      =DateTimeFormatter.ofPattern("EE HH:mm:ss");
-   private static DataLogger              singleton;
+   static private final Path              savePath=FileSystems.getDefault().getPath("TasmoView").toAbsolutePath();
+   static private final DateTimeFormatter df      =DateTimeFormatter.ofPattern("yyyyMMdd");
+   static private final DateTimeFormatter tf      =DateTimeFormatter.ofPattern("EE HH:mm:ss");
+   static private DataLogger              singleton;
    private final JSpinner                 saveSpinner;
    private final JLabel                   lastSaved;
    public DataLogger(JSpinner saveSpinner1, JLabel lastSaved1) {

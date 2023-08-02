@@ -10,7 +10,7 @@ import javax.swing.border.TitledBorder;
 import de.uhingen.kielkopf.andreas.tasmoview.tasks.*;
 
 public class SensorPanel extends JPanel {
-   private static final long   serialVersionUID=-349511026033574886L;
+   static private final long   serialVersionUID=-349511026033574886L;
    TreeSet<Tasmota>            tasmotasPoll    =new TreeSet<>();
    private JPanel              selectionPanel;
    private JPanel              refreshPanel;

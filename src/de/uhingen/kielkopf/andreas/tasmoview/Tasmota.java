@@ -24,7 +24,7 @@ import de.uhingen.kielkopf.andreas.tasmoview.sensors.Sensor;
  */
 public class Tasmota implements Comparable<Tasmota> {
    static private ConcurrentSkipListMap<Integer, Tasmota> unsicher       =new ConcurrentSkipListMap<>();
-   // private static long CONNECT_TIMEOUT=60000L;
+   // static private long CONNECT_TIMEOUT=60000L;
    // private IoSession session;
    /** IP-Nummer des Gerätes im lokalen Netzwerk (nur letzter Teil) */
    public final Integer                                   ipPart;
@@ -33,7 +33,7 @@ public class Tasmota implements Comparable<Tasmota> {
    /** Name des Gerätes nachdem es erkannt wurde (DeviceName oder anderer passender Text z.B. FriendlyName) */
    public String                                          deviceName;
    public String                                          moduleTyp;
-   private static final String[]                          NAMENSSUCHE    = {"DeviceName", "FriendlyName", "Hostname",
+   static private final String[]                          NAMENSSUCHE    = {"DeviceName", "FriendlyName", "Hostname",
             "Topic", "IPAddress", "Mac",};
    private JsonObject                                     warning;
    /** Liste aller Sensoren dieses Geräts */
@@ -56,9 +56,9 @@ public class Tasmota implements Comparable<Tasmota> {
    public static final String[]                           ZUSATZ_FRAGEN  = {"module", "Gpio", "state", "template",
             "rule1", "Timer1", "timer2", "timer3", "timer4"};
    /** Warnungen erkennen */
-   private static final String                            WARNING        ="WARNING";
-   private static final String                            SENSOREN       ="StatusSNS";
-   private static final String                            HTTP           ="http";
+   static private final String                            WARNING        ="WARNING";
+   static private final String                            SENSOREN       ="StatusSNS";
+   static private final String                            HTTP           ="http";
    /**
     * Lege ein Tasmota-Objekt probeweise an und fange an zu testen ob es antwortet
     * 

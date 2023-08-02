@@ -6,10 +6,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /** Raster verwaltet das Raster und die für eine Skala erforderlichen Werte */
 public class Raster {
-   private static DecimalFormat                        df3    =new DecimalFormat("###");
-   private static DecimalFormat                        df2    =new DecimalFormat("##");
-   private static DecimalFormat                        df1    =new DecimalFormat("#.#");
-   private static DecimalFormat                        df0    =new DecimalFormat("#.##");
+   static private DecimalFormat                        df3    =new DecimalFormat("###");
+   static private DecimalFormat                        df2    =new DecimalFormat("##");
+   static private DecimalFormat                        df1    =new DecimalFormat("#.#");
+   static private DecimalFormat                        df0    =new DecimalFormat("#.##");
    double                                              rmin   =18d;
    double                                              rmax   =25d;
    double                                              versatz=0.2d * (rmax - rmin);
