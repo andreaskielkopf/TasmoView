@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.uhingen.kielkopf.andreas.tasmoview.L2025;
+package de.uhingen.kielkopf.andreas.tasmoview.log;
 
 import java.io.IOException;
 import java.net.*;
@@ -19,13 +19,13 @@ import java.util.concurrent.*;
  *
  */
 public class OneScanner implements Runnable {
-   public static String username="andreas";
-   public static String password="akf4sonoff";
-   public static int    sekunden=300;         // alle 5 Minuten
-   public final String  ip;
-   private HttpClient   client;
-   private Builder      builder;
-   private SensorLog    sensorlog;
+   public static String      username="andreas";
+   public static String      password="akf4sonoff";
+   public static int         sekunden=300;         // alle 5 Minuten
+   public final String       ip;
+   private static HttpClient client;
+   private Builder           builder;
+   private SensorLog         sensorlog;
    /**
     * Erstellt den Scanner und bereitet alles vor
     * 
@@ -70,7 +70,7 @@ public class OneScanner implements Runnable {
                   , "    This will save everytime the cache holds 12 or more lines"//
                   , ""//
                   , "Data will be stored in /var/log/TasmoView/ or in ~/.log/TasmoView/"//
-                  , "This program is under GPL"))
+                  , "This program is under GPL (2025-05-04)"))
             System.out.println(s);
       }
       String basis="192.168.178.";
@@ -80,19 +80,17 @@ public class OneScanner implements Runnable {
          sekunden=Math.max(10, Integer.parseInt(args[1]));
       if ((args.length >= 3) && (args[2].matches("[0-9]{1,3}")))// 1-999
          SensorLog.maxListCount=Math.max(1 + 100 / sekunden, Integer.parseInt(args[1]));
-      Thread sh=new Thread(() -> SensorLog.flushAllLogs());
-      sh.setName("ShutdownHook");
-      Runtime.getRuntime().addShutdownHook(sh);
+      /// @todo Flags einbinden
+      // sh.setName("ShutdownHook");
+      Runtime.getRuntime().addShutdownHook(new Thread(SensorLog::flushAllLogs));
       try {
          username="andreas";
          password="akf4sonoff";
-         sekunden=10;
          HashSet<Thread> scanners=new HashSet<>();
          for (int i=2; i <= 254; i++)
             scanners.add(new OneScanner(basis + Integer.toString(i), "status 10").start());
          for (Thread oneScanner:scanners)
-            oneScanner.join();
-         // warte in main bis der Thread angehalten wird
+            oneScanner.join(); // warte in main bis der Thread angehalten wird
       } catch (URISyntaxException | InterruptedException | ExecutionException e) {
          e.printStackTrace();
       }
@@ -103,30 +101,26 @@ public class OneScanner implements Runnable {
     * @return thread
     */
    public Thread start() {
-      Thread t=Thread.ofVirtual().start(this);
-      t.setName(ip);
       sensorlog=new SensorLog(ip);
       try {
          Thread.sleep(100);
       } catch (InterruptedException e) {
          System.err.println(e);
       }
-      return t;
+      return Thread.ofVirtual().name(ip).start(this);
    }
    @Override
    public void run() {
       try {
-         int countdown=5;// nach 10 erfolglosen versuchen abbrechen
+         int countdown=5;// nach 5 erfolglosen versuchen abbrechen
          while (true) {
             try {
                CompletableFuture<HttpResponse<String>> erg=ask();
                String txt=erg.get(9, TimeUnit.SECONDS).body();// {"StatusSNS":{"Time":"2025-05-01T08:10:44" ...
                if (!txt.startsWith("{\"Status")// keine Statusdaten
                         || txt.length() < 70) { // das ist höchstens die Zeit, sonst nix
-                  if (txt.length() > 44)
-                     txt=txt.substring(0, 44);
-                  System.err.println(txt);
-                  Thread.sleep(5000);
+                  System.out.println(txt.length() <= 44 ? txt : txt.subSequence(0, 44));
+                  Thread.sleep(1000);
                   if (countdown-- < 0)
                      break;
                   continue; // zu kurz um daten zu enthalten, oder kein Status
@@ -147,6 +141,5 @@ public class OneScanner implements Runnable {
       }
       sensorlog.flush();
       sensorlog.remove();
-      client.close();
    }
 }

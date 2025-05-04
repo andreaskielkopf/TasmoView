@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.uhingen.kielkopf.andreas.tasmoview.L2025;
+package de.uhingen.kielkopf.andreas.tasmoview.log;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -14,7 +14,6 @@ import java.util.HashSet;
  * @author Andreas Kielkopf Interne Datenstruktur die den Log für ein Device intern(RAM) und extern(DISK) speichert
  */
 public class SensorLog {
-   // public static Path basis0=Path.of("/var/log/tasmoView/");
    public static Path                basis       =Path.of(System.getProperty("user.home"))   //
             .resolve(".log").resolve("TasmoView");
    private String                    ip;
@@ -32,7 +31,6 @@ public class SensorLog {
     */
    public SensorLog(String ip0) {
       ip=URLEncoder.encode(ip0, StandardCharsets.UTF_8);
-      // System.out.println(this);
    }
    /**
     * Schreibt das momentane Array in die Datei
@@ -40,15 +38,14 @@ public class SensorLog {
     * @throws IOException
     */
    public void flush() {
-      if (list.isEmpty())
-         return;
-      // System.out.println(this);
-      try {
-         Files.write(path, list, StandardOpenOption.APPEND, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-      } catch (IOException e) {
-         e.printStackTrace();
+      if (!list.isEmpty()) {
+         try {
+            Files.write(path, list, StandardOpenOption.APPEND, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+         } catch (IOException e) {
+            System.err.println(e);
+         }
+         list.clear();
       }
-      list.clear();
    }
    @Override
    public final String toString() {
@@ -67,11 +64,11 @@ public class SensorLog {
    public void add(String txt) throws IOException {
       if (status == null) // erstmalig status setzen
          setStatus(txt);
-      if (!txt.startsWith(start)) // nur jeweils der selbe status übernehmen
+      if (!txt.startsWith(start)) // nur jeweils den selben status übernehmen
          return;
       if (list.contains(txt))
          return; // keine doppelten Zeilen speichern
-      if (!txt.contains(date)) {
+      if (!txt.contains(date)) {// Wenn sich der Tag geändert hat
          flush(); // vorhandene Daten vollends schreiben
          setStatus(txt); // status neu setzen
       }
@@ -82,33 +79,27 @@ public class SensorLog {
    private void setStatus(String txt) throws IOException {
       if (status == null)// Dieser Log enthält ab jetzt daten, und muss beim shutdown flush() ausführen
          allLogs.add(this);
-      String first=txt;// {"StatusSNS":{"Time":"2025-05-01T08:10:44" ...
-      String[] tl=first.split('"' + "", 7);
-      status=tl[1];
-      start="{\"" + status + "\":";
-      if (!status.startsWith("Status") || !tl[3].equals("Time")) {
+      String[] a=txt.split('"' + "", 7);// {"StatusSNS":{"Time":"2025-05-01T08:10:44" ...
+      if ((a.length < 7) || !a[1].startsWith("Status") || !a[3].equals("Time")) {
          flush();
-         throw new IOException("Ungültiger Status " + txt);
+         throw new IOException("Ohne Status/Time: " + (txt.length() <= 32 ? txt : txt.substring(0, 32)));
       }
-      date=tl[5].substring(0, 10);
-      if (basis.startsWith("/root")) {
-         System.out.println("basis starts with /root");
+      status=a[1];
+      start="{\"" + a[1] + "\":";
+      date=a[5].length() <= 10 ? a[5] : a[5].substring(0, 10);// Datum ausschneiden
+      if (basis.startsWith("/root"))// mit root-rechten nach /var/log umziehen
          basis=Path.of("/var/log/TasmoView");
-      }
-      // if (basis.startsWith("/home"))
-      // System.out.println("basis starts with /home");
-      path=basis.resolve(ip);
-      try {
-         Files.createDirectories(path);
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
-      path=path.resolve(date);
+      path=basis.resolve(ip).resolve(date);
       System.out.println(this);
+      try {
+         Files.createDirectories(path.getParent());
+      } catch (IOException e) {
+         System.err.println(e);
+      }
    }
    public void remove() {
       allLogs.remove(this);
-      System.out.println("removed " + this);
+      System.out.println("removed: " + this);
    }
    /**
     * Beim Shutdown alle logs ins Dateisystem schreiben

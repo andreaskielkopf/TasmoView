@@ -4,14 +4,13 @@
     <options buildIfNeeded="true" compress="true" descriptionLocation="/TasmoView/jar/TasmoViewLog.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
-    <manifest generateManifest="true" mainClassHandleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview.L2025{OneScanner.java[OneScanner" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+    <manifest generateManifest="true" mainClassHandleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview.log{OneScanner.java[OneScanner" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
         <sealing sealJar="false">
             <packagesToSeal/>
             <packagesToUnSeal/>
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
-        <javaElement handleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview.L2025{OneScanner.java"/>
-        <javaElement handleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview.L2025{SensorLog.java"/>
+        <javaElement handleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview.log"/>
     </selectedElements>
 </jardesc>
