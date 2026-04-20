@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<jardesc>
+    <jar path="TasmoView/jar/LocalDevices.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/TasmoView/jar/LocalDevices.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" mainClassHandleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview.L2026{LocalDevices.java[LocalDevices" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+        <sealing sealJar="true">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
+        <javaElement handleIdentifier="=Beans/src&lt;de.uhingen.kielkopf.andreas.beans.gui{FrameHelper.java"/>
+        <file path="/TasmoView/LICENSE"/>
+        <javaElement handleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview.L2026"/>
+        <javaElement handleIdentifier="=TasmoView/src&lt;de.uhingen.kielkopf.andreas.tasmoview.L2026.devices"/>
+    </selectedElements>
+</jardesc>
