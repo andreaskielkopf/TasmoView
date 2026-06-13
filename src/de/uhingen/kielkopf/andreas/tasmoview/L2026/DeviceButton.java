@@ -1,11 +1,13 @@
 /**
- * 
+ *
  */
 package de.uhingen.kielkopf.andreas.tasmoview.L2026;
 
 import java.awt.Desktop;
 import java.io.IOException;
-import java.net.*;
+import java.net.Inet4Address;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.swing.JButton;
 
@@ -15,7 +17,7 @@ import de.uhingen.kielkopf.andreas.tasmoview.L2026.devices.Device;
 
 /**
  * Ein Button der einen Link zur HTTP-Seite des Device bereitstellt
- * 
+ *
  * @author Andreas Kielkopf
  *
  */
@@ -32,28 +34,27 @@ public class DeviceButton extends JButton {
     * @param d
     */
    public void setDevice(Device d) {
-      this.device=d;
+      device=d;
       setToolTipText(d.toString());
    }
    /**
     * @param device_
     *           Device zu dem der Link produzieret wird
-    * 
+    *
     */
    public DeviceButton(@NonNull Device device_) {
-      super();
-      if (device_ instanceof Device d) {
+      if (device_ instanceof final Device d) {
          setDevice(d);
          setText(d.getID().getName());
          addActionListener(_ -> Thread.ofVirtual().start(() -> {// System.out.println(device);
-            if (getDevice().getID().getIn4() instanceof Inet4Address in4a)
+            if (getDevice().getID().getIn4() instanceof final Inet4Address in4a)
                openURL(in4a.getHostAddress());
          }));
       }
    } // Frame
    /**
     * Öffnet diese URL im Browser
-    * 
+    *
     * @param host
     */
    public static void openURL(String host) {

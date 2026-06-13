@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package de.uhingen.kielkopf.andreas.tasmoview.L2026.devices;
 
@@ -7,8 +7,6 @@ import java.net.Inet4Address;
 import java.time.Instant;
 
 import org.eclipse.jdt.annotation.NonNull;
-
-import de.uhingen.kielkopf.andreas.tasmoview.L2026.ID;
 
 /**
  * @author Andreas Kielkopf
@@ -22,7 +20,7 @@ public final class Nodevice implements Device {
     *           Ip-Adresse nach der gesucht wurde
     */
    public Nodevice(Inet4Address in) {
-      this.id=new ID(in);
+      id=new ID(in);
    }
    @Override
    public ID getID() {

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package de.uhingen.kielkopf.andreas.tasmoview.L2026.devices;
 
@@ -14,7 +14,6 @@ import java.time.Instant;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import de.uhingen.kielkopf.andreas.tasmoview.L2026.ID;
 import de.uhingen.kielkopf.andreas.tasmoview.L2026.NetworkScanner;
 
 /**
@@ -35,11 +34,11 @@ public final class Httpdevice implements Device {
    /**
     * @param d
     *           Device aus dem das generiert wurde
-    * 
+    *
     */
    public Httpdevice(@NonNull Device d) {
-      this.id=d.getID();
-      this.since=d.getSince();
+      id=d.getID();
+      since=d.getSince();
    }
    @Override
    public @NonNull ID getID() {
@@ -82,7 +81,7 @@ public final class Httpdevice implements Device {
    }
    @Override
    public Device upgrade() {
-      if (id.getIn4() instanceof Inet4Address in4a && (statusCode != 200)) // nur wenn notwendig upgraden
+      if (id.getIn4() instanceof Inet4Address in4a && statusCode != 200) // nur wenn notwendig upgraden
          try {
             var request=builder.copy().uri(URI.create("http://" + in4a.getHostAddress())).build();
             var response=NetworkScanner.getClientA().send(request, HttpResponse.BodyHandlers.ofString());

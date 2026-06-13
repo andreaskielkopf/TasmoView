@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package de.uhingen.kielkopf.andreas.tasmoview.L2026.devices;
 
@@ -7,9 +7,6 @@ import java.io.Serializable;
 import java.time.Instant;
 
 import org.eclipse.jdt.annotation.NonNull;
-
-import de.uhingen.kielkopf.andreas.tasmoview.L2026.Device_ID;
-import de.uhingen.kielkopf.andreas.tasmoview.L2026.ID;
 
 /**
  * @author Andreas Kielkopf

@@ -1,9 +1,11 @@
 /**
- * 
+ *
  */
 package de.uhingen.kielkopf.andreas.tasmoview.L2026;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+import java.awt.FlowLayout;
 
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -24,9 +26,9 @@ public class LocalDevices extends JFrame {
    public static void main(String[] args) {
       EventQueue.invokeLater(() -> {
          try {
-            var window=new LocalDevices();
+            final var window=new LocalDevices();
             window.setVisible(true);
-         } catch (Exception e) {
+         } catch (final Exception e) {
             e.printStackTrace();
          }
       });
